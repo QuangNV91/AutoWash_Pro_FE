@@ -24,7 +24,7 @@ export default function Home() {
   return (
     <div style={containerStyle}>
       <div style={{ fontSize: 28, fontWeight: 800 }}>
-        HELLO! Đây là TRANG CHỦ DMM BẢO TRÌ (Home Page) của AutoWash Pro.
+        HELLO! Đây là TRANG CHỦ (Home Page) của AutoWash Pro.
       </div>
 
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
