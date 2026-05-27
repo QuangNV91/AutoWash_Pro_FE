@@ -28,7 +28,7 @@ export default function Home() {
       </div>
 
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-        <Link to="/auth" style={buttonStyle}>
+        <Link to="/auth/login" style={buttonStyle}>
           Đăng nhập/Đăng ký
         </Link>
         <Link to="/staff" style={buttonStyle}>
