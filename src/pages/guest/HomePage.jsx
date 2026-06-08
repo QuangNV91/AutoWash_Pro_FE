@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { 
-  Car, Star, Calendar, Clock, Award, CheckCircle, 
+import {
+  Car, Star, Calendar, Clock, Award, CheckCircle,
   MapPin, Phone, Menu, X, ArrowRight, ShieldCheck,
   Droplets, Sparkles
 } from 'lucide-react';
@@ -11,7 +11,7 @@ export default function HomePage() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+
   // Check auth
   const token = localStorage.getItem('token');
   const isLoggedIn = !!token;
@@ -63,15 +63,14 @@ export default function HomePage() {
   return (
     <div className="min-h-screen font-sans text-gray-800 bg-gray-50 flex flex-col">
       {/* NAVBAR */}
-      <nav 
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white ${
-          isScrolled ? 'shadow-md py-3' : 'py-5'
-        }`}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white ${isScrolled ? 'shadow-md py-3' : 'py-5'
+          }`}
       >
         <div className="container mx-auto px-4 md:px-6 flex justify-between items-center max-w-7xl">
           {/* Logo */}
-          <div 
-            className="flex items-center gap-2 cursor-pointer" 
+          <div
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => scrollToSection('hero')}
           >
             <div className="bg-primary text-white p-2 rounded-lg">
@@ -87,7 +86,7 @@ export default function HomePage() {
             <ul className="flex items-center gap-6 font-medium text-gray-600">
               {navLinks.map((link) => (
                 <li key={link.name}>
-                  <button 
+                  <button
                     onClick={() => scrollToSection(link.id)}
                     className="hover:text-primary transition-colors focus:outline-none"
                   >
@@ -99,21 +98,24 @@ export default function HomePage() {
 
             <div className="flex items-center gap-3 ml-4">
               {isLoggedIn ? (
-                <button 
-                  onClick={() => navigate('/dashboard')}
-                  className="px-5 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('token');
+                    window.location.reload();
+                  }}
+                  className="px-5 py-2.5 text-gray-500 font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  Vào hệ thống
+                  Đăng xuất
                 </button>
               ) : (
                 <>
-                  <button 
+                  <button
                     onClick={() => navigate('/auth/login')}
                     className="px-5 py-2.5 text-primary font-medium border border-primary rounded-lg hover:bg-blue-50 transition-colors"
                   >
                     Đăng nhập
                   </button>
-                  <button 
+                  <button
                     onClick={() => navigate('/auth/register')}
                     className="px-5 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
                   >
@@ -125,7 +127,7 @@ export default function HomePage() {
           </div>
 
           {/* Mobile Menu Toggle */}
-          <button 
+          <button
             className="md:hidden text-gray-600 p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
@@ -139,7 +141,7 @@ export default function HomePage() {
             <ul className="flex flex-col gap-4 font-medium text-gray-600">
               {navLinks.map((link) => (
                 <li key={link.name}>
-                  <button 
+                  <button
                     onClick={() => scrollToSection(link.id)}
                     className="w-full text-left py-2 hover:text-primary transition-colors"
                   >
@@ -150,21 +152,24 @@ export default function HomePage() {
             </ul>
             <div className="flex flex-col gap-3 mt-2 border-t border-gray-100 pt-4">
               {isLoggedIn ? (
-                <button 
-                  onClick={() => navigate('/dashboard')}
-                  className="w-full px-5 py-3 bg-primary text-white font-medium rounded-lg text-center"
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('token');
+                    window.location.reload();
+                  }}
+                  className="w-full px-5 py-3 text-gray-500 font-medium border border-gray-300 rounded-lg text-center hover:bg-gray-50 transition-colors"
                 >
-                  Vào hệ thống
+                  Đăng xuất
                 </button>
               ) : (
                 <>
-                  <button 
+                  <button
                     onClick={() => navigate('/auth/login')}
                     className="w-full px-5 py-3 text-primary font-medium border border-primary rounded-lg text-center"
                   >
                     Đăng nhập
                   </button>
-                  <button 
+                  <button
                     onClick={() => navigate('/auth/register')}
                     className="w-full px-5 py-3 bg-primary text-white font-medium rounded-lg text-center"
                   >
@@ -183,7 +188,7 @@ export default function HomePage() {
           {/* Background decorations */}
           <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-50 opacity-50 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-blue-50 opacity-50 blur-3xl"></div>
-          
+
           <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10">
             <div className="flex flex-col lg:flex-row items-center gap-12">
               {/* Left text */}
@@ -192,33 +197,33 @@ export default function HomePage() {
                   <Star size={16} className="fill-primary" />
                   <span>Dịch vụ chăm sóc xe hàng đầu</span>
                 </div>
-                
+
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
-                  Đặt lịch rửa xe <span className="text-primary">thông minh</span> <br className="hidden lg:block"/> 
+                  Đặt lịch rửa xe <span className="text-primary">thông minh</span> <br className="hidden lg:block" />
                   Nhanh chóng, Tiện lợi
                 </h1>
-                
+
                 <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl leading-relaxed">
-                  Hệ thống đặt lịch tự động, tích điểm thưởng, ưu đãi thành viên hấp dẫn. 
+                  Hệ thống đặt lịch tự động, tích điểm thưởng, ưu đãi thành viên hấp dẫn.
                   Tiết kiệm thời gian, trải nghiệm dịch vụ đẳng cấp cho xế yêu của bạn.
                 </p>
-                
+
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                  <button 
+                  <button
                     onClick={handleBookingClick}
                     className="px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2 text-lg"
                   >
                     <Calendar size={20} />
                     Đặt lịch ngay
                   </button>
-                  <button 
+                  <button
                     onClick={() => scrollToSection('services')}
                     className="px-8 py-4 text-gray-700 font-bold bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all flex items-center justify-center gap-2 text-lg"
                   >
                     Xem dịch vụ
                   </button>
                 </div>
-                
+
                 {/* Stats */}
                 <div className="mt-12 flex items-center gap-6 md:gap-12 pt-8 border-t border-gray-100 w-full justify-center lg:justify-start">
                   <div>
@@ -239,7 +244,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Right Image/Illustration */}
               <div className="w-full lg:w-1/2 relative">
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-200 aspect-[4/3] group">
@@ -247,7 +252,7 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
                     <Car size={120} className="text-primary opacity-20 transform group-hover:scale-110 transition-transform duration-700" />
                   </div>
-                  
+
                   {/* Decorative UI elements overlay */}
                   <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-lg animate-bounce" style={{ animationDuration: '3s' }}>
                     <div className="flex items-center gap-3">
@@ -260,7 +265,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-lg">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-primary">
@@ -296,12 +301,12 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Rửa xe cơ bản</h3>
                 <p className="text-gray-500 mb-6 min-h-[48px]">Làm sạch bề mặt ngoài, hút bụi sơ bộ bên trong nội thất.</p>
-                
+
                 <div className="flex items-baseline gap-1 mb-6">
                   <span className="text-4xl font-bold text-gray-900">40.000</span>
                   <span className="text-gray-500 font-medium">đ</span>
                 </div>
-                
+
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-3 text-gray-600 font-medium">
                     <Clock size={18} className="text-primary" /> 15 phút thực hiện
@@ -310,8 +315,8 @@ export default function HomePage() {
                     <Award size={18} className="text-primary" /> Tích lũy <span className="text-primary font-bold">+40</span> điểm
                   </li>
                 </ul>
-                
-                <button 
+
+                <button
                   onClick={handleBookingClick}
                   className="w-full py-3 rounded-lg border-2 border-gray-200 text-gray-700 font-bold hover:border-primary hover:text-primary transition-colors"
                 >
@@ -329,12 +334,12 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Rửa xe chuyên sâu</h3>
                 <p className="text-gray-500 mb-6 min-h-[48px]">Rửa chi tiết bọt tuyết, hút bụi kỹ, dưỡng bóng sơn & lốp xe.</p>
-                
+
                 <div className="flex items-baseline gap-1 mb-6">
                   <span className="text-4xl font-bold text-primary">150.000</span>
                   <span className="text-gray-500 font-medium">đ</span>
                 </div>
-                
+
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-3 text-gray-700 font-medium">
                     <Clock size={18} className="text-primary" /> 30 phút thực hiện
@@ -343,8 +348,8 @@ export default function HomePage() {
                     <Award size={18} className="text-primary" /> Tích lũy <span className="text-primary font-bold">+150</span> điểm
                   </li>
                 </ul>
-                
-                <button 
+
+                <button
                   onClick={handleBookingClick}
                   className="w-full py-3.5 rounded-lg bg-primary text-white font-bold hover:bg-blue-700 transition-colors shadow-md"
                 >
@@ -359,12 +364,12 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Phủ nano</h3>
                 <p className="text-gray-500 mb-6 min-h-[48px]">Quy trình cao cấp: rửa siêu chi tiết, đánh bóng và phủ lớp bảo vệ Nano.</p>
-                
+
                 <div className="flex items-baseline gap-1 mb-6">
                   <span className="text-4xl font-bold text-gray-900">300.000</span>
                   <span className="text-gray-500 font-medium">đ</span>
                 </div>
-                
+
                 <ul className="space-y-4 mb-8">
                   <li className="flex items-center gap-3 text-gray-600 font-medium">
                     <Clock size={18} className="text-purple-600" /> 60 phút thực hiện
@@ -373,8 +378,8 @@ export default function HomePage() {
                     <Award size={18} className="text-purple-600" /> Tích lũy <span className="text-purple-600 font-bold">+300</span> điểm
                   </li>
                 </ul>
-                
-                <button 
+
+                <button
                   onClick={handleBookingClick}
                   className="w-full py-3 rounded-lg border-2 border-gray-200 text-gray-700 font-bold hover:border-purple-600 hover:text-purple-600 transition-colors"
                 >
@@ -390,10 +395,10 @@ export default function HomePage() {
           {/* Decorative shapes */}
           <div className="absolute top-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -ml-20 -mt-20"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full -mr-20 -mb-20"></div>
-          
+
           <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10">
             <div className="flex flex-col lg:flex-row items-center gap-16">
-              
+
               {/* Left Content */}
               <div className="w-full lg:w-5/12">
                 <div className="inline-block px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-sm text-white font-medium text-sm mb-6 uppercase tracking-wider">
@@ -403,11 +408,11 @@ export default function HomePage() {
                   Chương trình khách hàng thân thiết
                 </h2>
                 <p className="text-blue-100 text-lg mb-8 leading-relaxed">
-                  Trở thành thành viên của AutoWash Pro để được tích điểm sau mỗi lần sử dụng dịch vụ. 
+                  Trở thành thành viên của AutoWash Pro để được tích điểm sau mỗi lần sử dụng dịch vụ.
                   Hạng thẻ càng cao, ưu đãi chiết khấu càng lớn.
                 </p>
                 {!isLoggedIn && (
-                  <button 
+                  <button
                     onClick={() => navigate('/auth/register')}
                     className="px-8 py-3.5 bg-white text-primary font-bold rounded-xl hover:bg-gray-100 transition-colors shadow-lg flex items-center gap-2"
                   >
@@ -483,7 +488,7 @@ export default function HomePage() {
             <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-4 relative">
               {/* Connecting Line (Desktop) */}
               <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2/3 h-1 bg-gray-100 -z-10"></div>
-              
+
               {/* Step 1 */}
               <div className="flex flex-col items-center text-center w-full md:w-1/3 bg-white z-10 px-4">
                 <div className="w-20 h-20 bg-blue-50 border-4 border-white shadow-lg rounded-full flex items-center justify-center text-2xl font-bold text-primary mb-6">
@@ -517,15 +522,15 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            
+
             <div className="mt-16 text-center">
-               <button 
-                  onClick={handleBookingClick}
-                  className="px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:-translate-y-1 inline-flex items-center gap-2"
-                >
-                  <Calendar size={20} />
-                  Đặt lịch rửa xe ngay hôm nay
-                </button>
+              <button
+                onClick={handleBookingClick}
+                className="px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg hover:-translate-y-1 inline-flex items-center gap-2"
+              >
+                <Calendar size={20} />
+                Đặt lịch rửa xe ngay hôm nay
+              </button>
             </div>
           </div>
         </section>
@@ -535,7 +540,7 @@ export default function HomePage() {
       <footer id="contact" className="bg-gray-900 text-gray-300 pt-16 pb-8 border-t border-gray-800">
         <div className="container mx-auto px-4 md:px-6 max-w-7xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-            
+
             {/* Brand */}
             <div className="col-span-1 lg:col-span-1">
               <div className="flex items-center gap-2 mb-6">

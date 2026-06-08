@@ -2,4 +2,26 @@
 
 @theme {
   --color-primary: #1A56DB;
+
+  /* Custom Backgrounds */
+  --color-dark-950: #0A0A0A;
+  --color-dark-900: #111111;
+  --color-dark-800: #1A1A1A;
+  --color-dark-700: #222222;
+  --color-dark-600: #2A2A2A;
+
+  /* Custom Gold Accent */
+  --color-gold-300: #F5D78E;
+  --color-gold-400: #E8B94F;
+  --color-gold-500: #C9981A;
+  --color-gold-600: #A67C00;
+
+  /* Custom Text Colors */
+  --color-text-primary: #F0E6CC;
+  --color-text-secondary: #A89070;
+  --color-text-muted: #5C5043;
+
+  /* Custom Fonts */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
 }
