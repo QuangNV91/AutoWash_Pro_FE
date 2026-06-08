@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+﻿import React, { useMemo, useState } from 'react'
 import {
   Badge,
   Button,
@@ -9,7 +9,6 @@ import {
   Table,
   Tag,
   Tabs,
-  Tooltip,
   Typography,
   notification,
 } from 'antd'
@@ -23,7 +22,7 @@ import {
   ClockCircleOutlined,
 } from '@ant-design/icons'
 
-const { Title, Text } = Typography
+const { Text } = Typography
 
 const DAYS_IN_WEEK = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật']
 
@@ -125,8 +124,8 @@ export default function BookingSlotDashboard() {
   const staffSummaryItems = useMemo(
     () =>
       staffProfiles.map((staff) => (
-        <Tag key={staff.id} color="purple" className="rounded-full py-2 px-3 text-sm font-semibold">
-          <UserOutlined /> {staff.name} <Badge className="ml-2" count={`${staff.weeklyHours}h`} style={{ backgroundColor: '#fde3ff', color: '#8739ea' }} />
+        <Tag key={staff.id} color="purple" className="summary-badge">
+          <UserOutlined /> {staff.name} <Badge count={`${staff.weeklyHours}h`} className="summary-badge__count" />
         </Tag>
       )),
     [staffProfiles],
@@ -151,7 +150,7 @@ export default function BookingSlotDashboard() {
     }))
 
     const schedule = DAYS_IN_WEEK.map((day, dayIndex) => {
-      const dayShifts = SHIFT_DEFINITIONS.map((shift, shiftIndex) => {
+      const dayShifts = SHIFT_DEFINITIONS.map((shift) => {
         const sortedStaff = staffState
           .filter((member) => member.currentHours < 30 && member.lastAssignedDay !== dayIndex && member.currentShifts < 6)
           .sort((a, b) => {
@@ -162,14 +161,11 @@ export default function BookingSlotDashboard() {
           })
 
         const capacity = Math.min(sortedStaff.length, 2)
-        const assignments = sortedStaff.slice(0, capacity).map((member, index) => {
-          const duty = capacity === 2 ? (index === 0 ? 'CASHIER' : 'TECHNICIAN') : 'CASHIER'
-          return {
-            id: `${day}-${shift.key}-${member.id}`,
-            name: member.name,
-            duty,
-          }
-        })
+        const assignments = sortedStaff.slice(0, capacity).map((member, index) => ({
+          id: `${day}-${shift.key}-${member.id}`,
+          name: member.name,
+          duty: capacity === 2 ? (index === 0 ? 'CASHIER' : 'TECHNICIAN') : 'CASHIER',
+        }))
 
         assignments.forEach((assignment) => {
           const worker = staffState.find((member) => member.name === assignment.name)
@@ -188,10 +184,7 @@ export default function BookingSlotDashboard() {
         }
       })
 
-      return {
-        day,
-        shifts: dayShifts,
-      }
+      return { day, shifts: dayShifts }
     })
 
     const updatedProfiles = staffState.map((member) => ({
@@ -217,7 +210,7 @@ export default function BookingSlotDashboard() {
       dataIndex: 'day',
       key: 'day',
       render: (value, record) => ({
-        children: <span className="font-semibold text-slate-800">{value}</span>,
+        children: <span className="data-label">{value}</span>,
         props: { rowSpan: record.showDay ? record.rowSpan : 0 },
       }),
     },
@@ -226,7 +219,7 @@ export default function BookingSlotDashboard() {
       dataIndex: 'shiftLabel',
       key: 'shiftLabel',
       render: (value, record) => ({
-        children: <span className="font-medium text-slate-700">{value}</span>,
+        children: <span className="data-text">{value}</span>,
         props: { rowSpan: record.showShift ? record.rowSpan : 0 },
       }),
     },
@@ -234,13 +227,13 @@ export default function BookingSlotDashboard() {
       title: 'Thông tin khách hàng & Xe',
       dataIndex: 'customerInfo',
       key: 'customerInfo',
-      render: (value) => <span className="text-slate-700">{value}</span>,
+      render: (value) => <span className="data-text">{value}</span>,
     },
     {
       title: 'Gói dịch vụ',
       dataIndex: 'service',
       key: 'service',
-      render: (value) => <span className="text-slate-700">{value}</span>,
+      render: (value) => <span className="data-text">{value}</span>,
     },
     {
       title: 'Trạng thái lịch hẹn',
@@ -252,7 +245,7 @@ export default function BookingSlotDashboard() {
         }
         const status = BOOKING_STATUS[value]
         return (
-          <Tag icon={status.icon} color={status.color} className="font-semibold rounded-full py-2 px-3">
+          <Tag icon={status.icon} color={status.color}>
             {status.label}
           </Tag>
         )
@@ -301,7 +294,7 @@ export default function BookingSlotDashboard() {
       dataIndex: 'day',
       key: 'day',
       render: (value, record) => ({
-        children: <span className="font-semibold text-slate-800">{value}</span>,
+        children: <span className="data-label">{value}</span>,
         props: { rowSpan: record.showDay ? record.dayRowSpan : 0 },
       }),
     },
@@ -310,7 +303,7 @@ export default function BookingSlotDashboard() {
       dataIndex: 'shiftLabel',
       key: 'shiftLabel',
       render: (value, record) => ({
-        children: <span className="font-medium text-slate-700">{value}</span>,
+        children: <span className="data-text">{value}</span>,
         props: { rowSpan: record.showShift ? record.shiftRowSpan : 0 },
       }),
     },
@@ -318,7 +311,7 @@ export default function BookingSlotDashboard() {
       title: 'Nhân viên trực',
       dataIndex: 'staffName',
       key: 'staffName',
-      render: (value) => <span className="text-slate-700">{value}</span>,
+      render: (value) => <span className="data-text">{value}</span>,
     },
     {
       title: 'Vị trí công việc (Hệ thống tự động gán)',
@@ -332,56 +325,43 @@ export default function BookingSlotDashboard() {
         const color = value === 'CASHIER' ? 'green' : 'blue'
         const icon = value === 'CASHIER' ? '💰' : '🚗'
         return (
-          <Tag color={color} className="font-semibold rounded-full py-2 px-3">
-            <span className="mr-2">{icon}</span>
-            {label}
+          <Tag color={color}>
+            {icon} {label}
           </Tag>
         )
       },
     },
   ]
 
-  const scheduleBadgeItems = useMemo(
-    () =>
-      staffProfiles.map((staff) => (
-        <Tag key={staff.id} color="default" className="rounded-full py-2 px-3 text-sm font-semibold">
-          <UserOutlined /> {staff.name} <span className="ml-2 text-slate-600">{staff.weeklyHours}h</span>
-        </Tag>
-      )),
-    [staffProfiles],
-  )
-
   return (
-    <div className="min-h-screen bg-slate-50 p-6 sm:p-8">
-      <div className="mx-auto max-w-[1280px] space-y-8">
-        <Card className="rounded-[28px] border-0 bg-white px-6 py-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
-          <Space direction="vertical" size={14} className="w-full">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-3 text-xl font-semibold text-slate-900">
-                  <CalendarOutlined className="text-violet-600" />
-                  📅 Quản lý Lịch hẹn & Vận hành Trạm AutoWash Pro
-                </div>
-                <Text className="text-slate-600">
-                  Hai bảng lịch tuần đồng bộ: Booking khách hàng và lịch làm việc nhân sự theo quy tắc nghiêm ngặt của trạm.
-                </Text>
+    <div className="booking-page">
+      <div className="page-shell">
+        <Card className="page-intro-card">
+          <Space direction="vertical" size={14} className="page-intro-card__inner">
+            <div className="page-intro-card__header">
+              <div className="page-intro-card__title">
+                <CalendarOutlined className="page-intro-card__icon" />
+                Quản lý Lịch hẹn & Vận hành trạm AutoWash Pro
               </div>
-              <Space size={12}>
-                <Tag icon={<CarOutlined />} color="geekblue">
-                  Max 2 xe/slot
-                </Tag>
-                <Tag icon={<ClockCircleOutlined />} color="purple">
-                  5h/ca
-                </Tag>
-                <Tag icon={<DollarOutlined />} color="green">
-                  30h/tuần/nhân sự
-                </Tag>
-              </Space>
+              <Text className="page-intro-card__subtitle">
+                Hai bảng lịch tuần đồng bộ: Booking khách hàng và lịch làm việc nhân sự theo quy tắc nghiêm ngặt của trạm.
+              </Text>
+            </div>
+            <div className="page-intro-card__tags">
+              <Tag icon={<CarOutlined />} color="geekblue">
+                2 xe cùng lúc/slot
+              </Tag>
+              <Tag icon={<ClockCircleOutlined />} color="purple">
+                5h/ca
+              </Tag>
+              <Tag icon={<DollarOutlined />} color="green">
+                30h/tuần/nhân sự
+              </Tag>
             </div>
           </Space>
         </Card>
 
-        <Card className="rounded-[28px] border-0 bg-white px-4 py-4 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+        <Card className="tabs-card">
           <Tabs
             activeKey={activeTab}
             onChange={(key) => setActiveTab(key)}
@@ -390,37 +370,34 @@ export default function BookingSlotDashboard() {
                 key: 'booking',
                 label: 'Lịch Hẹn Khách Hàng',
                 children: (
-                  <div className="space-y-6">
+                  <div className="tab-content">
                     <Row gutter={[24, 24]}>
                       <Col xs={24} lg={16}>
-                        <Card className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
-                          <div className="flex items-center gap-3 text-slate-900">
-                            <span className="rounded-2xl bg-yellow-100 p-2 text-yellow-700">
-                              <ClockCircleOutlined />
-                            </span>
-                            <div>
-                              <div className="font-semibold text-slate-900">Lịch hẹn hiện tại</div>
-                              <Text className="text-slate-600">Tổng quan các booking mẫu và trạng thái phòng rửa xe.</Text>
-                            </div>
+                        <Card className="info-card">
+                          <div className="info-card__header">
+                            <span className="info-card__badge">Booking hiện tại</span>
+                            <Text className="info-card__text">Tổng quan các booking mẫu và trạng thái phòng rửa xe.</Text>
                           </div>
                         </Card>
                       </Col>
                       <Col xs={24} lg={8}>
-                        <Card className="rounded-[24px] border border-slate-200 bg-white p-5">
-                          <div className="text-slate-900 text-sm font-semibold">Giới hạn công suất</div>
-                          <Space direction="vertical" size={8} className="mt-3">
-                            <Tag icon={<CarOutlined />} color="geekblue" className="rounded-full py-2 px-3">
-                              2 xe cùng lúc/slot
-                            </Tag>
-                            <Tag icon={<ThunderboltOutlined />} color="purple" className="rounded-full py-2 px-3">
-                              Chạy tự động đồng bộ với lịch nhân sự
-                            </Tag>
-                          </Space>
+                        <Card className="info-card">
+                          <div className="info-card__header">
+                            <span className="info-card__title">Giới hạn công suất</span>
+                            <div className="info-card__tags">
+                              <Tag icon={<CarOutlined />} color="geekblue">
+                                2 xe cùng lúc/slot
+                              </Tag>
+                              <Tag icon={<ThunderboltOutlined />} color="purple">
+                                Đồng bộ lịch nhân sự
+                              </Tag>
+                            </div>
+                          </div>
                         </Card>
                       </Col>
                     </Row>
 
-                    <Card className="rounded-[24px] border border-slate-200 bg-white p-4">
+                    <Card className="table-card">
                       <Table
                         columns={bookingColumns}
                         dataSource={bookingTableData}
@@ -429,11 +406,7 @@ export default function BookingSlotDashboard() {
                         rowKey="key"
                         size="middle"
                         locale={{
-                          emptyText: (
-                            <div className="py-10 text-center text-slate-500">
-                              Chưa có lịch hẹn khách hàng trong tuần.
-                            </div>
-                          ),
+                          emptyText: <div className="table-empty">Chưa có lịch hẹn khách hàng trong tuần.</div>,
                         }}
                       />
                     </Card>
@@ -444,38 +417,36 @@ export default function BookingSlotDashboard() {
                 key: 'staff',
                 label: 'Lịch Làm Việc Tự Động',
                 children: (
-                  <div className="space-y-6">
+                  <div className="tab-content">
                     <Row gutter={[24, 24]}>
                       <Col xs={24} lg={16}>
-                        <Card className="rounded-[24px] border border-slate-200 bg-slate-50 p-5">
-                          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                              <div className="font-semibold text-slate-900">Lịch làm việc tuần</div>
-                              <Text className="text-slate-600">
-                                Mô phỏng phân công nhân viên STAFF theo quy tắc làm việc 8h/ngày và 30h/tuần.
-                              </Text>
-                            </div>
-                            <Button
-                              type="primary"
-                              icon={<ThunderboltOutlined />}
-                              size="large"
-                              onClick={generateStaffSchedule}
-                              className="rounded-3xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white"
-                            >
-                              KÍCH HOẠT PHÂN LỊCH TỰ ĐỘNG
-                            </Button>
+                        <Card className="info-card info-card--flex">
+                          <div>
+                            <span className="info-card__title">Lịch làm việc tuần</span>
+                            <Text className="info-card__text">
+                              Mô phỏng phân công nhân viên STAFF theo quy tắc làm việc 8h/ngày và 30h/tuần.
+                            </Text>
                           </div>
+                          <Button
+                            type="primary"
+                            icon={<ThunderboltOutlined />}
+                            size="large"
+                            onClick={generateStaffSchedule}
+                            className="generate-schedule-button"
+                          >
+                            KÍCH HOẠT PHÂN LỊCH TỰ ĐỘNG
+                          </Button>
                         </Card>
                       </Col>
                       <Col xs={24} lg={8}>
-                        <Card className="rounded-[24px] border border-slate-200 bg-white p-5">
-                          <div className="font-semibold text-slate-900">Nhân sự STAFF</div>
-                          <div className="mt-4 flex flex-wrap gap-3">{staffSummaryItems}</div>
+                        <Card className="info-card">
+                          <span className="info-card__title">Nhân sự STAFF</span>
+                          <div className="staff-summary">{staffSummaryItems}</div>
                         </Card>
                       </Col>
                     </Row>
 
-                    <Card className="rounded-[24px] border border-slate-200 bg-white p-4">
+                    <Card className="table-card">
                       <Table
                         columns={scheduleColumns}
                         dataSource={createScheduleRows}
@@ -485,7 +456,7 @@ export default function BookingSlotDashboard() {
                         size="middle"
                         locale={{
                           emptyText: (
-                            <div className="py-10 text-center text-slate-500">
+                            <div className="table-empty">
                               Chưa có dữ liệu lịch làm việc. Vui lòng nhấn nút 'KÍCH HOẠT PHÂN LỊCH TỰ ĐỘNG' để hệ thống xử lý!
                             </div>
                           ),
