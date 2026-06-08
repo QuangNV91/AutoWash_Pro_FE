@@ -1,17 +1,16 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import AuthLayout from '../components/auth/AuthLayout.jsx'
-import LoginForm from '../components/auth/LoginForm.jsx'
-import RegisterForm from '../components/auth/RegisterForm.jsx'
+import LoginPage from './auth/LoginPage.jsx'
+import RegisterPage from './auth/RegisterPage.jsx'
+import ForgotPasswordPage from './auth/ForgotPasswordPage.jsx'
 
 export default function Auth() {
   return (
-    <AuthLayout>
-      <Routes>
-        <Route index element={<Navigate to="login" replace />} />
-        <Route path="login" element={<LoginForm />} />
-        <Route path="register" element={<RegisterForm />} />
-        <Route path="*" element={<Navigate to="login" replace />} />
-      </Routes>
-    </AuthLayout>
+    <Routes>
+      <Route index element={<Navigate to="login" replace />} />
+      <Route path="login" element={<LoginPage />} />
+      <Route path="register" element={<RegisterPage />} />
+      <Route path="forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="*" element={<Navigate to="login" replace />} />
+    </Routes>
   )
 }

@@ -7,18 +7,51 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+
+# Build files
+dist/
+dist-ssr/
+build/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Local files
 *.local
+
+# Archives
+*.zip
+*.rar
+*.7z
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Coverage
+coverage/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Vite
+vite.config.ts.timestamp-*
+
+# AI Context files
+CONTEXT.md
+TASKS.md
+Context.MD
+Task.MD
