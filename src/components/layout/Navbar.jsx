@@ -33,8 +33,8 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Trang chủ', id: 'hero' },
     { name: 'Dịch vụ', onClick: () => navigate('/services') },
-    { name: 'Bảng giá', onClick: () => navigate('/services#banggia') },
-    { name: 'Liên hệ', id: 'contact' },
+    { name: 'Bảng giá', onClick: () => navigate('/pricing') },
+    { name: 'Liên hệ', onClick: () => navigate('/contact') },
   ];
 
   return (

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import { Clock, ShieldCheck, PenTool, Award, Star } from 'lucide-react';
+import { Clock, ShieldCheck, PenTool, Award } from 'lucide-react';
 
 export default function ServicesPage() {
   const navigate = useNavigate();
@@ -36,7 +36,6 @@ export default function ServicesPage() {
       <main className="flex-grow pt-20">
         {/* HERO SECTION */}
         <section className="relative py-32 bg-dark-950 overflow-hidden">
-          {/* Background: gradient tối + subtle gold radial glow góc trên phải */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gold-500/10 via-dark-950 to-dark-950"></div>
           
           <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10 text-center">
@@ -58,7 +57,7 @@ export default function ServicesPage() {
         </section>
 
         {/* SERVICE DETAIL SECTION */}
-        <section id="banggia" className="py-24 bg-dark-900 border-t border-dark-800">
+        <section className="py-24 bg-dark-900 border-t border-dark-800">
           <div className="container mx-auto px-4 md:px-6 max-w-7xl">
             
             {/* Block 1 — Rửa xe cơ bản */}
@@ -110,10 +109,7 @@ export default function ServicesPage() {
                     Đặt lịch ngay
                   </button>
                   <button 
-                    onClick={() => {
-                      const el = document.getElementById('banggia');
-                      if(el) el.scrollIntoView({ behavior: 'smooth' });
-                    }}
+                    onClick={() => navigate('/pricing')}
                     className="px-8 py-3.5 text-gold-500 font-semibold border border-gold-500 rounded-full hover:bg-gold-500 hover:text-dark-950 transition-all duration-300 text-center"
                   >
                     Xem bảng giá
@@ -172,10 +168,7 @@ export default function ServicesPage() {
                     Đặt lịch ngay
                   </button>
                   <button 
-                    onClick={() => {
-                      const el = document.getElementById('banggia');
-                      if(el) el.scrollIntoView({ behavior: 'smooth' });
-                    }}
+                    onClick={() => navigate('/pricing')}
                     className="px-8 py-3.5 text-gold-500 font-semibold border border-gold-500 rounded-full hover:bg-gold-500 hover:text-dark-950 transition-all duration-300 text-center"
                   >
                     Xem bảng giá
@@ -194,7 +187,7 @@ export default function ServicesPage() {
             <div className="flex flex-col lg:flex-row items-center gap-16">
               <div className="w-full lg:w-1/2 relative">
                 <div className="aspect-[4/3] rounded-2xl overflow-hidden relative shadow-[0_0_40px_rgba(0,0,0,0.5)]">
-                  <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550355191-aa8a80b41353?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center"></div>
+                  <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center"></div>
                   <div className="absolute inset-0 bg-gradient-to-t from-dark-950/60 to-transparent"></div>
                 </div>
               </div>
@@ -241,10 +234,7 @@ export default function ServicesPage() {
                     Đặt lịch ngay
                   </button>
                   <button 
-                    onClick={() => {
-                      const el = document.getElementById('banggia');
-                      if(el) el.scrollIntoView({ behavior: 'smooth' });
-                    }}
+                    onClick={() => navigate('/pricing')}
                     className="px-8 py-3.5 text-gold-500 font-semibold border border-gold-500 rounded-full hover:bg-gold-500 hover:text-dark-950 transition-all duration-300 text-center"
                   >
                     Xem bảng giá

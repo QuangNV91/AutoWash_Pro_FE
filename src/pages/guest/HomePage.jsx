@@ -127,7 +127,7 @@ export default function HomePage() {
                   price: '300.000đ',
                   time: '60 phút',
                   desc: 'Đánh bóng, tẩy xước sơn và phủ lớp nano bảo vệ chống bám nước, bụi bẩn hoàn hảo.',
-                  img: 'https://images.unsplash.com/photo-1550355191-aa8a80b41353?q=80&w=2070&auto=format&fit=crop'
+                  img: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=2070&auto=format&fit=crop'
                 }
               ].map((service, idx) => (
                 <div key={idx} className="bg-dark-900 border border-dark-800 rounded-2xl overflow-hidden hover:border-gold-500/30 transition-all duration-300 group">
@@ -161,6 +161,181 @@ export default function HomePage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* WHY CHOOSE US */}
+        <section className="py-24 bg-dark-900 border-t border-dark-800">
+          <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+            <div className="text-center mb-16">
+              <span className="text-gold-500 tracking-widest text-sm font-semibold uppercase mb-4 inline-block">✦ Ưu điểm vượt trội</span>
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-text-primary">Tại sao chọn AutoWash Pro?</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { icon: <PenTool size={36} />, title: 'Thiết bị hiện đại', desc: 'Máy rửa áp lực cao, hóa chất nhập khẩu đảm bảo an toàn cho sơn xe.' },
+                { icon: <Clock size={36} />, title: 'Đúng giờ cam kết', desc: 'Hoàn thành đúng thời gian đã hẹn. Không để bạn chờ đợi lâu.' },
+                { icon: <Award size={36} />, title: 'Thợ lành nghề', desc: 'Đội ngũ kỹ thuật viên đào tạo bài bản, tỉ mỉ từng chi tiết.' },
+                { icon: <ShieldCheck size={36} />, title: 'Bảo đảm chất lượng', desc: 'Cam kết hài lòng tuyệt đối. Không hài lòng — hoàn tiền 100%.' },
+              ].map((item, idx) => (
+                <div key={idx} className="bg-dark-800 border border-dark-600 rounded-2xl p-6 hover:border-gold-500/50 transition-all duration-300 group">
+                  <div className="w-14 h-14 rounded-xl bg-gold-500/10 border border-gold-500/20 flex items-center justify-center text-gold-400 mb-5 group-hover:bg-gold-500/20 transition-colors">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-text-primary mb-3">{item.title}</h3>
+                  <p className="text-text-secondary text-sm leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PROCESS TIMELINE */}
+        <section className="py-24 bg-dark-950">
+          <div className="container mx-auto px-4 md:px-6 max-w-5xl">
+            <div className="text-center mb-16">
+              <span className="text-gold-500 tracking-widest text-sm font-semibold uppercase mb-4 inline-block">✦ Quy trình</span>
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-text-primary">4 bước đơn giản</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {[
+                { step: '01', title: 'Đặt lịch online', desc: 'Chọn gói dịch vụ và thời gian phù hợp trên hệ thống.' },
+                { step: '02', title: 'Đến cửa hàng', desc: 'Mang xe đến đúng giờ hẹn, nhân viên check-in nhanh chóng.' },
+                { step: '03', title: 'Thực hiện dịch vụ', desc: 'Kỹ thuật viên thực hiện đúng quy trình chuẩn chuyên nghiệp.' },
+                { step: '04', title: 'Nhận xe & Thanh toán', desc: 'Kiểm tra kết quả, thanh toán và tích điểm thành viên.' },
+              ].map((item, idx) => (
+                <div key={idx} className="relative text-center group">
+                  {idx < 3 && (
+                    <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-[2px] bg-gradient-to-r from-gold-500/40 to-transparent"></div>
+                  )}
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-dark-800 border border-dark-600 flex items-center justify-center group-hover:border-gold-500/50 group-hover:bg-gold-500/10 transition-all duration-300">
+                    <span className="text-gold-400 font-heading text-xl font-bold">{item.step}</span>
+                  </div>
+                  <h3 className="text-text-primary font-bold mb-2">{item.title}</h3>
+                  <p className="text-text-secondary text-sm leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* TESTIMONIALS */}
+        <section className="py-24 bg-dark-900 border-t border-dark-800">
+          <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+            <div className="text-center mb-16">
+              <span className="text-gold-500 tracking-widest text-sm font-semibold uppercase mb-4 inline-block">✦ Khách hàng nói gì</span>
+              <h2 className="font-heading text-4xl md:text-5xl font-bold text-text-primary">Đánh giá từ khách hàng</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { name: 'Nguyễn Văn An', role: 'Thành viên Gold', rating: 5, text: 'Dịch vụ rửa xe chuyên sâu rất tuyệt vời. Xe sạch bóng, nhân viên nhiệt tình. Tôi đã là khách quen hơn 1 năm.', avatar: 'A' },
+                { name: 'Trần Thị Bích', role: 'Thành viên Platinum', rating: 5, text: 'Hệ thống đặt lịch online rất tiện lợi. Không phải chờ đợi, đến đúng giờ là có người phục vụ ngay.', avatar: 'B' },
+                { name: 'Lê Minh Đức', role: 'Thành viên Silver', rating: 5, text: 'Phủ nano ceramic giúp xe bóng đẹp suốt cả tháng. Giá cả hợp lý so với chất lượng nhận được.', avatar: 'D' },
+              ].map((review, idx) => (
+                <div key={idx} className="bg-dark-800 border border-dark-600 rounded-2xl p-8 hover:border-gold-500/30 transition-all duration-300">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(review.rating)].map((_, i) => (
+                      <Star key={i} size={16} className="text-gold-400 fill-gold-400" />
+                    ))}
+                  </div>
+                  <p className="text-text-secondary text-sm leading-relaxed mb-6 italic">"{review.text}"</p>
+                  <div className="flex items-center gap-3 border-t border-dark-600 pt-5">
+                    <div className="w-10 h-10 rounded-full bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-400 font-bold text-sm">
+                      {review.avatar}
+                    </div>
+                    <div>
+                      <p className="text-text-primary font-semibold text-sm">{review.name}</p>
+                      <p className="text-text-muted text-xs">{review.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* LOYALTY PROGRAM */}
+        <section className="py-24 bg-dark-950">
+          <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+            <div className="flex flex-col lg:flex-row items-center gap-16">
+              <div className="w-full lg:w-1/2">
+                <span className="text-gold-500 tracking-widest text-sm font-semibold uppercase mb-4 inline-block">✦ Chương trình thành viên</span>
+                <h2 className="font-heading text-4xl md:text-5xl font-bold text-text-primary mb-6">
+                  Tích điểm — <span className="bg-gradient-to-r from-gold-300 to-gold-500 bg-clip-text text-transparent">Thăng hạng</span>
+                </h2>
+                <p className="text-text-secondary leading-relaxed mb-8">
+                  Mỗi lần sử dụng dịch vụ, bạn sẽ tự động tích điểm và thăng hạng thành viên. Hạng càng cao — chiết khấu càng lớn, quyền lợi càng nhiều.
+                </p>
+                <div className="space-y-4 mb-10">
+                  {[
+                    { tier: 'Silver', points: '500 điểm', discount: '5%', color: 'text-[#C0C0C0]', border: 'border-[#C0C0C0]/30' },
+                    { tier: 'Gold', points: '1.500 điểm', discount: '10%', color: 'text-gold-400', border: 'border-gold-500/40' },
+                    { tier: 'Platinum', points: '3.000 điểm', discount: '15%', color: 'text-purple-300', border: 'border-purple-500/30' },
+                  ].map((item, idx) => (
+                    <div key={idx} className={`flex items-center justify-between bg-dark-800 border ${item.border} rounded-xl px-5 py-4`}>
+                      <div className="flex items-center gap-3">
+                        <Award size={20} className={item.color} />
+                        <span className={`font-bold ${item.color}`}>{item.tier}</span>
+                        <span className="text-text-muted text-sm">({item.points})</span>
+                      </div>
+                      <span className="text-gold-400 font-bold">Giảm {item.discount}</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => navigate('/pricing')}
+                  className="px-8 py-3.5 text-gold-500 font-semibold border border-gold-500 rounded-full hover:bg-gold-500 hover:text-dark-950 transition-all duration-300"
+                >
+                  Xem chi tiết bảng giá
+                </button>
+              </div>
+              <div className="w-full lg:w-1/2">
+                <div className="bg-dark-800 border border-dark-600 rounded-2xl p-8 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-gold-500/5 rounded-bl-full"></div>
+                  <h3 className="font-heading text-2xl font-bold text-text-primary mb-6 relative z-10">Quyền lợi thành viên</h3>
+                  <ul className="space-y-5 relative z-10">
+                    {[
+                      'Chiết khấu lên đến 15% mọi dịch vụ',
+                      'Đặt lịch trước tối đa 14 ngày',
+                      'Cộng 10 điểm thưởng khi thanh toán online',
+                      'Thăng hạng tự động khi đủ điểm',
+                      'Ưu đãi độc quyền cho hạng Platinum',
+                      'Hỗ trợ ưu tiên qua hotline riêng',
+                    ].map((benefit, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <span className="text-gold-500 mt-1 text-xs">✦</span>
+                        <span className="text-text-secondary text-sm">{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA SECTION */}
+        <section className="py-20 bg-dark-900 border-t border-dark-800 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gold-500/5 via-transparent to-transparent"></div>
+          <div className="container mx-auto px-4 relative z-10">
+            <h2 className="font-heading text-4xl md:text-5xl font-bold text-text-primary mb-6">Sẵn sàng trải nghiệm?</h2>
+            <p className="text-text-secondary text-lg mb-10 max-w-2xl mx-auto">
+              Đặt lịch ngay hôm nay để trải nghiệm dịch vụ chăm sóc xe đẳng cấp tại AutoWash Pro!
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={handleBookingClick}
+                className="px-10 py-5 bg-gold-500 text-dark-950 font-bold rounded-full hover:bg-gold-400 shadow-[0_0_30px_rgba(201,152,26,0.4)] hover:shadow-[0_0_40px_rgba(201,152,26,0.6)] transition-all text-lg"
+              >
+                Đặt lịch ngay
+              </button>
+              <button
+                onClick={() => navigate('/contact')}
+                className="px-10 py-5 text-gold-500 font-bold border-2 border-gold-500 rounded-full hover:bg-gold-500 hover:text-dark-950 transition-all text-lg"
+              >
+                Liên hệ tư vấn
+              </button>
             </div>
           </div>
         </section>
