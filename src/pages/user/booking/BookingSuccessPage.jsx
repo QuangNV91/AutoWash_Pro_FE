@@ -1,31 +1,29 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import PageWrapper from '../../../components/layout/PageWrapper';
 import useBookingStore from '../../../store/bookingStore';
-import { CheckCircle2, Calendar, Clock, Car, MapPin } from 'lucide-react';
+import { CheckCircle2, Calendar, Clock, Car, MapPin, Star, Plus } from 'lucide-react';
 
 export default function BookingSuccessPage() {
   const navigate = useNavigate();
   const { 
-    selectedService, 
+    bookingItems,
     selectedDate, 
-    selectedTime, 
-    vehicleType,
-    customerNote,
-    resetBooking
+    submitResults,
+    paymentMethod,
+    getTotalPoints,
+    getDiscountedTotal,
+    resetCart,
+    resetKeepDate,
   } = useBookingStore();
 
-  // If user accesses this page directly without booking data, redirect home
-  useEffect(() => {
-    if (!selectedService || !selectedDate || !selectedTime) {
-      navigate('/');
-    }
-    
-    // Optional: Clean up state when leaving the success page (e.g., on unmount)
-    // return () => resetBooking();
-  }, [selectedService, selectedDate, selectedTime, navigate]);
 
-  if (!selectedService) return null;
+
+  if (!bookingItems.length || !bookingItems[0].service) return null;
+
+  const successCount = submitResults.filter(r => r.success).length;
+  const totalPoints = getTotalPoints();
+  const totalPrice = getDiscountedTotal();
 
   return (
     <PageWrapper title="Đặt lịch thành công">
@@ -41,49 +39,102 @@ export default function BookingSuccessPage() {
             
             <h1 className="font-heading text-4xl font-bold text-text-primary mb-4">Đặt lịch thành công!</h1>
             <p className="text-text-secondary mb-10 max-w-md mx-auto">
-              Cảm ơn bạn đã tin tưởng AutoWash Pro. Dưới đây là thông tin chi tiết về lịch hẹn của bạn.
+              Cảm ơn bạn đã tin tưởng AutoWash Pro. 
+              {successCount > 1 
+                ? ` Đã đặt thành công ${successCount} xe.`
+                : ' Dưới đây là thông tin chi tiết về lịch hẹn của bạn.'}
             </p>
 
-            <div className="w-full bg-dark-800 border border-dark-700 rounded-2xl p-6 md:p-8 text-left mb-10">
-              <h2 className="text-sm uppercase tracking-widest text-text-muted font-semibold mb-6 border-b border-dark-600 pb-3">Chi tiết lịch hẹn</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex gap-4">
-                  <div className="text-gold-500 mt-1"><Car size={20} /></div>
-                  <div>
-                    <p className="text-text-muted text-sm mb-1">Dịch vụ & Xe</p>
-                    <p className="text-text-primary font-bold">{selectedService.name}</p>
-                    <p className="text-text-secondary mt-1 bg-dark-900 inline-block px-3 py-1 rounded border border-dark-600 font-semibold">{vehicleType}</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-4">
-                  <div className="text-gold-500 mt-1"><Calendar size={20} /></div>
-                  <div>
-                    <p className="text-text-muted text-sm mb-1">Thời gian</p>
-                    <p className="text-text-primary font-bold">{selectedDate}</p>
-                    <p className="text-text-secondary flex items-center gap-1 mt-1">
-                      <Clock size={14} /> {selectedTime}
-                    </p>
-                  </div>
-                </div>
+            {/* Chi tiết từng xe */}
+            <div className="w-full space-y-4 mb-10">
+              {bookingItems.map((item, index) => {
+                const result = submitResults.find(r => r.itemId === item.id);
+                const price = item.service.base_price ?? item.service.price;
+                const duration = item.service.duration_minutes ?? item.service.duration;
+                const points = item.service.base_points ?? item.service.points;
 
-                <div className="flex gap-4 md:col-span-2 mt-2 pt-6 border-t border-dark-700">
-                  <div className="text-gold-500 mt-1"><MapPin size={20} /></div>
-                  <div>
-                    <p className="text-text-muted text-sm mb-1">Địa điểm</p>
-                    <p className="text-text-primary font-bold">AutoWash Pro Center</p>
-                    <p className="text-text-secondary mt-1">123 Đường Nguyễn Văn Linh, Quận 7, TP.HCM</p>
+                return (
+                  <div key={item.id} className="bg-dark-800 border border-dark-700 rounded-2xl p-6 text-left">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-sm uppercase tracking-widest text-text-muted font-semibold">
+                        Xe {index + 1}
+                      </h2>
+                      {result && (
+                        <span className="text-xs font-semibold text-green-400 bg-green-400/10 px-2 py-1 rounded">
+                          #{result.bookingId}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex gap-4">
+                        <div className="text-gold-500 mt-1"><Car size={20} /></div>
+                        <div>
+                          <p className="text-text-muted text-sm mb-1">Dịch vụ</p>
+                          <p className="text-text-primary font-bold">{item.service.name}</p>
+                          <p className="text-text-secondary text-sm mt-1">{duration} phút</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-4">
+                        <div className="text-gold-500 mt-1"><Clock size={20} /></div>
+                        <div>
+                          <p className="text-text-muted text-sm mb-1">Thời gian</p>
+                          <p className="text-text-primary font-bold">{selectedDate}</p>
+                          <p className="text-text-secondary flex items-center gap-1 mt-1">
+                            ⏰ {item.selectedTime}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+
+            {/* Tổng kết */}
+            <div className="w-full bg-dark-800 border border-dark-700 rounded-2xl p-6 mb-10">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-text-muted text-xs uppercase tracking-wider mb-1">Tổng xe</p>
+                  <p className="text-2xl font-bold text-text-primary">{successCount}</p>
                 </div>
+                <div>
+                  <p className="text-text-muted text-xs uppercase tracking-wider mb-1">Tổng tiền</p>
+                  <p className="text-2xl font-bold text-gold-400">{totalPrice.toLocaleString('vi-VN')}đ</p>
+                </div>
+                <div>
+                  <p className="text-text-muted text-xs uppercase tracking-wider mb-1">Điểm nhận</p>
+                  <p className="text-2xl font-bold text-gold-400 flex items-center justify-center gap-1">
+                    <Star size={18} /> +{totalPoints}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Địa điểm */}
+              <div className="flex gap-4 mt-6 pt-6 border-t border-dark-600">
+                <div className="text-gold-500 mt-1"><MapPin size={20} /></div>
+                <div>
+                  <p className="text-text-muted text-sm mb-1">Địa điểm</p>
+                  <p className="text-text-primary font-bold">AutoWash Pro Center</p>
+                  <p className="text-text-secondary mt-1">123 Đường Nguyễn Văn Linh, Quận 7, TP.HCM</p>
+                </div>
+              </div>
+
+              {/* Phương thức thanh toán */}
+              <div className="mt-4 pt-4 border-t border-dark-600">
+                <p className="text-xs text-text-muted">
+                  Thanh toán: {paymentMethod === 'ONLINE' ? '✅ Đã thanh toán Online' : '💵 Thanh toán tại cửa hàng'}
+                </p>
               </div>
             </div>
 
+            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
               <button 
                 onClick={() => {
                   navigate('/');
-                  setTimeout(() => resetBooking(), 100);
+                  setTimeout(() => resetCart(), 100);
                 }}
                 className="px-8 py-3.5 font-bold rounded-full border border-dark-600 text-text-secondary hover:bg-dark-800 hover:text-text-primary transition-colors"
               >
@@ -92,12 +143,22 @@ export default function BookingSuccessPage() {
               <button 
                 onClick={() => {
                   navigate('/dashboard');
-                  setTimeout(() => resetBooking(), 100);
+                  setTimeout(() => resetCart(), 100);
                 }}
                 className="px-8 py-3.5 font-bold rounded-full bg-gold-500 text-dark-950 hover:bg-gold-400 transition-colors shadow-[0_0_20px_rgba(201,152,26,0.3)]"
               >
                 Xem quản lý lịch hẹn
               </button>
+              <Link 
+                to="/booking"
+                onClick={() => {
+                  resetKeepDate();
+                }}
+                className="px-8 py-3.5 font-bold rounded-full border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-dark-950 transition-colors flex items-center justify-center gap-2"
+              >
+                <Plus size={18} />
+                Đặt lịch xe khác
+              </Link>
             </div>
             
           </div>

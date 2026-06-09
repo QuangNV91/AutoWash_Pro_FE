@@ -104,6 +104,29 @@ export default function UserDashboard() {
     setCancelModal({ isOpen: false, booking: null, policy: null });
   };
 
+  const TIERS = [
+    { id: 'MEMBER', label: 'Thành viên', points: 0 },
+    { id: 'SILVER', label: 'Bạc', points: 1000 },
+    { id: 'GOLD', label: 'Vàng', points: 2000 },
+    { id: 'DIAMOND', label: 'Kim Cương', points: 5000 },
+  ];
+
+  let currentTierIndex = 0;
+  for (let i = 0; i < TIERS.length; i++) {
+    if (user.points >= TIERS[i].points) {
+      currentTierIndex = i;
+    }
+  }
+
+  let progressPercent = 100;
+  if (currentTierIndex < TIERS.length - 1) {
+    const currentTier = TIERS[currentTierIndex];
+    const nextTier = TIERS[currentTierIndex + 1];
+    const tierProgress = (user.points - currentTier.points) / (nextTier.points - currentTier.points);
+    const sectionWidth = 100 / (TIERS.length - 1);
+    progressPercent = (currentTierIndex * sectionWidth) + (tierProgress * sectionWidth);
+  }
+
   return (
     <PageWrapper title="Quản lý tài khoản">
       <div className="container mx-auto px-4 max-w-6xl pt-8 pb-20">
@@ -132,14 +155,59 @@ export default function UserDashboard() {
                     <span className="text-xs text-text-muted uppercase tracking-wider font-semibold">Hạng thẻ</span>
                     <span className="text-xs text-gold-400 font-bold bg-gold-500/10 px-2 py-0.5 rounded">{user.tier}</span>
                   </div>
-                  <div className="text-2xl font-bold text-gold-500 mb-4">{user.points.toLocaleString('vi-VN')} <span className="text-sm font-normal text-text-secondary">Điểm</span></div>
+                  <div className="text-2xl font-bold text-gold-500 mb-6">{user.points.toLocaleString('vi-VN')} <span className="text-sm font-normal text-text-secondary">Điểm</span></div>
                   
-                  <div className="w-full bg-dark-950 rounded-full h-1.5 mb-1.5">
-                    <div className="bg-gradient-to-r from-gold-600 to-gold-400 h-1.5 rounded-full" style={{ width: `${(user.points / user.nextTierPoints) * 100}%` }}></div>
+                  {/* Progress Bar Container */}
+                  <div className="px-3 mt-2 mb-10">
+                    <div className="relative w-full h-8">
+                      {/* Background Bar */}
+                      <div className="absolute top-1.5 left-0 w-full h-1 bg-dark-950 rounded-full"></div>
+                      
+                      {/* Active Bar */}
+                      <div 
+                        className="absolute top-1.5 left-0 h-1 bg-gradient-to-r from-gold-600 to-gold-400 rounded-full transition-all duration-1000"
+                        style={{ width: `${progressPercent}%` }}
+                      ></div>
+
+                      {/* Checkpoints */}
+                      {TIERS.map((tier, idx) => {
+                        const isAchieved = user.points >= tier.points;
+                        const isCurrent = currentTierIndex === idx;
+                        const positionPercent = idx * (100 / (TIERS.length - 1));
+                        
+                        return (
+                          <div 
+                            key={tier.id} 
+                            className="absolute top-0 flex flex-col items-center"
+                            style={{ left: `${positionPercent}%`, transform: 'translateX(-50%)' }}
+                          >
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center bg-dark-800 transition-colors z-10 relative ${
+                              isAchieved 
+                                ? 'border-gold-400 shadow-[0_0_8px_rgba(201,152,26,0.5)]' 
+                                : 'border-dark-700'
+                            }`}>
+                              {isAchieved && <div className="w-1.5 h-1.5 rounded-full bg-gold-400"></div>}
+                            </div>
+                            <div className="absolute top-6 w-20 flex justify-center text-center">
+                              <span className={`text-[10px] font-bold ${isCurrent ? 'text-gold-400' : isAchieved ? 'text-text-primary' : 'text-dark-600'}`}>
+                                {tier.label}
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
-                  <p className="text-[10px] text-text-muted text-right">
-                    Cần thêm {user.nextTierPoints - user.points} điểm để lên hạng {user.nextTier}
-                  </p>
+
+                  {currentTierIndex < TIERS.length - 1 ? (
+                    <p className="text-[10px] text-text-muted text-center mt-2">
+                      Cần thêm <span className="text-gold-400">{TIERS[currentTierIndex + 1].points - user.points}</span> điểm để lên hạng {TIERS[currentTierIndex + 1].label}
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-gold-400 text-center mt-2 font-semibold">
+                      Bạn đã đạt hạng cao nhất!
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
