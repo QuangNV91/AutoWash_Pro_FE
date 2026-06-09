@@ -82,8 +82,8 @@ export default function BookingSuccessPage() {
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
               <button 
                 onClick={() => {
-                  resetBooking();
                   navigate('/');
+                  setTimeout(() => resetBooking(), 100);
                 }}
                 className="px-8 py-3.5 font-bold rounded-full border border-dark-600 text-text-secondary hover:bg-dark-800 hover:text-text-primary transition-colors"
               >
@@ -91,8 +91,8 @@ export default function BookingSuccessPage() {
               </button>
               <button 
                 onClick={() => {
-                  resetBooking();
                   navigate('/dashboard');
+                  setTimeout(() => resetBooking(), 100);
                 }}
                 className="px-8 py-3.5 font-bold rounded-full bg-gold-500 text-dark-950 hover:bg-gold-400 transition-colors shadow-[0_0_20px_rgba(201,152,26,0.3)]"
               >
