@@ -1,11 +1,11 @@
 import { Layout, Menu, Avatar } from 'antd'
 import { HomeOutlined, CalendarOutlined, TeamOutlined, SettingOutlined } from '@ant-design/icons'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, Outlet } from 'react-router-dom'
 import '../../styles/admin.css'
 
 const { Header, Sider, Content } = Layout
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout() {
   const location = useLocation()
   const selectedKey = location.pathname.includes('/admin/booking-schedule')
     ? 'booking'
@@ -49,7 +49,9 @@ export default function AdminLayout({ children }) {
           </div>
         </Header>
 
-        <Content className="admin-content">{children}</Content>
+        <Content className="admin-content">
+          <Outlet />
+        </Content>
       </Layout>
     </Layout>
   )

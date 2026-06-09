@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react'
-import { Button, Card, Space, Table, Tag, Typography, notification } from 'antd'
-import { ThunderboltOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons'
+import React, { useMemo, useState, useEffect } from 'react'
+import { Button, Card, Space, Table, Tag, Typography, notification, Modal, List, Select, Form } from 'antd'
+import { ThunderboltOutlined, UserOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
 
@@ -17,22 +17,6 @@ const initialStaffProfiles = [
   { id: 'staff-tun', name: 'Phạm Thị Tủn', weeklyHours: 0, shiftsAssigned: 0 },
 ]
 
-const getDutyTag = (duty) => {
-  if (duty === 'CASHIER') {
-    return (
-      <Tag color="green" className="font-semibold rounded-full py-2 px-3">
-        💰 Thu ngân (CASHIER)
-      </Tag>
-    )
-  }
-
-  return (
-    <Tag color="blue" className="font-semibold rounded-full py-2 px-3">
-      🚗 Thợ sửa xe (TECHNICIAN)
-    </Tag>
-  )
-}
-
 const buildStaffScheduleRows = (scheduleData) => {
   return scheduleData.flatMap((dayBlock) => {
     return dayBlock.shifts.flatMap((shiftBlock, shiftIndex) => {
@@ -43,7 +27,7 @@ const buildStaffScheduleRows = (scheduleData) => {
             day: dayBlock.day,
             shiftLabel: shiftBlock.shiftLabel,
             staffName: 'Chưa có nhân viên',
-            duty: null,
+            incomplete: true,
             dayRowSpan: dayBlock.shifts.reduce((sum, shift) => sum + Math.max(shift.assignments.length, 1), 0),
             shiftRowSpan: 1,
             showDay: shiftIndex === 0,
@@ -57,7 +41,6 @@ const buildStaffScheduleRows = (scheduleData) => {
         day: dayBlock.day,
         shiftLabel: shiftBlock.shiftLabel,
         staffName: assignment.name,
-        duty: assignment.duty,
         dayRowSpan: dayBlock.shifts.reduce((sum, shift) => sum + Math.max(shift.assignments.length, 1), 0),
         shiftRowSpan: shiftBlock.assignments.length,
         showDay: shiftIndex === 0 && assignmentIndex === 0,
@@ -71,6 +54,19 @@ export default function StaffScheduleDashboard() {
   const [staffProfiles, setStaffProfiles] = useState(initialStaffProfiles)
   const [scheduleData, setScheduleData] = useState([])
   const [rotationPointer, setRotationPointer] = useState(0)
+  const [leaveRequests, setLeaveRequests] = useState([
+    {
+      id: 'lr-demo-1',
+      staffId: 'staff-ti',
+      staffName: 'Trần Văn Tí',
+      startIndex: 2, // Thứ Tư
+      duration: 3,
+      status: 'pending',
+    },
+  ])
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
+  const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false)
+  const [staffLeaves, setStaffLeaves] = useState({})
 
   const staffBadges = useMemo(
     () =>
@@ -82,12 +78,67 @@ export default function StaffScheduleDashboard() {
     [staffProfiles],
   )
 
-  const createStaffSchedule = () => {
+  // Leave requests and handling
+  const pendingCount = leaveRequests.filter((r) => r.status === 'pending').length
+
+  const createLeaveRequest = (values) => {
+    const staff = staffProfiles.find((s) => s.id === values.staffId)
+    const req = {
+      id: `lr-${Date.now()}`,
+      staffId: values.staffId,
+      staffName: staff ? staff.name : 'Unknown',
+      startIndex: values.startIndex,
+      duration: values.duration,
+      status: 'pending',
+    }
+    setLeaveRequests((prev) => [req, ...prev])
+    setIsNewRequestModalOpen(false)
+    notification.info({
+      message: 'Đã tạo đơn nghỉ',
+      description: `${req.staffName} xin nghỉ ${req.duration} ngày bắt đầu ${DAYS_IN_WEEK[req.startIndex]}`,
+    })
+  }
+
+  const approveLeaveRequest = (id) => {
+    const req = leaveRequests.find((r) => r.id === id)
+    if (!req) return
+
+    // compute new leaves map
+    const prevLeaves = staffLeaves
+    const prevArr = prevLeaves[req.staffId] || []
+    const s = new Set(prevArr)
+    for (let i = 0; i < req.duration; i++) {
+      const idx = Math.min(req.startIndex + i, DAYS_IN_WEEK.length - 1)
+      s.add(idx)
+    }
+    const newLeaves = { ...prevLeaves, [req.staffId]: Array.from(s) }
+
+    setStaffLeaves(newLeaves)
+    setLeaveRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'approved' } : r)))
+
+    // regenerate schedule with new leaves applied
+    createStaffSchedule({ notify: true }, newLeaves)
+
+    notification.success({ message: 'Đã duyệt đơn nghỉ', description: `${req.staffName} được nghỉ ${req.duration} ngày.` })
+  }
+
+  const rejectLeaveRequest = (id) => {
+    const req = leaveRequests.find((r) => r.id === id)
+    if (!req) return
+    setLeaveRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'rejected' } : r)))
+    notification.info({ message: 'Đã từ chối đơn nghỉ', description: `${req.staffName} không được duyệt nghỉ` })
+  }
+
+  const createStaffSchedule = (opts = { notify: true }, leavesOverride = null) => {
+    const { notify } = opts
+    const leaves = leavesOverride || staffLeaves
     if (staffProfiles.length < 3) {
-      notification.error({
-        message: 'Không đủ nhân sự',
-        description: 'Tối thiểu 3 nhân viên STAFF để tạo lịch làm việc tuần tự động.',
-      })
+      if (notify) {
+        notification.error({
+          message: 'Không đủ nhân sự',
+          description: 'Tối thiểu 3 nhân viên STAFF để tạo lịch làm việc tuần tự động.',
+        })
+      }
       return
     }
 
@@ -95,35 +146,52 @@ export default function StaffScheduleDashboard() {
       ...staff,
       currentHours: 0,
       currentShifts: 0,
-      lastAssignedDay: -1,
       sortIndex: (index + rotationPointer) % staffProfiles.length,
     }))
 
     const newSchedule = DAYS_IN_WEEK.map((day, dayIndex) => {
-      const shifts = SHIFT_DEFINITIONS.map((shift) => {
-        const available = workers
-          .filter((worker) => worker.currentHours < 30 && worker.lastAssignedDay !== dayIndex)
-          .sort((a, b) => {
-            if (a.currentHours !== b.currentHours) {
-              return a.currentHours - b.currentHours
-            }
-            return a.sortIndex - b.sortIndex
-          })
-
-        const assigned = available.slice(0, Math.min(2, available.length))
-        const assignments = assigned.map((worker, index) => {
-          const duty = assigned.length === 2 ? (index === 0 ? 'CASHIER' : 'TECHNICIAN') : 'CASHIER'
-          return { id: `${day}-${shift.key}-${worker.id}`, name: worker.name, duty }
-        })
-
-        assigned.forEach((worker) => {
-          worker.currentHours += 5
-          worker.currentShifts += 1
-          worker.lastAssignedDay = dayIndex
-        })
-
-        return { key: shift.key, day, shiftLabel: `${shift.alias} • ${shift.label}`, assignments }
+      // Filter out workers who are on approved leave for this day
+      const availableWorkers = workers.filter((w) => {
+        const leavesFor = leaves[w.id] || []
+        return !leavesFor.includes(dayIndex)
       })
+
+      // Sort available workers by least hours then by stable sortIndex for fairness
+      const sortedWorkers = availableWorkers.slice().sort((a, b) => {
+        if (a.currentHours !== b.currentHours) return a.currentHours - b.currentHours
+        return a.sortIndex - b.sortIndex
+      })
+
+      const morningDef = SHIFT_DEFINITIONS[0]
+      const afternoonDef = SHIFT_DEFINITIONS[1]
+
+      // Pick top 2 workers for morning
+      const morningAssigned = sortedWorkers.slice(0, 2)
+
+      // Assign morning only if at least 2 available
+      let morningAssignments = []
+      if (morningAssigned.length >= 2) {
+        morningAssignments = morningAssigned.map((w) => ({ id: `${day}-${morningDef.key}-${w.id}`, name: w.name }))
+        morningAssigned.forEach((w) => {
+          w.currentHours += 5
+          w.currentShifts += 1
+        })
+      }
+
+      // For this request, afternoon should be done by the same two from morning (if they are available)
+      let afternoonAssignments = []
+      if (morningAssigned.length >= 2) {
+        afternoonAssignments = morningAssigned.map((w) => ({ id: `${day}-${afternoonDef.key}-${w.id}`, name: w.name }))
+        morningAssigned.forEach((w) => {
+          w.currentHours += 5
+          w.currentShifts += 1
+        })
+      }
+
+      const shifts = [
+        { key: morningDef.key, day, shiftLabel: `${morningDef.alias} • ${morningDef.label}`, assignments: morningAssignments },
+        { key: afternoonDef.key, day, shiftLabel: `${afternoonDef.alias} • ${afternoonDef.label}`, assignments: afternoonAssignments },
+      ]
 
       return { day, shifts }
     })
@@ -139,11 +207,19 @@ export default function StaffScheduleDashboard() {
     setScheduleData(newSchedule)
     setRotationPointer((prev) => (prev + 1) % staffProfiles.length)
 
-    notification.success({
-      message: 'Phân lịch thành công',
-      description: 'Lịch làm việc tuần đã được tạo tự động cho nhân viên STAFF.',
-    })
+    if (notify) {
+      notification.success({
+        message: 'Phân lịch thành công',
+        description: 'Lịch làm việc tuần đã được tạo tự động cho nhân viên STAFF.',
+      })
+    }
   }
+
+  useEffect(() => {
+    // Automatically generate schedule on first render without a notification
+    createStaffSchedule({ notify: false })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const scheduleRows = useMemo(() => buildStaffScheduleRows(scheduleData), [scheduleData])
 
@@ -170,13 +246,12 @@ export default function StaffScheduleDashboard() {
       title: 'Nhân viên trực',
       dataIndex: 'staffName',
       key: 'staffName',
-      render: (value) => <span className="text-slate-700">{value}</span>,
-    },
-    {
-      title: 'Vị trí công việc (Hệ thống tự động gán)',
-      dataIndex: 'duty',
-      key: 'duty',
-      render: (value) => (value ? getDutyTag(value) : <Tag color="default">Chưa có phân công</Tag>),
+      render: (value, record) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="text-slate-700">{value}</span>
+          {record.incomplete && <Tag color="error">Thiếu nhân sự</Tag>}
+        </div>
+      ),
     },
   ]
 
@@ -191,15 +266,83 @@ export default function StaffScheduleDashboard() {
                   🛠️ Lịch Làm Việc Nhân Viên STAFF
                 </Title>
                 <Text className="text-slate-600">
-                  Tự động sinh lịch nhân viên STAFF theo quy tắc: tối đa 2 người/ca, 1 ca/ngày, và 30h/tuần.
+                  Tự động sinh lịch nhân viên STAFF theo quy tắc: tối đa 2 người/ca, 1 ca/ngày.
                 </Text>
               </div>
-              <Button type="primary" icon={<ThunderboltOutlined />} size="large" onClick={createStaffSchedule} className="rounded-3xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white">
-                KÍCH HOẠT PHÂN LỊCH TỰ ĐỘNG
-              </Button>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Button onClick={() => setIsLeaveModalOpen(true)}>
+                  Yêu cầu nghỉ ({pendingCount})
+                </Button>
+                <Button type="default" onClick={() => setIsNewRequestModalOpen(true)}>
+                  Tạo đơn nghỉ
+                </Button>
+                <Button type="primary" icon={<ThunderboltOutlined />} size="large" onClick={() => createStaffSchedule()} className="rounded-3xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white">
+                  TẠO LẠI PHÂN LỊCH
+                </Button>
+              </div>
             </div>
           </Space>
         </Card>
+
+        {/* Leave Requests Modal */}
+        <Modal title={`Yêu cầu nghỉ (${pendingCount})`} open={isLeaveModalOpen} onCancel={() => setIsLeaveModalOpen(false)} footer={null}>
+          <List
+            dataSource={leaveRequests.filter((r) => r.status === 'pending')}
+            locale={{ emptyText: <div>Không có đơn nghỉ nào đang chờ</div> }}
+            renderItem={(item) => (
+              <List.Item
+                actions={[
+                  <Button key="approve" type="link" icon={<CheckOutlined />} onClick={() => approveLeaveRequest(item.id)}>
+                    Duyệt
+                  </Button>,
+                  <Button key="reject" danger type="link" icon={<CloseOutlined />} onClick={() => rejectLeaveRequest(item.id)}>
+                    Từ chối
+                  </Button>,
+                ]}
+              >
+                <List.Item.Meta title={item.staffName} description={`${DAYS_IN_WEEK[item.startIndex]} — ${item.duration} ngày`} />
+              </List.Item>
+            )}
+          />
+        </Modal>
+
+        {/* New Leave Request Modal (for demo) */}
+        <Modal title="Tạo đơn xin nghỉ" open={isNewRequestModalOpen} onCancel={() => setIsNewRequestModalOpen(false)} footer={null}>
+          <Form layout="vertical" onFinish={createLeaveRequest} initialValues={{ duration: 1 }}>
+            <Form.Item name="staffId" label="Nhân viên" rules={[{ required: true }]}>
+              <Select placeholder="Chọn nhân viên">
+                {staffProfiles.map((s) => (
+                  <Select.Option key={s.id} value={s.id}>
+                    {s.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item name="startIndex" label="Ngày bắt đầu (trong tuần)" rules={[{ required: true }]}>
+              <Select placeholder="Chọn ngày">
+                {DAYS_IN_WEEK.map((d, idx) => (
+                  <Select.Option key={idx} value={idx}>
+                    {d}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item name="duration" label="Số ngày" rules={[{ required: true }]}>
+              <Select>
+                <Select.Option value={1}>1 ngày</Select.Option>
+                <Select.Option value={3}>3 ngày</Select.Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Gửi đơn
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
 
         <Card className="rounded-[24px] border border-slate-200 bg-white p-5">
           <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -211,7 +354,7 @@ export default function StaffScheduleDashboard() {
               <div className="font-semibold text-slate-800">Luật vận hành</div>
               <div>• 2 nhân viên/ca</div>
               <div>• 1 ca/ngày mỗi nhân viên</div>
-              <div>• Tối đa 6 ca/tuần (30h)</div>
+              <div>• Không giới hạn giờ làm</div>
             </div>
           </div>
 
@@ -224,10 +367,10 @@ export default function StaffScheduleDashboard() {
             size="middle"
             locale={{
               emptyText: (
-                <div className="py-10 text-center text-slate-500">
-                  Chưa có dữ liệu lịch làm việc. Vui lòng nhấn nút 'KÍCH HOẠT PHÂN LỊCH TỰ ĐỘNG' để hệ thống xử lý!
-                </div>
-              ),
+                  <div className="py-10 text-center text-slate-500">
+                    Chưa có dữ liệu lịch làm việc. Hệ thống sẽ tự động tạo lịch khi có đủ nhân sự.
+                  </div>
+                ),
             }}
           />
         </Card>
