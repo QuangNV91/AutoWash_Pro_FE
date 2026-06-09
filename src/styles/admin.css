@@ -1,0 +1,92 @@
+/* Admin layout styles */
+.admin-layout {
+  background: var(--bg);
+}
+
+/* Sider (dark) */
+.admin-sider {
+  background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+  color: #fff;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 20px;
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: 18px;
+}
+
+.brand-info {
+  color: #fff;
+}
+
+.brand-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.brand-sub {
+  font-size: 12px;
+  opacity: 0.95;
+}
+
+/* Header (light surface) */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  height: 64px;
+}
+
+.admin-header .admin-breadcrumb {
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.admin-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+/* Content (light) */
+.admin-content {
+  color: var(--text);
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  min-height: calc(100vh - 64px);
+}
+
+.admin-content .info-card,
+.admin-content .feature-card,
+.admin-content .stat-card {
+  color: var(--text);
+}
+
+@media (max-width: 768px) {
+  .admin-sider {
+    display: none;
+  }
+  .admin-header {
+    padding: 0 12px;
+  }
+  .admin-content {
+    padding: 16px;
+  }
+}

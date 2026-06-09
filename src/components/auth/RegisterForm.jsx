@@ -86,20 +86,7 @@ export default function RegisterForm() {
           </div>
         </label>
 
-        <label className="auth-field">
-          <span>BIEN SO XE (DINH DANH CHINH)</span>
-          <div className="auth-field__input-wrap">
-            <input
-              type="text"
-              placeholder="30A-123.45"
-              value={form.licensePlate}
-              onChange={updateField('licensePlate')}
-            />
-            <i>
-              <CarIcon />
-            </i>
-          </div>
-        </label>
+
 
         <label className="auth-field">
           <span>MAT KHAU</span>
