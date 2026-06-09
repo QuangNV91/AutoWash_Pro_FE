@@ -4,6 +4,11 @@ import ServicesPage from './pages/guest/ServicesPage.jsx'
 import PricingPage from './pages/guest/PricingPage.jsx'
 import ContactPage from './pages/guest/ContactPage.jsx'
 import Auth from './pages/Auth.jsx'
+import BookingStep1Service from './pages/user/booking/BookingStep1Service.jsx'
+import BookingStep2DateTime from './pages/user/booking/BookingStep2DateTime.jsx'
+import BookingStep3Confirm from './pages/user/booking/BookingStep3Confirm.jsx'
+import BookingSuccessPage from './pages/user/booking/BookingSuccessPage.jsx'
+import UserDashboard from './pages/user/UserDashboard.jsx'
 import StaffDashboard from './pages/StaffDashboard.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 
@@ -15,6 +20,11 @@ export default function App() {
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/auth/*" element={<Auth />} />
+      <Route path="/booking" element={<BookingStep1Service />} />
+      <Route path="/booking/datetime" element={<BookingStep2DateTime />} />
+      <Route path="/booking/confirm" element={<BookingStep3Confirm />} />
+      <Route path="/booking/success" element={<BookingSuccessPage />} />
+      <Route path="/dashboard" element={<UserDashboard />} />
       <Route path="/staff" element={<StaffDashboard />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="*" element={<Navigate to="/" replace />} />

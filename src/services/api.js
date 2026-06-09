@@ -29,7 +29,16 @@ api.post = async (url, data, config) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
-          const users = JSON.parse(localStorage.getItem('mock_users') || '[]');
+          let users = JSON.parse(localStorage.getItem('mock_users'));
+          if (!users || users.length === 0) {
+            users = [{
+              id: 1,
+              fullName: 'Khách hàng VIP',
+              phone: '0905388789',
+              password: 'password123'
+            }];
+          }
+          
           
           // Kiểm tra xem user đã tồn tại chưa
           const exists = users.find(u => u.phone === data.phone);
@@ -55,7 +64,16 @@ api.post = async (url, data, config) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
-          const users = JSON.parse(localStorage.getItem('mock_users') || '[]');
+          let users = JSON.parse(localStorage.getItem('mock_users'));
+          if (!users || users.length === 0) {
+            users = [{
+              id: 1,
+              fullName: 'Khách hàng VIP',
+              phone: '0905388789',
+              password: 'password123' // default password
+            }];
+            localStorage.setItem('mock_users', JSON.stringify(users));
+          }
           const user = users.find(u => 
             (u.phone === data.identifier || u.identifier === data.identifier) && 
             u.password === data.password
