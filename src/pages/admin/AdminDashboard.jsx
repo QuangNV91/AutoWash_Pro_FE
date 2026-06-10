@@ -140,46 +140,46 @@ const AdminDashboard = () => {
     <Layout className="aw-dashboard-layout">
       <Content className="aw-content">
         
-        {/* --- Hero & Stats Section --- */}
-        <div className="aw-hero-section">
-          <Row gutter={[32, 32]} align="middle">
-            <Col xs={24} xl={14} className="aw-hero-text-col">
-              <Space direction="vertical" size={24} className="aw-hero-space">
-                <Tag className="aw-tag-eyebrow">
-                  <span className="eyebrow-label">eyebrow:</span> Hệ thống quản trị
-                </Tag>
-                <Title level={1} className="aw-hero-title">
-                  AutoWash Pro Admin
-                </Title>
-                <Paragraph className="aw-hero-subtitle">
-                  Trung tâm điều hành cho phép bạn quản lý lịch, nhân sự và hiệu suất trạm một cách nhanh gọn và trực quan.
-                </Paragraph>
-                <Space size="middle" className="aw-hero-buttons">
-                  <Button type="primary" size="large" className="aw-btn-primary">
-                    Khám phá ngay
-                  </Button>
-                  <Button size="large" className="aw-btn-default">
-                    Xem hướng dẫn
-                  </Button>
-                </Space>
-              </Space>
-              
-              {/* Illustration embedded in hero background or Col */}
-              <div className="aw-hero-illustration">
-                <img src="/path/to/your/carwash-illustration.png" alt="Car wash concept" />
+        {/* --- Hero & Stats Section (HomePage-like style) --- */}
+        <div className="relative overflow-hidden bg-dark-950 text-white">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1601362840469-51e4d8d58785?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-30"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-dark-950 via-dark-950/80 to-transparent"></div>
+
+          <Content style={{ position: 'relative', zIndex: 10, padding: '48px 24px' }}>
+            <div className="container mx-auto max-w-7xl px-4 md:px-6">
+              <div className="flex flex-col lg:flex-row items-center gap-8">
+                <div className="lg:w-2/3">
+                  <Tag className="inline-block mb-4 bg-amber-100/10 text-amber-300 border-0">Admin Center</Tag>
+                  <Title level={1} style={{ color: '#fff', margin: '10px 0' }}>
+                    AutoWash Pro Admin
+                  </Title>
+                  <Paragraph style={{ color: '#e5e7eb', maxWidth: 720 }}>
+                    Trung tâm điều hành cho phép bạn quản lý lịch, nhân sự và hiệu suất trạm một cách nhanh gọn và trực quan.
+                  </Paragraph>
+                  <Space size="middle" style={{ marginTop: 18 }}>
+                    <Button type="primary" size="large" className="bg-amber-400 border-0 text-dark-950">
+                      Khám phá ngay
+                    </Button>
+                    <Button size="large" className="text-white border border-white/20">
+                      Xem hướng dẫn
+                    </Button>
+                  </Space>
+                </div>
+
+                <div className="lg:w-1/3 w-full">
+                  <div className="bg-white/5 rounded-xl p-4 backdrop-blur-md">
+                    <div className="grid grid-cols-1 gap-4">
+                      {stats.map((item) => (
+                        <div key={item.key}>
+                          <StatCard item={item} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </Col>
-            
-            <Col xs={24} xl={10}>
-              <Row gutter={[24, 24]}>
-                {stats.map(item => (
-                  <Col span={24} sm={12} xl={24} key={item.key}>
-                    <StatCard item={item} />
-                  </Col>
-                ))}
-              </Row>
-            </Col>
-          </Row>
+            </div>
+          </Content>
         </div>
 
         {/* --- Quick Actions Section --- */}
