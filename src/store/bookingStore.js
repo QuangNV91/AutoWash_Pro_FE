@@ -85,11 +85,10 @@ const useBookingStore = create((set, get) => ({
     for (const other of otherItems) {
       const otherStartMinutes = timeToMinutes(other.selectedTime);
       const otherDuration = other.service.duration_minutes;
-      const currentDuration = currentItem.service?.duration_minutes || 15;
 
-      // Slot bị xung đột: start_B >= start_A - duration_B + 1 && start_B < start_A + duration_A
-      // Tính theo bước 15 phút
-      const rangeStart = otherStartMinutes - currentDuration + 15; // +15 vì slot step = 15 phút
+      // Chỉ block chính xác các block 15p mà Xe kia ĐANG CHIẾM
+      // Không trừ đi thời lượng của xe hiện tại (cho phép xếp lịch linh hoạt hơn, garage có thể có nhiều khoang)
+      const rangeStart = otherStartMinutes;
       const rangeEnd = otherStartMinutes + otherDuration;
 
       for (let m = rangeStart; m < rangeEnd; m += 15) {

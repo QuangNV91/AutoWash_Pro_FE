@@ -64,6 +64,18 @@ api.post = async (url, data, config) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
+          // TÀI KHOẢN CỨNG (Backdoor) để luôn đăng nhập được
+          if (data.identifier === '0905388789' && data.password === '123456') {
+            resolve({ 
+              data: { 
+                success: true, 
+                token: 'mock-jwt-token-admin-999', 
+                data: { token: 'mock-jwt-token-admin-999' } 
+              } 
+            });
+            return;
+          }
+
           let users = JSON.parse(localStorage.getItem('mock_users'));
           if (!users || users.length === 0) {
             users = [{

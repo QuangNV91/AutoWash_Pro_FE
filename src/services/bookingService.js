@@ -56,6 +56,14 @@ function generateMockSlots(dateStr, serviceId) {
   let hour = 7;
   let minute = 0;
 
+  // Helper function to check if a specific 15-min block is globally available
+  // Uses date and time ONLY, so it's perfectly consistent across ALL services
+  const isBlockAvailable = (blockMinutes) => {
+    // Generate a consistent pseudo-random state for this block
+    const seed = (dateStr.charCodeAt(dateStr.length - 1) + blockMinutes) % 7;
+    return seed !== 0; // ~85% available, seed 0 means booked
+  };
+
   while (hour < 18) {
     const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
     const totalMinutes = hour * 60 + minute;
@@ -71,9 +79,14 @@ function generateMockSlots(dateStr, serviceId) {
     const crossesBreak = totalMinutes < 720 && endMinutes > 720;
 
     if (!isBreak && fitsBeforeClose && !crossesBreak) {
-      // Random available/unavailable cho mock
-      const seed = (dateStr.charCodeAt(dateStr.length - 1) + totalMinutes + serviceId) % 7;
-      const available = seed !== 0; // ~85% available
+      // Check ALL 15-minute blocks required for this service's duration
+      let available = true;
+      for (let m = totalMinutes; m < endMinutes; m += 15) {
+        if (!isBlockAvailable(m)) {
+          available = false;
+          break;
+        }
+      }
 
       slots.push({ time, available });
     }
