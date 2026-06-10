@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Form, Input, InputNumber, Button } from 'antd';
+import { Modal, Form, Input, InputNumber, Button, Space } from 'antd';
 
 export default function ExtraCostModal({ visible, onCancel, onSubmit }) {
   const [form] = Form.useForm();
