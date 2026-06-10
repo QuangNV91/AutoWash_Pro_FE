@@ -3,14 +3,14 @@ import HomePage from './pages/guest/HomePage.jsx'
 import ServicesPage from './pages/guest/ServicesPage.jsx'
 import PricingPage from './pages/guest/PricingPage.jsx'
 import ContactPage from './pages/guest/ContactPage.jsx'
-import Auth from './pages/Auth.jsx'
+import Auth from './pages/auth/Auth.jsx'
 import BookingStep1Service from './pages/user/booking/BookingStep1Service.jsx'
 import BookingStep2DateTime from './pages/user/booking/BookingStep2DateTime.jsx'
 import BookingStep3Confirm from './pages/user/booking/BookingStep3Confirm.jsx'
 import BookingSuccessPage from './pages/user/booking/BookingSuccessPage.jsx'
 import UserDashboard from './pages/user/UserDashboard.jsx'
-import StaffDashboard from './pages/StaffDashboard.jsx'
-import AdminDashboard from './pages/AdminDashboard.jsx'
+import StaffDashboard from './pages/staff/StaffDashboard.jsx'
+import AdminDashboard from './pages/admin/AdminDashboard.jsx'
 
 export default function App() {
   return (
