@@ -94,12 +94,12 @@ export default function BookingStep2DateTime() {
         <div className="mb-8 relative">
           <button 
             onClick={handleBack}
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-dark-800 hover:bg-dark-700 text-text-secondary transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
           >
             <ArrowLeft size={20} />
           </button>
-          <h1 className="font-heading text-4xl font-bold text-text-primary text-center mb-2">Đặt lịch dịch vụ</h1>
-          <p className="text-text-secondary text-center">Vui lòng chọn ngày và giờ cho từng xe.</p>
+          <h1 className="font-hero text-4xl font-medium text-white text-center mb-2 tracking-tight">Đặt lịch dịch vụ</h1>
+          <p className="text-white/60 text-center">Vui lòng chọn ngày và giờ cho từng xe.</p>
         </div>
 
         <StepIndicator currentStep={2} />
@@ -110,8 +110,8 @@ export default function BookingStep2DateTime() {
             {/* Date Selection — chung cho tất cả xe */}
             <div>
               <div className="flex justify-between items-end mb-6">
-                <h2 className="font-heading text-2xl font-bold text-text-primary">Chọn ngày</h2>
-                <span className="text-sm text-gold-500 font-medium bg-gold-500/10 px-3 py-1 rounded-full">
+                <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Chọn ngày</h2>
+                <span className="text-sm text-white/80 font-medium bg-white/10 px-3 py-1 rounded-full border border-white/10">
                   Hạng {tierLabels[userTier]} (Tối đa {maxDays} ngày tới)
                 </span>
               </div>
@@ -127,22 +127,22 @@ export default function BookingStep2DateTime() {
               const conflictSlots = getConflictingSlots(item.id);
               
               return (
-                <div key={item.id} className="bg-dark-900 border border-dark-800 rounded-2xl p-6">
+                <div key={item.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6">
                   {/* Header xe */}
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center text-gold-500">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80">
                       <Car size={20} />
                     </div>
                     <div>
-                      <h3 className="font-heading text-xl font-bold text-text-primary">
+                      <h3 className="font-hero text-xl font-medium text-white tracking-tight">
                         Xe {index + 1}
                       </h3>
-                      <p className="text-sm text-text-secondary">
+                      <p className="text-sm text-white/60">
                         {item.service.name} — {item.service.duration_minutes ?? item.service.duration} phút
                       </p>
                     </div>
                     {item.selectedTime && (
-                      <span className="ml-auto text-sm font-semibold text-gold-400 bg-gold-500/10 px-3 py-1 rounded-full">
+                      <span className="ml-auto text-sm font-medium text-white bg-white/10 px-3 py-1 rounded-full">
                         {item.selectedTime}
                       </span>
                     )}
@@ -164,23 +164,23 @@ export default function BookingStep2DateTime() {
 
             {/* Legend */}
             {selectedDate && (
-              <div className="flex flex-wrap items-center gap-6 justify-center text-sm text-text-muted">
+              <div className="flex flex-wrap items-center gap-6 justify-center text-sm text-white/40">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-dark-800 border border-dark-700"></div>
+                  <div className="w-4 h-4 rounded bg-transparent border border-white/20"></div>
                   <span>Còn trống</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-gold-500/20 border border-gold-500"></div>
-                  <span className="text-gold-500">Đang chọn</span>
+                  <div className="w-4 h-4 rounded bg-white border border-white"></div>
+                  <span className="text-white">Đang chọn</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-dark-800 opacity-50 border border-dark-700"></div>
+                  <div className="w-4 h-4 rounded bg-white/5 border border-white/10 opacity-50"></div>
                   <span>Hết chỗ</span>
                 </div>
                 {bookingItems.length > 1 && (
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-amber-900/10 border border-amber-900/30"></div>
-                    <span className="text-amber-400/60">Trùng xe khác</span>
+                    <div className="w-4 h-4 rounded bg-white/10 border border-white/20"></div>
+                    <span className="text-white/40">Trùng xe khác</span>
                   </div>
                 )}
               </div>

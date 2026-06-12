@@ -58,7 +58,7 @@ export default function UserDashboard() {
 
     const config = statusConfig[status] || statusConfig['PENDING'];
     return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${config.color}`}>
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${config.color}`}>
         {config.icon}
         {config.text}
       </span>
@@ -72,7 +72,7 @@ export default function UserDashboard() {
 
   const calculateCancelPolicy = (date, time) => {
     // Giả lập thời gian hiện tại (có thể thay đổi để test)
-    const now = new Date(); 
+    const now = new Date();
     const bookingDateTime = new Date(`${date}T${time}:00`);
     const diffHours = (bookingDateTime - now) / (1000 * 60 * 60);
 
@@ -90,9 +90,9 @@ export default function UserDashboard() {
 
   const confirmCancel = () => {
     const { booking, policy } = cancelModal;
-    
+
     // Cập nhật state bookings
-    setBookings(prev => prev.map(b => 
+    setBookings(prev => prev.map(b =>
       b.id === booking.id ? { ...b, status: 'CANCELLED' } : b
     ));
 
@@ -131,41 +131,41 @@ export default function UserDashboard() {
     <PageWrapper title="Quản lý tài khoản">
       <div className="container mx-auto px-4 max-w-6xl pt-8 pb-20">
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* Sidebar */}
           <div className="w-full lg:w-1/4">
             {/* User Card */}
-            <div className="bg-dark-900 border border-dark-800 rounded-2xl p-6 mb-6">
+            <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 mb-6">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-full bg-gold-500/10 border-2 border-gold-500/20 flex items-center justify-center text-gold-500">
+                <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white">
                   <User size={32} />
                 </div>
                 <div>
-                  <h2 className="font-bold text-text-primary text-lg">{user.fullName}</h2>
-                  <p className="text-text-secondary text-sm">{user.phone}</p>
+                  <h2 className="font-medium text-white text-lg">{user.fullName}</h2>
+                  <p className="text-white/60 text-sm">{user.phone}</p>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-dark-800 to-dark-950 border border-dark-700 rounded-xl p-4 relative overflow-hidden">
-                <div className="absolute -right-4 -bottom-4 text-dark-800 opacity-50">
+              <div className="bg-neutral-900/50 border border-white/10 rounded-xl p-4 relative overflow-hidden">
+                <div className="absolute -right-4 -bottom-4 text-white/5">
                   <Star size={80} />
                 </div>
                 <div className="relative z-10">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-text-muted uppercase tracking-wider font-semibold">Hạng thẻ</span>
-                    <span className="text-xs text-gold-400 font-bold bg-gold-500/10 px-2 py-0.5 rounded">{user.tier}</span>
+                    <span className="text-xs text-white/40 uppercase tracking-wider font-medium">Hạng thẻ</span>
+                    <span className="text-xs text-white font-medium bg-white/10 px-2 py-0.5 rounded">{user.tier}</span>
                   </div>
-                  <div className="text-2xl font-bold text-gold-500 mb-6">{user.points.toLocaleString('vi-VN')} <span className="text-sm font-normal text-text-secondary">Điểm</span></div>
-                  
+                  <div className="text-2xl font-medium text-white mb-6">{user.points.toLocaleString('vi-VN')} <span className="text-sm font-normal text-white/60">Điểm</span></div>
+
                   {/* Progress Bar Container */}
                   <div className="px-3 mt-2 mb-10">
                     <div className="relative w-full h-8">
                       {/* Background Bar */}
-                      <div className="absolute top-1.5 left-0 w-full h-1 bg-dark-950 rounded-full"></div>
-                      
+                      <div className="absolute top-1.5 left-0 w-full h-1 bg-white/5 rounded-full"></div>
+
                       {/* Active Bar */}
-                      <div 
-                        className="absolute top-1.5 left-0 h-1 bg-gradient-to-r from-gold-600 to-gold-400 rounded-full transition-all duration-1000"
+                      <div
+                        className="absolute top-1.5 left-0 h-1 bg-white rounded-full transition-all duration-1000"
                         style={{ width: `${progressPercent}%` }}
                       ></div>
 
@@ -174,22 +174,21 @@ export default function UserDashboard() {
                         const isAchieved = user.points >= tier.points;
                         const isCurrent = currentTierIndex === idx;
                         const positionPercent = idx * (100 / (TIERS.length - 1));
-                        
+
                         return (
-                          <div 
-                            key={tier.id} 
+                          <div
+                            key={tier.id}
                             className="absolute top-0 flex flex-col items-center"
                             style={{ left: `${positionPercent}%`, transform: 'translateX(-50%)' }}
                           >
-                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center bg-dark-800 transition-colors z-10 relative ${
-                              isAchieved 
-                                ? 'border-gold-400 shadow-[0_0_8px_rgba(201,152,26,0.5)]' 
-                                : 'border-dark-700'
-                            }`}>
-                              {isAchieved && <div className="w-1.5 h-1.5 rounded-full bg-gold-400"></div>}
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors z-10 relative ${isAchieved
+                                ? 'bg-white border-white'
+                                : 'bg-black border-white/20'
+                              }`}>
+                              {isAchieved && <div className="w-1.5 h-1.5 rounded-full bg-black"></div>}
                             </div>
                             <div className="absolute top-6 w-20 flex justify-center text-center">
-                              <span className={`text-[10px] font-bold ${isCurrent ? 'text-gold-400' : isAchieved ? 'text-text-primary' : 'text-dark-600'}`}>
+                              <span className={`text-[10px] font-medium ${isCurrent ? 'text-white' : isAchieved ? 'text-white/80' : 'text-white/40'}`}>
                                 {tier.label}
                               </span>
                             </div>
@@ -200,11 +199,11 @@ export default function UserDashboard() {
                   </div>
 
                   {currentTierIndex < TIERS.length - 1 ? (
-                    <p className="text-[10px] text-text-muted text-center mt-2">
-                      Cần thêm <span className="text-gold-400">{TIERS[currentTierIndex + 1].points - user.points}</span> điểm để lên hạng {TIERS[currentTierIndex + 1].label}
+                    <p className="text-[10px] text-white/40 text-center mt-2">
+                      Cần thêm <span className="text-white">{TIERS[currentTierIndex + 1].points - user.points}</span> điểm để lên hạng {TIERS[currentTierIndex + 1].label}
                     </p>
                   ) : (
-                    <p className="text-[10px] text-gold-400 text-center mt-2 font-semibold">
+                    <p className="text-[10px] text-white text-center mt-2 font-medium">
                       Bạn đã đạt hạng cao nhất!
                     </p>
                   )}
@@ -213,68 +212,68 @@ export default function UserDashboard() {
             </div>
 
             {/* Navigation */}
-            <div className="bg-dark-900 border border-dark-800 rounded-2xl overflow-hidden">
-              <button 
+            <div className="bg-neutral-950 border border-white/5 rounded-2xl overflow-hidden">
+              <button
                 onClick={() => setActiveTab('bookings')}
                 className={`w-full flex items-center justify-between px-6 py-4 text-left transition-colors border-l-2
-                  ${activeTab === 'bookings' ? 'bg-dark-800 border-gold-500 text-gold-400' : 'border-transparent text-text-secondary hover:bg-dark-800 hover:text-text-primary'}`}
+                  ${activeTab === 'bookings' ? 'bg-white/5 border-white text-white' : 'border-transparent text-white/60 hover:bg-white/5 hover:text-white'}`}
               >
                 <div className="flex items-center gap-3">
                   <Calendar size={18} />
-                  <span className="font-semibold">Lịch hẹn của tôi</span>
+                  <span className="font-medium">Lịch hẹn của tôi</span>
                 </div>
                 <ChevronRight size={16} />
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setActiveTab('history')}
                 className={`w-full flex items-center justify-between px-6 py-4 text-left transition-colors border-l-2
-                  ${activeTab === 'history' ? 'bg-dark-800 border-gold-500 text-gold-400' : 'border-transparent text-text-secondary hover:bg-dark-800 hover:text-text-primary'}`}
+                  ${activeTab === 'history' ? 'bg-white/5 border-white text-white' : 'border-transparent text-white/60 hover:bg-white/5 hover:text-white'}`}
               >
                 <div className="flex items-center gap-3">
                   <History size={18} />
-                  <span className="font-semibold">Lịch sử dịch vụ</span>
+                  <span className="font-medium">Lịch sử dịch vụ</span>
                 </div>
                 <ChevronRight size={16} />
               </button>
 
-              <button 
+              <button
                 onClick={() => setActiveTab('profile')}
                 className={`w-full flex items-center justify-between px-6 py-4 text-left transition-colors border-l-2
-                  ${activeTab === 'profile' ? 'bg-dark-800 border-gold-500 text-gold-400' : 'border-transparent text-text-secondary hover:bg-dark-800 hover:text-text-primary'}`}
+                  ${activeTab === 'profile' ? 'bg-white/5 border-white text-white' : 'border-transparent text-white/60 hover:bg-white/5 hover:text-white'}`}
               >
                 <div className="flex items-center gap-3">
                   <Settings size={18} />
-                  <span className="font-semibold">Cài đặt tài khoản</span>
+                  <span className="font-medium">Cài đặt tài khoản</span>
                 </div>
                 <ChevronRight size={16} />
               </button>
 
-              <div className="h-px bg-dark-800 w-full my-2"></div>
+              <div className="h-px bg-white/5 w-full my-2"></div>
 
-              <button 
+              <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-6 py-4 text-left transition-colors text-red-400 hover:bg-dark-800"
+                className="w-full flex items-center gap-3 px-6 py-4 text-left transition-colors text-red-400 hover:bg-white/5"
               >
                 <LogOut size={18} />
-                <span className="font-semibold">Đăng xuất</span>
+                <span className="font-medium">Đăng xuất</span>
               </button>
             </div>
           </div>
 
           {/* Main Content */}
           <div className="w-full lg:w-3/4">
-            
+
             {activeTab === 'bookings' && (
               <div className="space-y-6">
                 <div className="flex justify-between items-end mb-2">
                   <div>
-                    <h2 className="font-heading text-2xl font-bold text-text-primary">Lịch hẹn sắp tới</h2>
-                    <p className="text-text-secondary mt-1">Quản lý các dịch vụ bạn đã đặt trước.</p>
+                    <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Lịch hẹn sắp tới</h2>
+                    <p className="text-white/60 mt-1">Quản lý các dịch vụ bạn đã đặt trước.</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => navigate('/booking')}
-                    className="hidden sm:block px-6 py-2 bg-gold-500 text-dark-950 font-bold rounded-full hover:bg-gold-400 transition-colors"
+                    className="hidden sm:block px-6 py-2 bg-white text-black text-sm font-medium rounded-full hover:bg-neutral-200 transition-colors"
                   >
                     Đặt lịch mới
                   </button>
@@ -282,73 +281,73 @@ export default function UserDashboard() {
 
                 <div className="space-y-4">
                   {bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').length === 0 ? (
-                    <div className="bg-dark-900 border border-dark-800 rounded-2xl p-12 text-center">
-                      <p className="text-text-secondary mb-4">Bạn chưa có lịch hẹn nào sắp tới.</p>
-                      <button 
+                    <div className="bg-neutral-950 border border-white/5 rounded-2xl p-12 text-center">
+                      <p className="text-white/60 mb-4">Bạn chưa có lịch hẹn nào sắp tới.</p>
+                      <button
                         onClick={() => navigate('/booking')}
-                        className="px-6 py-2 border border-gold-500 text-gold-500 font-bold rounded-full hover:bg-gold-500 hover:text-dark-950 transition-colors"
+                        className="px-6 py-2 border border-white/20 text-white text-sm font-medium rounded-full hover:bg-white/10 transition-colors"
                       >
                         Đặt lịch ngay
                       </button>
                     </div>
                   ) : bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').map(booking => (
-                    <div key={booking.id} className="bg-dark-900 border border-dark-800 hover:border-dark-700 rounded-2xl p-6 transition-all">
+                    <div key={booking.id} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
-                            <span className="font-mono text-xs text-text-muted">{booking.id}</span>
+                            <span className="font-mono text-xs text-white/40">{booking.id}</span>
                             <StatusBadge status={booking.status} />
                           </div>
-                          <h3 className="font-bold text-lg text-text-primary">{booking.serviceName}</h3>
-                          <div className="flex items-center gap-2 mt-1 text-text-secondary">
-                            <Car size={14} className="text-gold-500" />
+                          <h3 className="font-medium text-lg text-white">{booking.serviceName}</h3>
+                          <div className="flex items-center gap-2 mt-1 text-white/60">
+                            <Car size={14} className="text-white/40" />
                             <span className="text-sm">{booking.vehicleType}</span>
                           </div>
                         </div>
                         <div className="text-left sm:text-right">
-                          <p className="text-sm text-text-muted mb-1">Tổng thanh toán</p>
-                          <p className="font-bold text-lg text-gold-400">{booking.price.toLocaleString('vi-VN')}đ</p>
+                          <p className="text-sm text-white/40 mb-1">Tổng thanh toán</p>
+                          <p className="font-medium text-lg text-white">{booking.price.toLocaleString('vi-VN')}đ</p>
                           <p className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded inline-block mt-1">
                             {booking.paymentMethod === 'ONLINE' ? 'Đã thanh toán Online' : 'Thanh toán tại cửa hàng'}
                           </p>
                         </div>
                       </div>
 
-                      <div className="bg-dark-950 rounded-xl p-4 flex flex-col sm:flex-row gap-4 sm:gap-8 border border-dark-800">
+                      <div className="bg-black rounded-xl p-4 flex flex-col sm:flex-row gap-4 sm:gap-8 border border-white/5">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-dark-800 flex items-center justify-center text-text-secondary">
+                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60">
                             <Calendar size={18} />
                           </div>
                           <div>
-                            <p className="text-xs text-text-muted">Ngày đặt</p>
-                            <p className="font-semibold text-text-primary">{booking.date}</p>
+                            <p className="text-xs text-white/40">Ngày đặt</p>
+                            <p className="font-medium text-white">{booking.date}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-dark-800 flex items-center justify-center text-text-secondary">
+                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60">
                             <Clock size={18} />
                           </div>
                           <div>
-                            <p className="text-xs text-text-muted">Thời gian</p>
-                            <p className="font-semibold text-text-primary">{booking.time}</p>
+                            <p className="text-xs text-white/40">Thời gian</p>
+                            <p className="font-medium text-white">{booking.time}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-dark-800 flex items-center justify-center text-text-secondary">
+                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60">
                             <MapPin size={18} />
                           </div>
                           <div>
-                            <p className="text-xs text-text-muted">Chi nhánh</p>
-                            <p className="font-semibold text-text-primary">AutoWash Pro Center</p>
+                            <p className="text-xs text-white/40">Chi nhánh</p>
+                            <p className="font-medium text-white">AutoWash Pro Center</p>
                           </div>
                         </div>
                       </div>
-                      
+
                       {booking.status === 'PENDING' && (
                         <div className="mt-4 flex justify-end gap-3">
-                          <button 
+                          <button
                             onClick={() => openCancelModal(booking)}
-                            className="px-5 py-2 text-sm font-semibold rounded-lg border border-red-900/30 text-red-400 hover:text-red-300 hover:bg-red-900/10 transition-colors"
+                            className="px-5 py-2 text-sm font-medium rounded-lg border border-white/10 text-white/60 hover:text-white hover:bg-white/5 transition-colors"
                           >
                             Hủy lịch
                           </button>
@@ -363,39 +362,39 @@ export default function UserDashboard() {
             {activeTab === 'history' && (
               <div className="space-y-6">
                 <div className="mb-2">
-                  <h2 className="font-heading text-2xl font-bold text-text-primary">Lịch sử dịch vụ</h2>
-                  <p className="text-text-secondary mt-1">Danh sách các dịch vụ bạn đã sử dụng trước đây.</p>
+                  <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Lịch sử dịch vụ</h2>
+                  <p className="text-white/60 mt-1">Danh sách các dịch vụ bạn đã sử dụng trước đây.</p>
                 </div>
 
                 <div className="space-y-4">
                   {bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED').map(booking => (
-                    <div key={booking.id} className="bg-dark-900 border border-dark-800 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
+                    <div key={booking.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
-                            <span className="font-mono text-xs text-text-muted">{booking.id}</span>
+                            <span className="font-mono text-xs text-white/40">{booking.id}</span>
                             <StatusBadge status={booking.status} />
                           </div>
-                          <h3 className="font-bold text-lg text-text-primary">{booking.serviceName}</h3>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-text-secondary">
+                          <h3 className="font-medium text-lg text-white">{booking.serviceName}</h3>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-white/60">
                             <div className="flex items-center gap-1.5">
-                              <Calendar size={14} className="text-gold-500" />
+                              <Calendar size={14} className="text-white/40" />
                               <span>{booking.date} {booking.time}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
-                              <Car size={14} className="text-gold-500" />
+                              <Car size={14} className="text-white/40" />
                               <span>{booking.vehicleType}</span>
                             </div>
                           </div>
                         </div>
                         <div className="text-left sm:text-right">
-                          <p className="font-bold text-lg text-gold-400">{booking.price.toLocaleString('vi-VN')}đ</p>
+                          <p className="font-medium text-lg text-white">{booking.price.toLocaleString('vi-VN')}đ</p>
                           {booking.status === 'CANCELLED' && booking.penaltyPoints > 0 && (
                             <p className="text-xs text-red-400 mt-1">Đã trừ {booking.penaltyPoints} điểm</p>
                           )}
-                          <button 
+                          <button
                             onClick={() => navigate('/booking')}
-                            className="mt-2 text-sm text-gold-500 hover:text-gold-400 font-semibold transition-colors underline"
+                            className="mt-2 text-sm text-white hover:text-white/80 font-medium transition-colors underline"
                           >
                             Đặt lại dịch vụ này
                           </button>
@@ -408,10 +407,10 @@ export default function UserDashboard() {
             )}
 
             {activeTab === 'profile' && (
-              <div className="bg-dark-900 border border-dark-800 rounded-2xl p-8 flex flex-col items-center justify-center text-center h-64">
-                <Settings size={48} className="text-dark-600 mb-4" />
-                <h3 className="font-bold text-xl text-text-primary mb-2">Tính năng đang phát triển</h3>
-                <p className="text-text-secondary">Phần cài đặt thông tin cá nhân sẽ sớm ra mắt.</p>
+              <div className="bg-neutral-950 border border-white/5 rounded-2xl p-8 flex flex-col items-center justify-center text-center h-64">
+                <Settings size={48} className="text-white/20 mb-4" />
+                <h3 className="font-medium text-xl text-white mb-2">Tính năng đang phát triển</h3>
+                <p className="text-white/60">Phần cài đặt thông tin cá nhân sẽ sớm ra mắt.</p>
               </div>
             )}
 
@@ -422,33 +421,32 @@ export default function UserDashboard() {
       {/* Cancel Confirmation Modal */}
       {cancelModal.isOpen && cancelModal.booking && cancelModal.policy && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-dark-950/80 backdrop-blur-sm" onClick={() => setCancelModal({ isOpen: false, booking: null, policy: null })}></div>
-          <div className="relative bg-dark-900 border border-dark-700 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 className="text-xl font-bold text-text-primary mb-4 font-heading">Xác nhận hủy lịch</h3>
-            
-            <div className="bg-dark-950 border border-dark-800 rounded-xl p-4 mb-4">
-              <p className="text-sm text-text-secondary mb-1">Dịch vụ: <span className="font-semibold text-text-primary">{cancelModal.booking.serviceName}</span></p>
-              <p className="text-sm text-text-secondary">Thời gian: <span className="font-semibold text-gold-400">{cancelModal.booking.date} {cancelModal.booking.time}</span></p>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setCancelModal({ isOpen: false, booking: null, policy: null })}></div>
+          <div className="relative bg-neutral-950 border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 className="text-xl font-medium text-white mb-4 font-hero tracking-tight">Xác nhận hủy lịch</h3>
+
+            <div className="bg-black border border-white/5 rounded-xl p-4 mb-4">
+              <p className="text-sm text-white/60 mb-1">Dịch vụ: <span className="font-medium text-white">{cancelModal.booking.serviceName}</span></p>
+              <p className="text-sm text-white/60">Thời gian: <span className="font-medium text-white">{cancelModal.booking.date} {cancelModal.booking.time}</span></p>
             </div>
 
-            <div className={`p-4 rounded-xl border mb-6 ${
-              cancelModal.policy.type === 'REFUND' 
-                ? 'bg-green-900/10 border-green-500/20 text-green-400' 
+            <div className={`p-4 rounded-xl border mb-6 ${cancelModal.policy.type === 'REFUND'
+                ? 'bg-green-900/10 border-green-500/20 text-green-400'
                 : 'bg-red-900/10 border-red-500/20 text-red-400'
-            }`}>
+              }`}>
               <p className="text-sm font-medium">{cancelModal.policy.message}</p>
             </div>
 
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={() => setCancelModal({ isOpen: false, booking: null, policy: null })}
-                className="flex-1 py-2.5 rounded-lg border border-dark-600 text-text-secondary hover:bg-dark-800 transition-colors font-medium"
+                className="flex-1 py-2.5 rounded-lg border border-white/10 text-white/60 hover:bg-white/5 hover:text-white transition-colors font-medium text-sm"
               >
                 Đóng
               </button>
-              <button 
+              <button
                 onClick={confirmCancel}
-                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors"
+                className="flex-1 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors text-sm"
               >
                 Chấp nhận hủy
               </button>

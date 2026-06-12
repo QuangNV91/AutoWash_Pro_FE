@@ -46,50 +46,59 @@ export default function ForgotPasswordPage() {
   });
 
   return (
-    <div className="flex min-h-screen w-full bg-white">
-      {/* Left Column - Branding (Hidden on Mobile) */}
-      <div className="hidden lg:flex w-1/2 bg-primary flex-col items-center justify-center p-12 text-white relative overflow-hidden">
-        {/* Abstract Background Decoration */}
-        <div className="absolute inset-0 opacity-10">
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full">
-            <polygon fill="currentColor" points="0,100 100,0 100,100" />
-          </svg>
-        </div>
+    <div className="flex min-h-screen w-full bg-black font-body">
+      {/* Left Column - 60% */}
+      <div className="hidden lg:flex w-[60%] relative overflow-hidden bg-[url('https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=2069&auto=format&fit=crop')] bg-cover bg-center">
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(6,182,212,0.15),transparent_50%)]"></div>
         
-        <div className="relative z-10 flex flex-col items-center text-center">
-          <div className="w-24 h-24 bg-white rounded-2xl flex items-center justify-center mb-8 shadow-xl">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        {/* Logo */}
+        <div className="absolute top-8 left-12 z-20">
+          <Link to="/" className="flex items-center gap-2">
+            <svg viewBox="0 0 256 256" className="h-6 w-6" fill="#ffffff">
+              <path d="M 128 192 L 128 256 L 64.5 256 L 32 223 L 0 192 L 0 128 L 64 128 Z M 256 192 L 256 256 L 192.5 256 L 160 223 L 128 192 L 128 128 L 192 128 Z M 128 64 L 128 128 L 64.5 128 L 32 95 L 0 64 L 0 0 L 64 0 Z M 256 64 L 256 128 L 192.5 128 L 160 95 L 128 64 L 128 0 L 192 0 Z" />
             </svg>
-          </div>
-          <h1 className="text-4xl font-bold mb-4">AutoWash Pro</h1>
-          <p className="text-lg text-blue-100 max-w-md">
-            Đừng lo lắng, chúng tôi sẽ giúp bạn lấy lại quyền truy cập một cách nhanh chóng.
+            <span className="text-white text-base font-normal tracking-tight">autowash pro</span>
+          </Link>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-center h-full px-12 lg:px-24">
+          <h1 className="font-hero text-5xl lg:text-6xl font-medium text-white leading-tight mb-2 tracking-tight">
+            Khôi phục mật khẩu <br />
+            <span className="text-white/70">
+              nhanh chóng
+            </span>
+          </h1>
+          <p className="text-lg text-white/60 max-w-lg mt-4 mb-8 leading-relaxed">
+            Đừng lo lắng, hệ thống của chúng tôi sẽ giúp bạn lấy lại quyền truy cập một cách an toàn và dễ dàng.
           </p>
         </div>
       </div>
 
-      {/* Right Column - Forgot Password Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-[400px]">
+      {/* Right Column - 40% */}
+      <div className="w-full lg:w-[40%] bg-neutral-950 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden max-h-screen">
+        <div className="absolute top-1/2 right-0 w-[30rem] h-[30rem] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none translate-x-1/2 -translate-y-1/2"></div>
+        <div className="w-full max-w-[420px] relative z-10">
           <Link 
             to="/auth/login" 
-            className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-primary transition-colors mb-6"
+            className="inline-flex items-center text-sm font-medium text-white/40 hover:text-cyan-400 transition-colors mb-8"
           >
             <ArrowLeft size={16} className="mr-2" />
             Quay lại đăng nhập
           </Link>
           
           <div className="text-center lg:text-left mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Quên mật khẩu</h2>
-            <p className="text-gray-500">
+            <h2 className="font-hero text-3xl font-medium text-white mb-2 tracking-tight">Quên mật khẩu</h2>
+            <p className="text-white/60 text-sm leading-relaxed">
               Nhập email hoặc số điện thoại của bạn, chúng tôi sẽ gửi hướng dẫn khôi phục mật khẩu.
             </p>
           </div>
 
           <form onSubmit={formik.handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="identifier" className="block text-sm font-medium text-white/80 mb-2">
                 Email / Số điện thoại
               </label>
               <input
@@ -98,20 +107,20 @@ export default function ForgotPasswordPage() {
                 type="text"
                 {...formik.getFieldProps('identifier')}
                 placeholder="Nhập email hoặc số điện thoại"
-                className={`w-full px-4 py-3 rounded-lg border outline-none transition-colors ${
+                className={`bg-white/5 border ${
                   formik.touched.identifier && formik.errors.identifier
-                    ? 'border-red-500 focus:ring-2 focus:ring-red-200'
-                    : 'border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary'
-                }`}
+                    ? 'border-red-500 focus:border-red-500'
+                    : 'border-white/10 focus:border-cyan-400'
+                } text-white placeholder-white/30 rounded-lg px-4 py-3.5 w-full outline-none transition-colors duration-200`}
                 disabled={formik.isSubmitting || success}
               />
               {formik.touched.identifier && formik.errors.identifier ? (
-                <div className="mt-1 text-sm text-red-600">{formik.errors.identifier}</div>
+                <div className="mt-2 text-sm text-red-400">{formik.errors.identifier}</div>
               ) : null}
             </div>
 
             {success && (
-              <div className="p-4 rounded-lg bg-green-50 text-green-700 text-sm font-medium border border-green-100">
+              <div className="mt-5 p-4 rounded-lg bg-green-900/20 border border-green-500/20 text-green-400 text-sm font-medium">
                 {success}
               </div>
             )}
@@ -120,11 +129,11 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={formik.isSubmitting}
-                className="w-full bg-primary hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-medium px-8 py-3.5 rounded-full transition-all duration-300 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed mt-4 text-sm shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]"
               >
                 {formik.isSubmitting ? (
                   <>
-                    <Loader2 className="animate-spin mr-2" size={20} />
+                    <Loader2 className="animate-spin mr-2" size={18} />
                     Đang gửi yêu cầu...
                   </>
                 ) : (
@@ -135,7 +144,7 @@ export default function ForgotPasswordPage() {
           </form>
 
           {apiError && (
-            <div className="mt-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium text-center border border-red-100">
+            <div className="mt-5 p-3 rounded-lg bg-red-900/20 border border-red-500/20 text-red-400 text-sm font-medium text-center">
               {apiError}
             </div>
           )}

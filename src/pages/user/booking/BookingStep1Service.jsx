@@ -74,8 +74,8 @@ export default function BookingStep1Service() {
     <PageWrapper title="Chọn dịch vụ">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="mb-8">
-          <h1 className="font-heading text-4xl font-bold text-text-primary text-center mb-2">Đặt lịch dịch vụ</h1>
-          <p className="text-text-secondary text-center">Chọn dịch vụ và thêm xe bạn muốn đặt lịch rửa.</p>
+          <h1 className="font-hero text-4xl font-medium text-white text-center mb-2 tracking-tight">Đặt lịch dịch vụ</h1>
+          <p className="text-white/60 text-center">Chọn dịch vụ và thêm xe bạn muốn đặt lịch rửa.</p>
         </div>
 
         <StepIndicator currentStep={1} />
@@ -85,19 +85,19 @@ export default function BookingStep1Service() {
           <div className="lg:col-span-2 space-y-8">
             
             {bookingItems.map((item, index) => (
-              <div key={item.id} className="bg-dark-900 border border-dark-800 rounded-2xl p-6 relative">
+              <div key={item.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 relative">
                 {/* Header xe */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center text-gold-500">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80">
                       <Car size={20} />
                     </div>
                     <div>
-                      <h3 className="font-heading text-xl font-bold text-text-primary">
+                      <h3 className="font-hero text-xl font-medium text-white tracking-tight">
                         Xe {index + 1}
                       </h3>
                       {item.service && (
-                        <p className="text-sm text-gold-400">{item.service.name}</p>
+                        <p className="text-sm text-white/60">{item.service.name}</p>
                       )}
                     </div>
                   </div>
@@ -106,7 +106,7 @@ export default function BookingStep1Service() {
                   {bookingItems.length > 1 && (
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="w-8 h-8 rounded-full bg-red-900/20 border border-red-900/30 flex items-center justify-center text-red-400 hover:bg-red-900/40 transition-colors"
+                      className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
                       title="Xóa xe này"
                     >
                       <X size={16} />
@@ -114,20 +114,18 @@ export default function BookingStep1Service() {
                   )}
                 </div>
 
-
-
                 {/* Chọn dịch vụ */}
                 <div>
-                  <span className="text-text-secondary font-semibold text-sm mb-4 block">Chọn gói dịch vụ *</span>
+                  <span className="text-white/60 font-medium text-sm mb-4 block">Chọn gói dịch vụ *</span>
                   
                   {servicesLoading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {[1, 2, 3].map(i => (
-                        <div key={i} className="h-52 rounded-2xl bg-dark-800 animate-pulse border border-dark-700"></div>
+                        <div key={i} className="h-52 rounded-2xl bg-white/5 animate-pulse border border-white/10"></div>
                       ))}
                     </div>
                   ) : servicesError ? (
-                    <div className="text-center py-8 border border-red-900/30 rounded-2xl bg-red-900/5">
+                    <div className="text-center py-8 border border-red-500/20 rounded-2xl bg-red-900/10">
                       <AlertCircle className="mx-auto text-red-400 mb-2" size={28} />
                       <p className="text-red-400 text-sm">{servicesError}</p>
                     </div>
@@ -152,21 +150,21 @@ export default function BookingStep1Service() {
             {canAddMore ? (
               <button
                 onClick={addItem}
-                className="w-full py-4 border-2 border-dashed border-dark-600 rounded-2xl text-text-secondary hover:border-gold-500/40 hover:text-gold-400 transition-all flex items-center justify-center gap-2 group"
+                className="w-full py-4 border border-dashed border-white/20 rounded-2xl text-white/60 hover:border-white/40 hover:text-white transition-all flex items-center justify-center gap-2 group bg-white/5"
               >
-                <Plus size={20} className="group-hover:text-gold-400 transition-colors" />
-                <span className="font-semibold">Thêm xe khác</span>
-                <span className="text-sm text-text-muted ml-2">({bookingItems.length}/{maxVehicles})</span>
+                <Plus size={20} className="group-hover:text-white transition-colors" />
+                <span className="font-medium">Thêm xe khác</span>
+                <span className="text-sm text-white/40 ml-2">({bookingItems.length}/{maxVehicles})</span>
               </button>
             ) : (
-              <div className="w-full py-4 border-2 border-dashed border-dark-700 rounded-2xl text-center">
-                <div className="flex items-center justify-center gap-2 text-text-muted mb-1">
-                  <Crown size={16} className="text-gold-500" />
-                  <span className="font-semibold">Đã đạt giới hạn {maxVehicles} xe</span>
+              <div className="w-full py-4 border border-dashed border-white/10 rounded-2xl text-center bg-white/5">
+                <div className="flex items-center justify-center gap-2 text-white/60 mb-1">
+                  <Crown size={16} className="text-white/80" />
+                  <span className="font-medium">Đã đạt giới hạn {maxVehicles} xe</span>
                 </div>
                 {getNextTierName() && (
-                  <p className="text-xs text-text-muted">
-                    Nâng lên hạng <span className="text-gold-400 font-semibold">{tierLabels[getNextTierName()]}</span> để đặt thêm xe!
+                  <p className="text-xs text-white/40">
+                    Nâng lên hạng <span className="text-white font-medium">{tierLabels[getNextTierName()]}</span> để đặt thêm xe!
                   </p>
                 )}
               </div>
