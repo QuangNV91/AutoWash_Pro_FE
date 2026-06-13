@@ -306,8 +306,8 @@ export default function BookingStep3Confirm() {
           </div>
 
           {/* Right Column: Summary + Submit */}
-          <div className="lg:col-span-1 lg:mt-[56px]">
-            <div className="sticky top-24 space-y-4">
+          <div className="lg:col-span-1 lg:mt-[56px] lg:sticky lg:top-28 lg:self-start z-10">
+            <div className="space-y-4">
               <BookingSummaryCard />
 
               {/* Submit Button */}

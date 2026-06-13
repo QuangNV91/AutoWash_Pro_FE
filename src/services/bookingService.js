@@ -6,45 +6,72 @@ import api from './api';
 const MOCK_SERVICES = [
   {
     id: 1,
-    name: 'Rửa xe cơ bản',
+    name: 'Eco Wash',
+    subtitle: 'Gói Cơ Bản',
+    badge: 'Tiết Kiệm',
+    themeColor: 'cyan',
     base_price: 40000,
     duration_minutes: 15,
     base_points: 40,
     features: [
-      'Xịt nước rửa bụi bẩn bề mặt',
+      'Xịt nước rửa bụi bẩn bề mặt ngoài',
       'Phun xà bông bọt tuyết toàn thân xe',
       'Rửa sạch bằng nước áp lực cao',
-      'Lau khô bằng khăn microfiber',
+      'Lau khô bằng khăn microfiber chuyên dụng',
     ],
   },
   {
     id: 2,
-    name: 'Rửa xe chuyên sâu',
+    name: 'Premium Care',
+    subtitle: 'Gói Chuyên Sâu',
+    badge: 'Phổ Biến Nhất',
+    themeColor: 'purple',
     base_price: 150000,
     duration_minutes: 30,
     base_points: 150,
     features: [
-      'Toàn bộ quy trình gói Cơ bản',
+      'Toàn bộ quy trình Eco Wash',
+      'Rửa kỹ gầm xe & rửa nội thất bánh xe',
       'Vệ sinh sên xích, tra dầu bôi trơn',
-      'Rửa sạch lốc máy, khu vực động cơ',
-      'Vệ sinh phanh, vành xe',
-      'Lau bóng nhựa, cao su',
-      'Kiểm tra áp suất lốp',
+      'Rửa sạch lốc máy & khu vực động cơ',
+      'Hút bụi & lau dọn nội thất xe cơ bản',
+      'Kiểm tra áp suất lốp tiêu chuẩn',
     ],
   },
   {
     id: 3,
-    name: 'Phủ nano ceramic',
-    base_price: 300000,
+    name: 'Detailing & Shine',
+    subtitle: 'Gói Cao Cấp',
+    badge: 'Khuyên Dùng',
+    themeColor: 'emerald',
+    base_price: 350000,
     duration_minutes: 60,
-    base_points: 300,
+    base_points: 350,
     features: [
-      'Toàn bộ quy trình gói Chuyên sâu',
-      'Đánh bóng bề mặt sơn bằng máy',
-      'Tẩy các vết xước nhỏ, ố vàng',
-      'Phủ lớp nano ceramic bảo vệ sơn',
-      'Xử lý chống bám nước, bụi bẩn',
+      'Toàn bộ quy trình Premium Care',
+      'Chăm sóc chuyên sâu bề mặt sơn xe',
+      'Tẩy ố kính & phủ Nano kính lái chống bám nước',
+      'Đánh bóng & xóa xước nhẹ bề mặt sơn',
+      'Dưỡng & bảo vệ nội thất da, nhựa cao cấp',
       'Kiểm tra tổng thể và bàn giao xe',
+    ],
+  },
+  {
+    id: 4,
+    name: 'Ceramic Shield',
+    subtitle: 'Gói Siêu Cấp',
+    badge: 'Ultimate',
+    themeColor: 'amber',
+    base_price: 800000,
+    duration_minutes: 120,
+    base_points: 800,
+    features: [
+      'Toàn bộ quy trình Detailing & Shine',
+      'Tẩy sạch nhựa đường & bụi sắt bám sơn',
+      'Hiệu chỉnh sơn toàn diện (Multi-stage Paint Correction)',
+      'Phủ 2 lớp Ceramic cao cấp — bảo vệ sơn toàn diện',
+      'Xử lý kháng nước, kháng bụi, kháng tia UV',
+      'Bảo hành lớp phủ Ceramic trong vòng 6 tháng',
     ],
   },
 ];
@@ -59,9 +86,11 @@ function generateMockSlots(dateStr, serviceId) {
   // Helper function to check if a specific 15-min block is globally available
   // Uses date and time ONLY, so it's perfectly consistent across ALL services
   const isBlockAvailable = (blockMinutes) => {
-    // Generate a consistent pseudo-random state for this block
-    const seed = (dateStr.charCodeAt(dateStr.length - 1) + blockMinutes) % 7;
-    return seed !== 0; // ~85% available, seed 0 means booked
+    // Để tránh các "lỗ hổng" 15 phút gây khó hiểu (ví dụ 10:45 trống nhưng 11:00 hết chỗ do 11:45 bận),
+    // ta gom nhóm availability theo block 60 phút. Nếu một giờ nào đó bận, toàn bộ 60p đó sẽ bận.
+    const hourChunk = Math.floor(blockMinutes / 60);
+    const seed = (dateStr.charCodeAt(dateStr.length - 1) + hourChunk) % 5;
+    return seed !== 0; // ~80% available, seed 0 means booked
   };
 
   while (hour < 18) {

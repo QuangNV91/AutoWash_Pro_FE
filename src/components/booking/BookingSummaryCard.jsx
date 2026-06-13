@@ -26,7 +26,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
   // Empty state
   if (!hasAnyService && !selectedDate) {
     return (
-      <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center sticky top-24">
+      <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center">
         <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-white/40 mb-4 border border-white/10">
           <Car size={32} />
         </div>
@@ -36,7 +36,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
   }
 
   return (
-    <div className="bg-neutral-950 border border-white/5 rounded-2xl overflow-hidden sticky top-24">
+    <div className="bg-neutral-950 border border-white/5 rounded-2xl overflow-hidden">
       <div className="bg-white/5 px-6 py-4 border-b border-white/5">
         <h3 className="font-hero font-medium text-lg text-white tracking-tight">
           Thông tin đặt lịch
@@ -108,14 +108,12 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
               </span>
             </div>
             
-            {discount > 0 && (
-              <div className="flex justify-between items-center text-sm text-green-400">
-                <span>Chiết khấu hạng {tierLabels[userTier]} ({discount * 100}%):</span>
-                <span className="font-medium">
-                  -{discountAmount.toLocaleString('vi-VN')}đ
-                </span>
-              </div>
-            )}
+            <div className={`flex justify-between items-center text-sm ${discount > 0 ? 'text-green-400' : 'text-white/60'}`}>
+              <span>Chiết khấu hạng {tierLabels[userTier]} ({discount * 100}%):</span>
+              <span className="font-medium">
+                -{discountAmount.toLocaleString('vi-VN')}đ
+              </span>
+            </div>
 
             {/* Điểm */}
             <div className="flex justify-between items-center text-sm">

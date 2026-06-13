@@ -188,7 +188,7 @@ export default function BookingStep2DateTime() {
           </div>
 
           {/* Right Column: Booking Summary */}
-          <div className="lg:col-span-1 lg:mt-[56px]">
+          <div className="lg:col-span-1 lg:mt-[56px] lg:sticky lg:top-28 lg:self-start z-10">
             <BookingSummaryCard 
               onNext={handleNext}
               canProceed={step2Valid}
