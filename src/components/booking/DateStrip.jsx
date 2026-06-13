@@ -23,16 +23,16 @@ export default function DateStrip({ selectedDate, onSelectDate, maxDays = 7 }) {
             <button
               key={item.dateString}
               onClick={() => onSelectDate(item.dateString)}
-              className={`flex-shrink-0 w-24 h-28 rounded-2xl border-2 flex flex-col items-center justify-center transition-all duration-300
+              className={`flex-shrink-0 w-24 h-28 rounded-2xl border flex flex-col items-center justify-center transition-all duration-300
                 ${isSelected 
-                  ? 'border-gold-500 bg-gold-500/10 shadow-[0_0_20px_rgba(201,152,26,0.2)] text-gold-400' 
-                  : 'border-dark-700 bg-dark-800 text-text-secondary hover:border-gold-500/50 hover:bg-dark-700'}
+                  ? 'border-white bg-white/10 text-white' 
+                  : 'border-white/10 bg-white/5 text-white/60 hover:border-white/30 hover:bg-white/10'}
               `}
             >
-              <span className={`text-xs uppercase font-semibold mb-2 ${isSelected ? 'text-gold-500' : 'text-text-muted'}`}>
+              <span className={`text-xs uppercase font-medium mb-2 ${isSelected ? 'text-white' : 'text-white/40'}`}>
                 {item.dayName}
               </span>
-              <span className="text-3xl font-heading font-bold mb-1">
+              <span className="text-3xl font-hero font-medium mb-1">
                 {item.dayOfMonth}
               </span>
               <span className="text-xs">

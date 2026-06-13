@@ -43,7 +43,7 @@ const useBookingStore = create((set, get) => ({
   // === Thông tin chung ===
   selectedDate: null,
   paymentMethod: 'CASH',
-  userTier: 'MEMBER',
+  userTier: 'SILVER', // Đồng bộ với MOCK_USER trong UserDashboard
 
   // === Kết quả submit ===
   submitResults: [],
@@ -81,18 +81,22 @@ const useBookingStore = create((set, get) => ({
     if (!currentItem) return conflictSlots;
 
     const otherItems = bookingItems.filter(i => i.id !== itemId && i.selectedTime && i.service);
+    const currentDuration = currentItem.service?.duration_minutes || 15;
 
     for (const other of otherItems) {
       const otherStartMinutes = timeToMinutes(other.selectedTime);
       const otherDuration = other.service.duration_minutes;
+      const otherEndMinutes = otherStartMinutes + otherDuration;
 
-      // Chỉ block chính xác các block 15p mà Xe kia ĐANG CHIẾM
-      // Không trừ đi thời lượng của xe hiện tại (cho phép xếp lịch linh hoạt hơn, garage có thể có nhiều khoang)
-      const rangeStart = otherStartMinutes;
-      const rangeEnd = otherStartMinutes + otherDuration;
-
-      for (let m = rangeStart; m < rangeEnd; m += 15) {
-        if (m >= 0 && m < 18 * 60) {
+      // Xe hiện tại không được phép bắt đầu ở bất kỳ slot nào (m) sao cho:
+      // m + currentDuration > otherStartMinutes VÀ m < otherEndMinutes
+      // Nghĩa là: thời gian rửa của xe hiện tại KHÔNG được giao nhau với xe kia
+      
+      for (let m = 0; m < 18 * 60; m += 15) {
+        const currentEnd = m + currentDuration;
+        const isOverlap = currentEnd > otherStartMinutes && m < otherEndMinutes;
+        
+        if (isOverlap) {
           conflictSlots.push({
             time: minutesToTime(m),
             conflictWith: `Xe ${bookingItems.indexOf(other) + 1}`,

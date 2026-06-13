@@ -7,7 +7,7 @@ export default function Navbar() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+
   const isLoggedIn = !!localStorage.getItem('token');
 
   useEffect(() => {
@@ -43,41 +43,27 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-dark-950/90 backdrop-blur-md shadow-lg border-b border-dark-600' : 'bg-transparent'}`}>
-      <div className="w-full px-4 md:px-8 lg:px-12">
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-neutral-950/90 backdrop-blur-md shadow-lg border-b border-white/5' : 'bg-neutral-950/80 backdrop-blur-sm'}`}>
+      <div className="w-full px-6 md:px-10 lg:px-12">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-2">
-            <span className="font-heading text-2xl font-bold text-gold-400 tracking-wider">AutoWash<span className="text-text-primary">Pro</span></span>
+            <svg viewBox="0 0 256 256" className="h-5 w-5" fill="#ffffff">
+              <path d="M 128 192 L 128 256 L 64.5 256 L 32 223 L 0 192 L 0 128 L 64 128 Z M 256 192 L 256 256 L 192.5 256 L 160 223 L 128 192 L 128 128 L 192 128 Z M 128 64 L 128 128 L 64.5 128 L 32 95 L 0 64 L 0 0 L 64 0 Z M 256 64 L 256 128 L 192.5 128 L 160 95 L 128 64 L 128 0 L 192 0 Z" />
+            </svg>
+            <span className="text-white text-sm font-normal tracking-tight">autowash pro</span>
           </Link>
-          
-          <div className="hidden md:flex items-center gap-2">
+
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link, idx) => {
               const active = isActive(link.path);
               return (
-                <button 
-                  key={idx} 
+                <button
+                  key={idx}
                   onClick={link.onClick ? link.onClick : () => handleNavClick(link.id)}
-                  className="relative px-6 py-2.5 group transition-all"
+                  className={`px-5 py-2 rounded-full text-sm font-normal transition-colors ${active ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
                 >
-                  {/* Active Background */}
-                  {active && (
-                    <div 
-                      className="absolute inset-0 bg-gradient-to-r from-gold-600 to-gold-400 shadow-[0_0_15px_rgba(201,152,26,0.3)] rounded-lg" 
-                    />
-                  )}
-                  
-                  {/* Hover Background (subtle) */}
-                  {!active && (
-                    <div 
-                      className="absolute inset-0 bg-gold-500/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
-                    />
-                  )}
-
-                  <span className={`relative z-10 font-bold tracking-wider uppercase text-sm transition-colors ${
-                    active ? 'text-dark-950' : 'text-text-secondary group-hover:text-gold-400'
-                  }`}>
-                    {link.name}
-                  </span>
+                  {link.name}
                 </button>
               );
             })}
@@ -85,103 +71,103 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-4">
             {isLoggedIn ? (
-              <button 
-                onClick={() => navigate('/dashboard')}
-                className="w-10 h-10 rounded-full bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 hover:bg-gold-500/20 transition-colors"
-                title="Quản lý tài khoản"
-              >
-                <User size={20} />
-              </button>
+              <div className="relative group hidden md:block">
+                <button
+                  className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  title="Quản lý tài khoản"
+                >
+                  <User size={18} />
+                </button>
+
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 top-full mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right group-hover:translate-y-0 translate-y-2 bg-neutral-900 border border-white/10 rounded-2xl shadow-xl overflow-hidden py-2">
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="w-full text-left px-5 py-3 text-white text-sm hover:bg-white/10 transition-colors flex items-center gap-2"
+                  >
+                    Quản lý lịch hẹn
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('token');
+                      window.location.reload();
+                    }}
+                    className="w-full text-left px-5 py-3 text-red-400 text-sm hover:bg-red-500/10 transition-colors flex items-center gap-2 border-t border-white/5"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              </div>
             ) : (
-              <button 
+              <button
                 onClick={() => navigate('/auth/login')}
-                className="px-5 py-2.5 text-gold-400 border border-gold-400 rounded-full hover:bg-gold-400 hover:text-dark-950 font-medium transition-all"
+                className="px-6 py-2.5 text-white border border-white/20 rounded-full hover:bg-white hover:text-black font-medium transition-all text-sm"
               >
                 Đăng nhập
               </button>
             )}
-            
-            <button 
-              onClick={() => navigate('/booking')}
-              className="px-5 py-2.5 bg-gold-500 text-dark-950 font-bold rounded-full hover:bg-gold-400 transition-all"
-            >
-              Đặt lịch ngay
-            </button>
-
-            {isLoggedIn && (
-              <button 
-                onClick={() => {
-                  localStorage.removeItem('token');
-                  window.location.reload();
-                }}
-                className="px-4 py-2 text-red-400 hover:text-red-300 font-medium transition-colors text-sm border border-red-900/30 rounded-full bg-red-900/10"
-              >
-                Đăng xuất
-              </button>
-            )}
           </div>
 
-          <button 
-            className="md:hidden text-text-primary"
+          <button
+            className="md:hidden text-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            {isMenuOpen ? <X size={26} /> : <Menu size={26} />}
           </button>
         </div>
       </div>
 
       {isMenuOpen && (
-        <div className="md:hidden absolute top-20 left-0 w-full bg-dark-950/95 backdrop-blur-md border-b border-dark-600 px-4 py-6 shadow-xl">
-          <div className="flex flex-col gap-4">
+        <div className="md:hidden absolute top-20 left-0 w-full bg-neutral-950/95 backdrop-blur-md border-b border-white/10 px-4 py-6 shadow-xl">
+          <div className="flex flex-col gap-2">
             {navLinks.map((link, idx) => {
               const active = isActive(link.path);
               return (
-                <button 
-                  key={idx} 
+                <button
+                  key={idx}
                   onClick={link.onClick ? link.onClick : () => handleNavClick(link.id)}
-                  className={`text-left px-4 py-3 font-bold transition-colors rounded-lg ${
-                    active
-                      ? 'bg-gradient-to-r from-gold-600/20 to-transparent text-gold-400 border-l-4 border-gold-500'
-                      : 'text-text-secondary hover:text-gold-400 hover:bg-dark-800'
-                  }`}
+                  className={`text-left px-4 py-3 font-normal transition-colors rounded-lg text-sm ${active
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   {link.name}
                 </button>
               );
             })}
-            <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-dark-600">
+            <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-white/10">
               {isLoggedIn ? (
-                <button 
+                <button
                   onClick={() => navigate('/dashboard')}
-                  className="w-full px-5 py-3 text-gold-400 font-bold text-center border border-gold-400/30 bg-gold-500/10 rounded-lg flex items-center justify-center gap-2"
+                  className="w-full px-5 py-3 text-white font-medium text-sm text-center border border-white/20 bg-white/5 rounded-full flex items-center justify-center gap-2"
                 >
                   <User size={18} />
-                  Quản lý tài khoản
+                  quản lý tài khoản
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={() => navigate('/auth/login')}
-                  className="w-full px-5 py-3 text-gold-400 text-center border border-gold-400 rounded-lg"
+                  className="w-full px-5 py-3 text-white text-sm font-medium text-center border border-white/20 rounded-full"
                 >
-                  Đăng nhập
+                  đăng nhập
                 </button>
               )}
-              <button 
+              <button
                 onClick={() => navigate('/booking')}
-                className="w-full px-5 py-3 bg-gold-500 text-dark-950 font-bold rounded-lg"
+                className="w-full px-5 py-3 bg-white text-black text-sm font-medium rounded-full"
               >
-                Đặt lịch ngay
+                đặt lịch ngay
               </button>
-              
+
               {isLoggedIn && (
-                <button 
+                <button
                   onClick={() => {
                     localStorage.removeItem('token');
                     window.location.reload();
                   }}
-                  className="w-full mt-2 px-5 py-3 text-red-400 text-center border border-red-900/30 bg-red-900/10 rounded-lg"
+                  className="w-full mt-2 px-5 py-3 text-white/50 hover:text-red-400 text-sm font-medium text-center"
                 >
-                  Đăng xuất
+                  đăng xuất
                 </button>
               )}
             </div>
@@ -191,3 +177,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

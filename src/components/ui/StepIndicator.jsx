@@ -11,11 +11,11 @@ export default function StepIndicator({ currentStep }) {
     <div className="w-full py-6">
       <div className="flex items-center justify-between max-w-2xl mx-auto relative">
         {/* Connecting line */}
-        <div className="absolute top-1/2 left-0 w-full h-[2px] bg-dark-800 -z-10 -translate-y-1/2"></div>
+        <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/10 -z-10 -translate-y-1/2"></div>
         
         {/* Active connecting line */}
         <div 
-          className="absolute top-1/2 left-0 h-[2px] bg-gold-500 -z-10 -translate-y-1/2 transition-all duration-500"
+          className="absolute top-1/2 left-0 h-[1px] bg-white -z-10 -translate-y-1/2 transition-all duration-500"
           style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
         ></div>
 
@@ -26,17 +26,17 @@ export default function StepIndicator({ currentStep }) {
           return (
             <div key={step.id} className="flex flex-col items-center">
               <div 
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300
-                  ${isActive ? 'bg-gold-500 text-dark-950 shadow-[0_0_15px_rgba(201,152,26,0.4)]' : 
-                    isCompleted ? 'bg-gold-500/20 text-gold-500 border border-gold-500' : 
-                    'bg-dark-800 text-text-muted border border-dark-600'}
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm transition-all duration-300
+                  ${isActive ? 'bg-white text-black' : 
+                    isCompleted ? 'bg-black text-white border border-white' : 
+                    'bg-black text-white/40 border border-white/10'}
                 `}
               >
                 {isCompleted ? '✓' : step.id}
               </div>
               <span 
-                className={`mt-2 text-xs font-semibold uppercase tracking-wider
-                  ${isActive ? 'text-gold-500' : isCompleted ? 'text-text-primary' : 'text-text-muted'}
+                className={`mt-2 text-xs font-medium uppercase tracking-wider
+                  ${isActive ? 'text-white' : isCompleted ? 'text-white/80' : 'text-white/40'}
                 `}
               >
                 {step.label}
