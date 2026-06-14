@@ -14,6 +14,7 @@ import AdminLayout from './components/admin/AdminLayout.jsx'
 import AdminDashboard from './pages/admin/AdminDashboard.jsx'
 import BookingSlotDashboard from './pages/admin/BookingSlotDashboard.jsx'
 import StaffScheduleDashboard from './pages/admin/StaffScheduleDashboard.jsx'
+import ServiceManagement from './pages/admin/ServiceManagement.jsx'
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="booking-schedule" element={<BookingSlotDashboard />} />
         <Route path="staff-schedule" element={<StaffScheduleDashboard />} />
+        <Route path="services" element={<ServiceManagement />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
