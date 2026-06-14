@@ -1,362 +1,594 @@
-﻿import React, { useMemo, useState, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react';
 import {
-  Button,
-  Modal,
-  Form,
-  Input,
-  Select,
-  notification,
-  Tooltip,
-  Tag,
-  Divider
-} from 'antd'
-import {
-  ClockCircleOutlined,
-  CheckCircleOutlined,
-  SyncOutlined,
-  LoginOutlined,
-  PlusOutlined,
-  LeftOutlined,
-  RightOutlined,
-  UserOutlined,
-  EditOutlined
-} from '@ant-design/icons'
+  Calendar as CalendarIcon, Clock, CheckCircle2, ChevronLeft, ChevronRight,
+  Plus, User, Edit2, Car, CreditCard, ArrowRight, LogIn, RefreshCw, X, Trash2, CalendarDays
+} from 'lucide-react';
 
-const { Option } = Select
+const SERVICE_CONFIG = {
+  'Eco Wash': { duration: 15, badge: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
+  'Premium Care': { duration: 30, badge: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+  'Detailing & Shine': { duration: 60, badge: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+  'Ceramic Shield': { duration: 120, badge: 'text-amber-400 bg-amber-500/10 border-amber-500/20' }
+};
 
-const DAYS_IN_WEEK = [
-  { id: 'T2', name: 'Thứ Hai', eng: 'Monday', dateStr: '08' },
-  { id: 'T3', name: 'Thứ Ba', eng: 'Tuesday', dateStr: '09' },
-  { id: 'T4', name: 'Thứ Tư', eng: 'Wednesday', dateStr: '10' },
-  { id: 'T5', name: 'Thứ Năm', eng: 'Thursday', dateStr: '11' },
-  { id: 'T6', name: 'Thứ Sáu', eng: 'Friday', dateStr: '12' },
-  { id: 'T7', name: 'Thứ Bảy', eng: 'Saturday', dateStr: '13' },
-  { id: 'CN', name: 'Chủ Nhật', eng: 'Sunday', dateStr: '14' },
-]
+const WORK_STATUS = {
+  PENDING: { label: 'Lịch hẹn', color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20', icon: Clock },
+  ARRIVED: { label: 'Đã đến', color: 'text-orange-400 bg-orange-400/10 border-orange-400/20', icon: LogIn },
+  WORKING: { label: 'Đang làm', color: 'text-blue-400 bg-blue-400/10 border-blue-400/20', icon: RefreshCw },
+  COMPLETED: { label: 'Hoàn thành', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20', icon: CheckCircle2 },
+};
+
+const PAYMENT_STATUS = {
+  UNPAID: { label: 'Chưa thanh toán', color: 'text-red-400 bg-red-400/10 border-red-400/20' },
+  PAID: { label: 'Đã thanh toán', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' }
+};
 
 const TEN_SLOTS = [
   { key: 'slot-1', time: '08:00 - 09:00', label: 'Slot 01' },
   { key: 'slot-2', time: '09:00 - 10:00', label: 'Slot 02' },
   { key: 'slot-3', time: '10:00 - 11:00', label: 'Slot 03' },
   { key: 'slot-4', time: '11:00 - 12:00', label: 'Slot 04' },
+  { key: 'slot-break', time: '12:00 - 13:00', label: 'Nghỉ trưa', isBreak: true },
   { key: 'slot-5', time: '13:00 - 14:00', label: 'Slot 05' },
   { key: 'slot-6', time: '14:00 - 15:00', label: 'Slot 06' },
   { key: 'slot-7', time: '15:00 - 16:00', label: 'Slot 07' },
   { key: 'slot-8', time: '16:00 - 17:00', label: 'Slot 08' },
   { key: 'slot-9', time: '17:00 - 18:00', label: 'Slot 09' },
   { key: 'slot-10', time: '18:00 - 19:00', label: 'Slot 10' },
-]
+];
 
-const SERVICE_CONFIG = {
-  'Rửa bình thường': { duration: 15, color: '#2db7f5' },
-  'Rửa tiêu chuẩn': { duration: 30, color: '#108ee9' },
-  'Gói cao cấp': { duration: 60, color: '#87d068' }
-}
+// Helper functions for date
+const formatDate = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
-const WORK_STATUS = {
-  BOOKED: { label: 'Lịch hẹn', color: 'blue', icon: <ClockCircleOutlined /> },
-  ARRIVED: { label: 'Xe đã đến', color: 'orange', icon: <LoginOutlined /> },
-  PROCESSING: { label: 'Đang làm việc', color: 'purple', icon: <SyncOutlined spin /> },
-  DONE: { label: 'Hoàn thành', color: 'green', icon: <CheckCircleOutlined /> },
-}
+const getStartOfWeek = (date) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  return new Date(d.setDate(diff));
+};
 
-const PAYMENT_STATUS = {
-  UNPAID: { label: 'Chưa thanh toán', color: 'error' },
-  PAID: { label: 'Đã thanh toán', color: 'success' }
-}
-
-const initialBookings = [
-  { id: 'b-1', day: 'Thứ Hai', slotKey: 'slot-1', customer: 'Nguyễn Văn A', plate: '30A-123.45', service: 'Rửa tiêu chuẩn', status: 'BOOKED', payment: 'UNPAID' },
-  { id: 'b-2', day: 'Thứ Hai', slotKey: 'slot-1', customer: 'Đặng Quốc Bảo', plate: '29C-888.88', service: 'Gói cao cấp', status: 'PROCESSING', payment: 'PAID' },
-  { id: 'b-3', day: 'Thứ Hai', slotKey: 'slot-3', customer: 'Trần Văn B', plate: '51K-999.99', service: 'Rửa bình thường', status: 'DONE', payment: 'PAID' },
-]
-
-export default function CalendarPageSchedule() {
-  const [bookings, setBookings] = useState(initialBookings)
-  const [currentDayIndex, setCurrentDayIndex] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+const generateWeekDays = (startDate) => {
+  const days = [];
+  const start = new Date(startDate);
+  const dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  const shortNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
   
-  const selectedDayObj = DAYS_IN_WEEK[currentDayIndex] || DAYS_IN_WEEK[0]
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalMode, setModalMode] = useState('add')
-  const [targetSlotKey, setTargetSlotKey] = useState('')
-  const [editingBookingId, setEditingBookingId] = useState(null)
-  const [form] = Form.useForm()
-
-  const handleOpenAddModal = (slotKey) => {
-    setModalMode('add')
-    setTargetSlotKey(slotKey)
-    setEditingBookingId(null)
-    form.resetFields()
-    form.setFieldsValue({ day: selectedDayObj.name, slotKey: slotKey, status: 'BOOKED', payment: 'UNPAID' })
-    setIsModalOpen(true)
+  for (let i = 0; i < 7; i++) {
+    const current = new Date(start);
+    current.setDate(start.getDate() + i);
+    days.push({
+      id: shortNames[current.getDay()],
+      name: dayNames[current.getDay()],
+      dateStr: String(current.getDate()).padStart(2, '0'),
+      fullDate: formatDate(current),
+      isToday: formatDate(current) === formatDate(new Date())
+    });
   }
+  return days;
+};
 
-  const handleOpenEditModal = (bookingItem) => {
-    setModalMode('edit')
-    setEditingBookingId(bookingItem.id)
-    form.resetFields()
-    form.setFieldsValue({ ...bookingItem })
-    setIsModalOpen(true)
-  }
+// Initial state data
+const today = new Date();
+const todayStr = formatDate(today);
+const initialBookings = [
+  { id: 'BKG-10312', date: todayStr, slotKey: 'slot-1', customer: 'Nguyễn Văn A', plate: '30A-123.45', service: 'Premium Care', status: 'PENDING', payment: 'UNPAID' },
+  { id: 'BKG-10313', date: todayStr, slotKey: 'slot-1', customer: 'Đặng Quốc Bảo', plate: '29C-888.88', service: 'Detailing & Shine', status: 'WORKING', payment: 'PAID' },
+  { id: 'BKG-10314', date: todayStr, slotKey: 'slot-3', customer: 'Trần Văn B', plate: '51K-999.99', service: 'Eco Wash', status: 'COMPLETED', payment: 'PAID' },
+];
 
-  const handleFormSubmit = (values) => {
-    const currentDayBookings = bookings.filter((b) => b.day === values.day && b.slotKey === values.slotKey && b.id !== editingBookingId)
-    const currentAllocatedTime = currentDayBookings.reduce((sum, b) => sum + (SERVICE_CONFIG[b.service]?.duration || 0), 0)
-    const newServiceTime = SERVICE_CONFIG[values.service]?.duration || 0
+export default function BookingSlotDashboard() {
+  const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
+  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+  const [bookings, setBookings] = useState(initialBookings);
 
-    if (currentAllocatedTime + newServiceTime > 120) {
-      notification.error({
-        message: 'Không thể xếp lịch!',
-        description: `Tổng thời gian vượt quá năng suất của 2 nhân viên (Tối đa 120 phút/Slot). Hiện tại đã dùng ${currentAllocatedTime} phút, gói mới yêu cầu thêm ${newServiceTime} phút.`,
-      })
-      return
+  // Week navigation
+  const handlePrevWeek = () => {
+    const newDate = new Date(currentWeekStart);
+    newDate.setDate(newDate.getDate() - 7);
+    setCurrentWeekStart(newDate);
+  };
+  
+  const handleNextWeek = () => {
+    const newDate = new Date(currentWeekStart);
+    newDate.setDate(newDate.getDate() + 7);
+    setCurrentWeekStart(newDate);
+  };
+
+  const handleToday = () => {
+    const now = new Date();
+    setCurrentWeekStart(getStartOfWeek(now));
+    setSelectedDate(formatDate(now));
+  };
+
+  const weekDays = useMemo(() => generateWeekDays(currentWeekStart), [currentWeekStart]);
+  const selectedDayObj = weekDays.find(d => d.fullDate === selectedDate) || weekDays[0];
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState('add');
+  const [editingBookingId, setEditingBookingId] = useState(null);
+  
+  const [formData, setFormData] = useState({
+    date: '', slotKey: '', service: 'Eco Wash', customer: '', plate: '', status: 'PENDING', payment: 'UNPAID'
+  });
+
+  // Calculate Capacity Logic
+  const calculateAllocation = (slotBookings) => {
+    let staff1 = 0;
+    let staff2 = 0;
+    
+    // Process each booking
+    for (const b of slotBookings) {
+      const duration = SERVICE_CONFIG[b.service]?.duration || 0;
+      if (duration === 120) {
+        staff1 += 60;
+        staff2 += 60;
+      } else {
+        if (staff1 + duration <= 60) {
+          staff1 += duration;
+        } else if (staff2 + duration <= 60) {
+          staff2 += duration;
+        } else {
+          return { staff1, staff2, isValid: false }; // Cannot fit
+        }
+      }
     }
+    
+    return { 
+      staff1, 
+      staff2, 
+      isValid: staff1 <= 60 && staff2 <= 60,
+      isFull: staff1 === 60 && staff2 === 60,
+      hasCeramic: slotBookings.some(b => b.service === 'Ceramic Shield')
+    };
+  };
 
-    if (modalMode === 'add') {
-      setBookings((prev) => [...prev, { id: `b-${Date.now()}`, ...values }])
-      notification.success({ message: 'Ghi nhận đơn đặt lịch thành công!' })
-    } else {
-      setBookings((prev) => prev.map((b) => (b.id === editingBookingId ? { ...b, ...values } : b)))
-      notification.success({ message: 'Cập nhật tiến độ đơn hàng thành công!' })
-    }
-    setIsModalOpen(false)
-  }
+  const currentDayBookings = useMemo(() => bookings.filter((b) => b.date === selectedDate), [bookings, selectedDate]);
 
-  const navigateCalendar = (direction) => {
-    if (direction === 'prev' && currentDayIndex > 0) {
-      setCurrentDayIndex(prev => prev - 1)
-    } else if (direction === 'next' && currentDayIndex < DAYS_IN_WEEK.length - 1) {
-      setCurrentDayIndex(prev => prev + 1)
-    }
-  }
+  const summary = useMemo(() => {
+    return {
+      total: currentDayBookings.length,
+      working: currentDayBookings.filter(b => ['WORKING', 'ARRIVED'].includes(b.status)).length,
+      completed: currentDayBookings.filter(b => b.status === 'COMPLETED').length,
+      unpaid: currentDayBookings.filter(b => b.payment === 'UNPAID').length
+    };
+  }, [currentDayBookings]);
 
   const computedDayData = useMemo(() => {
-    const currentDayBookings = bookings.filter((b) => b.day === selectedDayObj.name)
     return TEN_SLOTS.map((slot) => {
-      const slotBookings = currentDayBookings.filter((b) => b.slotKey === slot.key)
-      const totalMinutes = slotBookings.reduce((sum, b) => sum + (SERVICE_CONFIG[b.service]?.duration || 0), 0)
+      if (slot.isBreak) return { ...slot, isBreak: true };
+      
+      const slotBookings = currentDayBookings.filter((b) => b.slotKey === slot.key);
+      const allocation = calculateAllocation(slotBookings);
+      
       return { 
         ...slot, 
         bookingsList: slotBookings, 
-        usedMinutes: totalMinutes,
-        isFull: totalMinutes >= 120
-      }
-    })
-  }, [bookings, selectedDayObj.name])
+        allocation
+      };
+    });
+  }, [currentDayBookings]);
+
+  // Form Validation (Instant check on capacity)
+  const isFormValid = useMemo(() => {
+    if (!formData.service) return true;
+    const existingBookings = bookings.filter(b => b.date === formData.date && b.slotKey === formData.slotKey && b.id !== editingBookingId);
+    existingBookings.push(formData); // Test add
+    const { isValid } = calculateAllocation(existingBookings);
+    return isValid;
+  }, [formData, bookings, editingBookingId]);
+
+  const handleOpenAddModal = (slotKey) => {
+    setModalMode('add');
+    setEditingBookingId(null);
+    setFormData({
+      date: selectedDate,
+      slotKey: slotKey,
+      service: 'Eco Wash',
+      customer: '',
+      plate: '',
+      status: 'PENDING',
+      payment: 'UNPAID'
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (bookingItem) => {
+    setModalMode('edit');
+    setEditingBookingId(bookingItem.id);
+    setFormData({ ...bookingItem });
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteBooking = () => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa đơn đặt lịch này?")) {
+      setBookings((prev) => prev.filter((b) => b.id !== editingBookingId));
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!isFormValid) {
+      alert("Không đủ năng suất phục vụ cho gói dịch vụ này trong khung giờ hiện tại.");
+      return;
+    }
+
+    if (modalMode === 'add') {
+      setBookings((prev) => [...prev, { id: `BKG-${Math.floor(Math.random()*10000)}`, ...formData }]);
+    } else {
+      setBookings((prev) => prev.map((b) => (b.id === editingBookingId ? { ...b, ...formData } : b)));
+    }
+    setIsModalOpen(false);
+  };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f3f4f6', padding: isMobile ? '12px' : '40px', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', fontFamily: 'sans-serif' }}>
-      
-      <div style={{ width: '100%', maxWidth: isMobile ? '100%' : '1400px', position: 'relative', transition: 'all 0.3s' }}>
-        
-        {/* THANH KHUYÊN SẮT GÁY LỊCH */}
-        <div style={{ position: 'absolute', top: '-16px', left: 0, right: 0, height: '24px', backgroundColor: '#92400e', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', display: 'flex', justifyContent: 'space-around', padding: isMobile ? '0 16px' : '0 100px', zIndex: 30 }}>
-          {[...Array(isMobile ? 4 : 7)].map((_, i) => (
-            <div key={i} style={{ width: '16px', height: '40px', backgroundColor: '#cbd5e1', borderRadius: '9999px', marginTop: '-12px', border: '1px solid #94a3b8', zIndex: 40 }} />
-          ))}
+    <div className="p-6 lg:p-8 space-y-8 w-full max-w-7xl mx-auto font-body">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="font-hero text-3xl font-medium text-white tracking-tight">Lịch hẹn & Điều phối</h1>
+          <p className="text-white/40 mt-1 text-sm flex items-center gap-2">
+            <CalendarDays size={14}/> Ngày {selectedDayObj.dateStr}/{selectedDayObj.fullDate.split('-')[1]} - {selectedDayObj.name}
+          </p>
         </div>
-
-        {/* NỀN GIẤY LỚP SAU */}
-        <div style={{ position: 'absolute', left: '10px', right: '10px', top: '10px', height: '100%', backgroundColor: '#ffffff', borderRadius: '20px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', transform: 'translateY(10px)', zIndex: 10 }} />
-
-        {/* TỜ LỊCH CHÍNH KHỔ LỚN */}
-        <div style={{ position: 'relative', backgroundColor: '#ffffff', borderRadius: '20px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)', border: '1px solid #e5e7eb', zIndex: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          
-          {/* HEADER LỊCH BLOC ĐỎ */}
-          <div style={{ backgroundColor: '#dc2626', color: '#ffffff', padding: isMobile ? '16px' : '28px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Button 
-              disabled={currentDayIndex === 0}
-              onClick={() => navigateCalendar('prev')}
-              icon={<LeftOutlined />}
-              style={{ backgroundColor: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', height: '40px', width: '40px' }}
-            />
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: isMobile ? '10px' : '14px', trackingWidest: '0.15em', fontFamily: 'monospace', textTransform: 'uppercase', color: '#fca5a5', margin: 0, fontWeight: 'bold' }}>HỆ THỐNG ĐIỀU PHỐI & GIÁM SÁT TRẠM RỬA XE</p>
-              <h3 style={{ fontSize: isMobile ? '18px' : '32px', fontWeight: 800, color: '#ffffff', margin: '6px 0 0 0' }}>THÁNG 06 • 2026</h3>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleToday}
+            className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium text-white transition-colors"
+          >
+            Hôm nay
+          </button>
+          <div className="flex items-center gap-2 bg-neutral-950 border border-white/5 rounded-xl p-1">
+            <button
+              onClick={handlePrevWeek}
+              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <div className="px-4 text-sm font-medium text-white w-32 text-center whitespace-nowrap">
+              Tuần này
             </div>
-            <Button 
-              disabled={currentDayIndex === DAYS_IN_WEEK.length - 1}
-              onClick={() => navigateCalendar('next')}
-              icon={<RightOutlined />}
-              style={{ backgroundColor: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', height: '40px', width: '40px' }}
-            />
+            <button
+              onClick={handleNextWeek}
+              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <ChevronRight size={18} />
+            </button>
           </div>
-
-          {/* SỐ BẢNG NGÀY TRUNG TÂM */}
-          <div style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb', padding: isMobile ? '20px' : '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-            <div style={{ fontSize: isMobile ? '64px' : '120px', fontWeight: 900, color: '#dc2626', lineHeight: 1, fontFamily: 'Georgia, serif' }}>
-              {selectedDayObj.dateStr}
-            </div>
-            <div style={{ fontSize: isMobile ? '14px' : '22px', fontWeight: 'bold', color: '#111827', marginTop: '12px', textTransform: 'uppercase' }}>
-              {selectedDayObj.name}
-            </div>
-            
-            <div style={{ position: isMobile ? 'static' : 'absolute', right: '40px', bottom: '24px', textAlign: isMobile ? 'center' : 'right', marginTop: isMobile ? '16px' : '0' }}>
-              <div style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>Năng suất nhân sự vận hành:</div>
-              <div style={{ fontSize: '15px', color: '#111827', fontWeight: 'bold', marginTop: '4px' }}>
-                <UserOutlined /> 2 Nhân viên sẵn sàng (120 phút/Slot)
-              </div>
-            </div>
-          </div>
-
-          {/* NỘI DUNG RUỘT LỊCH DỌC 10 KHUNG GIỜ */}
-          <div style={{ padding: isMobile ? '16px' : '40px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
-            {computedDayData.map((slot) => {
-              return (
-                <div key={slot.key} style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'flex-start', gap: isMobile ? '12px' : '32px', borderBottom: '2px solid #f3f4f6', paddingBottom: '24px' }}>
-                  
-                  {/* TIÊU ĐỀ SLOT VÀ THANH ĐO NĂNG SUẤT */}
-                  <div style={{ width: isMobile ? '100%' : '180px', flexShrink: 0 }}>
-                    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9ca3af', fontWeight: 'bold' }}>{slot.label}</div>
-                    <div style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b', margin: '2px 0' }}>{slot.time}</div>
-                    
-                    <div style={{ marginTop: '6px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>
-                        <span>Đã dùng: {slot.usedMinutes}p</span>
-                        <span>Max: 120p</span>
-                      </div>
-                      <div style={{ width: '100%', height: '6px', backgroundColor: '#e2e8f0', borderRadius: '3px', overflow: 'hidden' }}>
-                        <div style={{ width: `${Math.min((slot.usedMinutes / 120) * 100, 100)}%`, height: '100%', backgroundColor: slot.usedMinutes >= 120 ? '#ef4444' : slot.usedMinutes > 60 ? '#f59e0b' : '#10b981', transition: 'width 0.3s' }} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* THÔNG TIN XE HOẶC ĐĂNG KÝ TRONG SLOT */}
-                  <div style={{ flex: 1, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : (slot.bookingsList.length >= 2 ? '1fr 1fr' : '1fr'), gap: '16px' }}>
-                    
-                    {slot.bookingsList.map((item) => (
-                      <div key={item.id} style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', gap: '12px' }}>
-                        
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ padding: '4px 10px', backgroundColor: '#0f172a', color: '#ffffff', fontFamily: 'monospace', fontSize: '13px', fontWeight: 'bold', borderRadius: '6px' }}>
-                            {item.plate ? item.plate.toUpperCase() : "CHƯA CÓ BKS"}
-                          </span>
-                          <Tag color={SERVICE_CONFIG[item.service]?.color || 'default'}>
-                            {item.service} ({SERVICE_CONFIG[item.service]?.duration} phút)
-                          </Tag>
-                        </div>
-
-                        <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#334155' }}>
-                          Khách hàng: <span style={{ color: '#0284c7' }}>{item.customer}</span>
-                        </div>
-
-                        <Divider style={{ margin: '4px 0' }} />
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                          <div style={{ display: 'flex', gap: '6px' }}>
-                            <Tag icon={WORK_STATUS[item.status]?.icon} color={WORK_STATUS[item.status]?.color || 'default'}>
-                              {WORK_STATUS[item.status]?.label || item.status}
-                            </Tag>
-                            <Tag color={PAYMENT_STATUS[item.payment]?.color || 'default'}>
-                              {PAYMENT_STATUS[item.payment]?.label || item.payment}
-                            </Tag>
-                          </div>
-
-                          <Button 
-                            type="primary" 
-                            size="small"
-                            ghost
-                            icon={<EditOutlined />}
-                            onClick={() => handleOpenEditModal(item)}
-                            style={{ borderRadius: '6px' }}
-                          >
-                            Cập nhật
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-
-                    {!slot.isFull && (
-                      <button
-                        type="button"
-                        onClick={() => handleOpenAddModal(slot.key)}
-                        style={{ width: '100%', minHeight: '110px', padding: '16px', border: '2px dashed #cbd5e1', borderRadius: '12px', backgroundColor: 'transparent', fontSize: '14px', fontWeight: '600', color: '#64748b', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', transition: 'all 0.2s' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#dc2626'; e.currentTarget.style.color = '#dc2626'; e.currentTarget.style.backgroundColor = '#fef2f2'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.color = '#64748b'; e.currentTarget.style.backgroundColor = 'transparent'; }}
-                      >
-                        <PlusOutlined style={{ fontSize: '16px' }} />
-                        <span>Thêm xe vào khung giờ</span>
-                        <span style={{ fontSize: '11px', fontWeight: 'normal', color: '#94a3b8' }}>Thời gian còn trống: {120 - slot.usedMinutes} phút</span>
-                      </button>
-                    )}
-                  </div>
-
-                </div>
-              )
-            })}
-          </div>
-
         </div>
       </div>
 
-      {/* POPUP BIỂU MẪU */}
-      <Modal
-        title={modalMode === 'add' ? 'Thêm đơn đặt lịch trạm' : 'Cập nhật Tiến độ & Thanh toán'}
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        onOk={() => form.submit()}
-        centered
-        destroyOnClose
-        width={450}
-      >
-        <Form form={form} layout="vertical" onFinish={handleFormSubmit} style={{ paddingTop: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <Form.Item name="day" label="Ngày" rules={[{ required: true }]}>
-              <Select disabled={modalMode === 'edit'}>
-                {DAYS_IN_WEEK.map(d => <Option key={d.id} value={d.name}>{d.name}</Option>)}
-              </Select>
-            </Form.Item>
-            <Form.Item name="slotKey" label="Khung giờ" rules={[{ required: true }]}>
-              <Select disabled={modalMode === 'edit'}>
-                {TEN_SLOTS.map(s => <Option key={s.key} value={s.key}>{s.time}</Option>)}
-              </Select>
-            </Form.Item>
+      {/* Week overview pills */}
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        {weekDays.map((day) => {
+          const hasBookings = bookings.some(b => b.date === day.fullDate);
+          const isSelected = selectedDate === day.fullDate;
+          
+          return (
+            <button
+              key={day.fullDate}
+              onClick={() => setSelectedDate(day.fullDate)}
+              className={`relative flex flex-col items-center min-w-[80px] p-3 rounded-2xl border transition-all duration-300 ${
+                isSelected
+                  ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
+                  : day.isToday 
+                    ? 'bg-white/5 border-white/20 text-white hover:bg-white/10'
+                    : 'bg-neutral-950 border-white/5 text-white/50 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span className="text-xs font-medium mb-1">{day.name}</span>
+              <span className={`text-xl font-hero ${isSelected || day.isToday ? 'text-white' : ''}`}>{day.dateStr}</span>
+              {hasBookings && (
+                <span className={`absolute top-2 right-2 w-2 h-2 rounded-full ${isSelected ? 'bg-cyan-400' : 'bg-emerald-400'}`} />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Summary Bar */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-neutral-950 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-white/40 text-xs font-medium mb-1">Tổng lịch hẹn</p>
+            <p className="text-2xl font-hero text-white">{summary.total}</p>
           </div>
-
-          <Form.Item name="service" label="Dịch vụ lựa chọn" rules={[{ required: true }]}>
-            <Select placeholder="Chọn gói rửa">
-              <Option value="Rửa bình thường">Rửa bình thường (15 phút)</Option>
-              <Option value="Rửa tiêu chuẩn">Rửa tiêu chuẩn (30 phút)</Option>
-              <Option value="Gói cao cấp">Gói cao cấp (60 phút / 1 tiếng)</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item name="customer" label="Họ tên khách hàng" rules={[{ required: true, message: 'Nhập tên khách' }]}>
-            <Input placeholder="Nhập tên khách hàng..." />
-          </Form.Item>
-
-          <Form.Item name="plate" label="Biển số xe (BKS)" help="Có thể bỏ trống lúc đặt lịch hẹn, điền khi xe tới quán">
-            <Input style={{ textTransform: 'uppercase' }} placeholder="Ví dụ: 30A-123.45" />
-          </Form.Item>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <Form.Item name="status" label="Tiến độ công việc" rules={[{ required: true }]}>
-              <Select>
-                <Option value="BOOKED">1. Lịch hẹn đặt trước</Option>
-                <Option value="ARRIVED">2. Xe đã đến quán</Option>
-                <Option value="PROCESSING">3. Đang làm việc</Option>
-                <Option value="DONE">4. Làm việc xong</Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item name="payment" label="Trạng thái thanh toán" rules={[{ required: true }]}>
-              <Select>
-                <Option value="UNPAID">Chưa thanh toán</Option>
-                <Option value="PAID">Đã thanh toán</Option>
-              </Select>
-            </Form.Item>
+          <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white">
+            <Car size={20} />
           </div>
-        </Form>
-      </Modal>
+        </div>
+        <div className="bg-neutral-950 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-blue-400/60 text-xs font-medium mb-1">Đang xử lý</p>
+            <p className="text-2xl font-hero text-blue-400">{summary.working}</p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+            <RefreshCw size={20} />
+          </div>
+        </div>
+        <div className="bg-neutral-950 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-emerald-400/60 text-xs font-medium mb-1">Đã hoàn thành</p>
+            <p className="text-2xl font-hero text-emerald-400">{summary.completed}</p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+            <CheckCircle2 size={20} />
+          </div>
+        </div>
+        <div className="bg-neutral-950 border border-white/5 rounded-2xl p-4 flex items-center justify-between">
+          <div>
+            <p className="text-red-400/60 text-xs font-medium mb-1">Chưa thanh toán</p>
+            <p className="text-2xl font-hero text-red-400">{summary.unpaid}</p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400">
+            <CreditCard size={20} />
+          </div>
+        </div>
+      </div>
+
+      {/* Slots List */}
+      <div className="space-y-6">
+        {computedDayData.map((slot) => {
+          if (slot.isBreak) {
+            return (
+              <div key={slot.key} className="flex flex-col lg:flex-row gap-6 opacity-60">
+                <div className="w-full lg:w-48 shrink-0">
+                  <div className="bg-white/5 border border-white/5 rounded-2xl p-5 h-full flex flex-col justify-center">
+                    <span className="text-xs text-white/40 font-mono">BREAK</span>
+                    <h3 className="text-xl font-hero text-white/60 tracking-tight mt-1">{slot.time}</h3>
+                  </div>
+                </div>
+                <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-5 flex items-center justify-center border-dashed">
+                  <p className="text-white/40 text-sm font-medium tracking-widest uppercase">Giờ nghỉ trưa toàn ca</p>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div key={slot.key} className="flex flex-col lg:flex-row gap-6">
+              {/* Slot Time & Capacity Bar */}
+              <div className="w-full lg:w-48 shrink-0">
+                <div className={`bg-neutral-950 border border-white/5 rounded-2xl p-5 h-full relative overflow-hidden group ${slot.allocation.hasCeramic ? 'border-amber-500/30' : ''}`}>
+                  {/* Glow */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
+                  <div className="flex justify-between items-start">
+                    <span className="text-xs text-white/40 font-mono">{slot.label}</span>
+                    {slot.allocation.hasCeramic && <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" title="Ceramic Shield Locked" />}
+                  </div>
+                  <h3 className="text-xl font-hero text-white tracking-tight mt-1">{slot.time}</h3>
+                  
+                  <div className="mt-4 space-y-2">
+                    {/* NV1 Progress */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-medium text-white/60 w-6">NV1</span>
+                      <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ${slot.allocation.staff1 === 60 ? 'bg-red-500' : slot.allocation.staff1 > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                          style={{ width: `${(slot.allocation.staff1 / 60) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-white/40 w-8 text-right">{slot.allocation.staff1}p</span>
+                    </div>
+                    {/* NV2 Progress */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-medium text-white/60 w-6">NV2</span>
+                      <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ${slot.allocation.staff2 === 60 ? 'bg-red-500' : slot.allocation.staff2 > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                          style={{ width: `${(slot.allocation.staff2 / 60) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-white/40 w-8 text-right">{slot.allocation.staff2}p</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slot Bookings Grid */}
+              <div className="flex-1 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
+                {slot.bookingsList.map((item) => {
+                  const StatusIcon = WORK_STATUS[item.status].icon;
+                  const isCeramic = item.service === 'Ceramic Shield';
+                  return (
+                    <div key={item.id} className={`bg-neutral-950 border rounded-2xl p-5 relative group hover:border-white/10 transition-colors ${isCeramic ? 'border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.05)]' : 'border-white/5'}`}>
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="inline-flex items-center px-2 py-1 rounded bg-white/5 border border-white/10 font-mono text-xs text-white font-medium">
+                          {item.plate ? item.plate.toUpperCase() : "CHƯA CÓ BKS"}
+                        </div>
+                        <span className={`text-xs font-medium px-2 py-1 rounded border ${SERVICE_CONFIG[item.service]?.badge}`}>
+                          {item.service} ({SERVICE_CONFIG[item.service]?.duration}p)
+                        </span>
+                      </div>
+
+                      <div className="mb-4">
+                        <p className="text-sm text-white font-medium">{item.customer}</p>
+                        <p className="text-xs text-white/40 mt-0.5">Mã đơn: {item.id}</p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 mb-4">
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${WORK_STATUS[item.status].color}`}>
+                          <StatusIcon size={12} />
+                          {WORK_STATUS[item.status].label}
+                        </span>
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${PAYMENT_STATUS[item.payment].color}`}>
+                          {PAYMENT_STATUS[item.payment].label}
+                        </span>
+                      </div>
+
+                      <button 
+                        onClick={() => handleOpenEditModal(item)}
+                        className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {!slot.allocation.isFull && (
+                  <button
+                    onClick={() => handleOpenAddModal(slot.key)}
+                    className="bg-neutral-950/50 border-2 border-dashed border-white/5 rounded-2xl p-5 flex flex-col items-center justify-center text-white/40 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all min-h-[160px] cursor-pointer"
+                  >
+                    <Plus size={24} className="mb-2" />
+                    <span className="text-sm font-medium">Thêm xe vào khung giờ</span>
+                    <span className="text-xs mt-1">
+                      Còn trống {60 - slot.allocation.staff1}p (NV1) / {60 - slot.allocation.staff2}p (NV2)
+                    </span>
+                  </button>
+                )}
+                
+                {slot.allocation.hasCeramic && slot.bookingsList.length === 1 && (
+                  <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-5 flex flex-col items-center justify-center text-amber-500/60 min-h-[160px]">
+                    <Shield size={24} className="mb-2 opacity-50" />
+                    <span className="text-sm font-medium text-center">Khung giờ bị khóa</span>
+                    <span className="text-xs mt-1 text-center px-4">Gói Ceramic Shield chiếm dụng 100% nhân lực hiện tại</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Modal Overlay */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="bg-neutral-950 border border-white/10 rounded-2xl w-full max-w-md relative z-10 overflow-hidden shadow-2xl">
+            <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+              <h2 className="text-lg font-hero text-white font-medium">
+                {modalMode === 'add' ? 'Thêm đơn đặt lịch' : 'Cập nhật tiến độ'}
+              </h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-white/40 hover:text-white transition-colors cursor-pointer">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5">Ngày</label>
+                  <input type="text" disabled value={formData.date} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white/50 cursor-not-allowed" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5">Khung giờ</label>
+                  <input type="text" disabled value={TEN_SLOTS.find(s => s.key === formData.slotKey)?.time} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white/50 cursor-not-allowed" />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-end mb-1.5">
+                  <label className="block text-xs font-medium text-white/60">Gói dịch vụ</label>
+                  {!isFormValid && (
+                    <span className="text-[10px] text-red-400">Vượt quá năng suất slot này!</span>
+                  )}
+                </div>
+                <select 
+                  value={formData.service}
+                  onChange={(e) => setFormData({...formData, service: e.target.value})}
+                  className={`w-full bg-neutral-900 border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none appearance-none ${!isFormValid ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-cyan-500'}`}
+                >
+                  <option value="Eco Wash">Eco Wash (15 phút)</option>
+                  <option value="Premium Care">Premium Care (30 phút)</option>
+                  <option value="Detailing & Shine">Detailing & Shine (60 phút)</option>
+                  <option value="Ceramic Shield">Ceramic Shield (120 phút)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-white/60 mb-1.5">Họ tên khách hàng</label>
+                <input 
+                  type="text" 
+                  required
+                  value={formData.customer}
+                  onChange={(e) => setFormData({...formData, customer: e.target.value})}
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none" 
+                  placeholder="Nhập tên khách hàng..." 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-white/60 mb-1.5">Biển số xe (Tùy chọn)</label>
+                <input 
+                  type="text" 
+                  value={formData.plate}
+                  onChange={(e) => setFormData({...formData, plate: e.target.value})}
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white uppercase focus:border-cyan-500 focus:outline-none" 
+                  placeholder="Ví dụ: 30A-123.45" 
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5">Tiến độ</label>
+                  <select 
+                    value={formData.status}
+                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none appearance-none"
+                  >
+                    <option value="PENDING">Lịch hẹn</option>
+                    <option value="ARRIVED">Xe đã đến</option>
+                    <option value="WORKING">Đang làm</option>
+                    <option value="COMPLETED">Hoàn thành</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-white/60 mb-1.5">Thanh toán</label>
+                  <select 
+                    value={formData.payment}
+                    onChange={(e) => setFormData({...formData, payment: e.target.value})}
+                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none appearance-none"
+                  >
+                    <option value="UNPAID">Chưa thanh toán</option>
+                    <option value="PAID">Đã thanh toán</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-white/5 mt-6 flex justify-between items-center">
+                {modalMode === 'edit' ? (
+                  <button
+                    type="button"
+                    onClick={handleDeleteBooking}
+                    className="p-2 text-red-400/60 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                    title="Xóa lịch hẹn"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                ) : <div />}
+                
+                <div className="flex gap-3">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-5 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={!isFormValid}
+                    className="px-5 py-2.5 rounded-xl text-sm font-medium bg-cyan-500 text-black hover:bg-cyan-400 disabled:opacity-50 disabled:hover:bg-cyan-500 disabled:cursor-not-allowed transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] cursor-pointer"
+                  >
+                    {modalMode === 'add' ? 'Thêm mới' : 'Lưu cập nhật'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
