@@ -27,15 +27,27 @@ export default function LoginPage() {
 
       try {
         const response = await api.post('/auth/login', {
-          identifier: values.phone,
+          phone: values.phone,
           password: values.password
         });
 
-        const token = response?.data?.token || response?.data?.data?.token || response?.token;
+        const data = response?.data || response;
+        const token = data?.token;
+        const role = data?.role;
+        const username = data?.username;
 
         if (token) {
           localStorage.setItem('token', token);
-          navigate('/');
+          if (role) localStorage.setItem('role', role);
+          if (username) localStorage.setItem('username', username);
+          
+          if (role === 'ADMIN') {
+            navigate('/admin');
+          } else if (role === 'STAFF') {
+            navigate('/staff');
+          } else {
+            navigate('/dashboard');
+          }
         } else {
           setApiError('Đăng nhập thành công nhưng không tìm thấy token.');
         }
