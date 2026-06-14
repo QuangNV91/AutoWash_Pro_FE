@@ -165,7 +165,7 @@ export default function HomePage() {
             <div className="absolute right-6 md:right-20 bottom-16 md:bottom-20">
               <div className="flex items-center gap-3 justify-end">
                 <div className="hidden md:block h-px w-24 bg-white/40 rotate-[-20deg]" />
-                <span className="text-4xl md:text-5xl font-medium tracking-tight text-white">3 gói</span>
+                <span className="text-4xl md:text-5xl font-medium tracking-tight text-white">4 gói</span>
               </div>
               <p className="text-xs md:text-sm text-white/70 mt-1 text-right">dịch vụ chuyên nghiệp</p>
             </div>
@@ -185,31 +185,31 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
-                  title: 'Rửa xe cơ bản',
+                  title: 'Eco Wash',
                   price: '40.000đ',
                   time: '15 phút',
-                  desc: 'Rửa sạch bụi bẩn bề mặt, phun bọt tuyết toàn thân xe và lau khô bằng khăn microfiber.',
+                  desc: 'Nhanh gọn, sạch bóng — lý tưởng cho người bận rộn',
                   img: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?q=80&w=2069&auto=format&fit=crop'
                 },
                 {
-                  title: 'Rửa xe chuyên sâu',
+                  title: 'Premium Care',
                   price: '150.000đ',
                   time: '30 phút',
-                  desc: 'Bao gồm gói cơ bản, vệ sinh sên xích, lốc máy, phanh và kiểm tra áp suất lốp.',
-                  img: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?q=80&w=2070&auto=format&fit=crop',
+                  desc: 'Dành cho xe đi mưa nhiều, cần rửa kỹ càng',
+                  img: '/images/premium_care.png',
                   popular: true
                 },
                 {
-                  title: 'Phủ nano ceramic',
-                  price: '300.000đ',
+                  title: 'Detailing & Shine',
+                  price: '350.000đ',
                   time: '60 phút',
-                  desc: 'Đánh bóng, tẩy xước sơn và phủ lớp nano bảo vệ chống bám nước, bụi bẩn hoàn hảo.',
+                  desc: 'Chăm sóc toàn diện sơn xe, kính & nội thất',
                   img: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=2070&auto=format&fit=crop'
                 }
               ].map((service, idx) => (
                 <div key={idx} className="bg-neutral-900/40 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.1)] transition-all duration-300 group">
                   <div className="aspect-[4/3] relative overflow-hidden">
-                    <div className={`absolute inset-0 bg-[url('${service.img}')] bg-cover bg-center group-hover:scale-105 transition-transform duration-700`}></div>
+                    <div className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700" style={{ backgroundImage: `url(${service.img})` }}></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 to-transparent"></div>
                     {service.popular && (
                       <div className="absolute top-4 right-4 bg-purple-500 text-white text-xs font-medium px-3 py-1 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.4)]">
