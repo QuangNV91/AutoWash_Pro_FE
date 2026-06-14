@@ -15,7 +15,11 @@ import AdminDashboard from './pages/admin/AdminDashboard.jsx'
 import BookingSlotDashboard from './pages/admin/BookingSlotDashboard.jsx'
 import StaffScheduleDashboard from './pages/admin/StaffScheduleDashboard.jsx'
 import ServiceManagement from './pages/admin/ServiceManagement.jsx'
-
+import CustomerManagement from './pages/admin/CustomerManagement.jsx'
+import PaymentManagement from './pages/admin/PaymentManagement.jsx'
+import PromotionManagement from './pages/admin/PromotionManagement.jsx'
+import ReportDashboard from './pages/admin/ReportDashboard.jsx'
+import SystemSettings from './pages/admin/SystemSettings.jsx'
 export default function App() {
   return (
     <Routes>
@@ -35,6 +39,11 @@ export default function App() {
         <Route path="booking-schedule" element={<BookingSlotDashboard />} />
         <Route path="staff-schedule" element={<StaffScheduleDashboard />} />
         <Route path="services" element={<ServiceManagement />} />
+        <Route path="customers" element={<CustomerManagement />} />
+        <Route path="payments" element={<PaymentManagement />} />
+        <Route path="promotions" element={<PromotionManagement />} />
+        <Route path="reports" element={<ReportDashboard />} />
+        <Route path="settings" element={<SystemSettings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
