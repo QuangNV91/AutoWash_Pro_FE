@@ -101,4 +101,31 @@ api.post = async (url, data, config) => {
   return originalPost.call(api, url, data, config);
 };
 
+ // MOCK: Ghi đè api.get để lấy dữ liệu cho Staff
+const originalGet = api.get;
+api.get = async (url, config) => {
+  
+  // 1. MOCK API lấy danh sách xe trong ca hôm nay cho Staff
+  if (url === '/staff/today-tasks') {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Trả về Mock Data bạn đã cấu trúc trước đó
+        resolve({
+          data: {
+            success: true,
+            data: [
+              { id: 'task-1', licensePlate: '29A-123.45', service: 'Rửa xe bọt tuyết + Hút bụi', time: '08:00 - 08:30', status: 'pending' },
+              { id: 'task-2', licensePlate: '30F-987.65', service: 'Phủ Ceramic gói VIP', time: '08:30 - 11:00', status: 'processing' },
+              { id: 'task-3', licensePlate: '51H-456.78', service: 'Rửa xe tiêu chuẩn', time: '10:00 - 10:30', status: 'completed' },
+            ]
+          }
+        });
+      }, 800); // Giả lập mạng chậm 0.8s
+    });
+  }
+
+  // Nếu không phải route mock, gọi API thật
+  return originalGet.call(api, url, config);
+ };
+ 
 export default api;

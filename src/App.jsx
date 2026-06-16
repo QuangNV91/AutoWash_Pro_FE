@@ -9,11 +9,14 @@ import BookingStep2DateTime from './pages/user/booking/BookingStep2DateTime.jsx'
 import BookingStep3Confirm from './pages/user/booking/BookingStep3Confirm.jsx'
 import BookingSuccessPage from './pages/user/booking/BookingSuccessPage.jsx'
 import UserDashboard from './pages/user/UserDashboard.jsx'
-import StaffDashboard from './pages/StaffDashboard.jsx'
+import StaffDashboard from './pages/staff/StaffDashboard.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
 import AdminDashboard from './pages/admin/AdminDashboard.jsx'
 import BookingSlotDashboard from './pages/admin/BookingSlotDashboard.jsx'
 import StaffScheduleDashboard from './pages/admin/StaffScheduleDashboard.jsx'
+import StaffSchedule from './pages/staff/StaffSchedule';
+import TaskDetail from './pages/staff/TaskDetail';
+import StaffLayout from './components/staff/StaffLayout';
 
 export default function App() {
   return (
@@ -28,7 +31,12 @@ export default function App() {
       <Route path="/booking/confirm" element={<BookingStep3Confirm />} />
       <Route path="/booking/success" element={<BookingSuccessPage />} />
       <Route path="/dashboard" element={<UserDashboard />} />
-      <Route path="/staff" element={<StaffDashboard />} />
+      <Route path="/staff" element={<StaffLayout />}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<StaffDashboard />} />
+        <Route path="schedule" element={<StaffSchedule />} />
+        <Route path="tasks/:taskId" element={<TaskDetail />} />          
+      </Route>
       <Route path="/admin/*" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="booking-schedule" element={<BookingSlotDashboard />} />
@@ -37,4 +45,4 @@ export default function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
-}
+} 
