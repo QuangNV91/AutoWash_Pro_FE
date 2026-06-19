@@ -20,21 +20,30 @@ import PaymentManagement from './pages/admin/PaymentManagement.jsx'
 import PromotionManagement from './pages/admin/PromotionManagement.jsx'
 import ReportDashboard from './pages/admin/ReportDashboard.jsx'
 import SystemSettings from './pages/admin/SystemSettings.jsx'
+import ProtectedRoute from './components/auth/ProtectedRoute.jsx'
+
 export default function App() {
   return (
     <Routes>
+      {/* === Public Routes - Ai cũng vào được === */}
       <Route path="/" element={<HomePage />} />
       <Route path="/services" element={<ServicesPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/auth/*" element={<Auth />} />
-      <Route path="/booking" element={<BookingStep1Service />} />
-      <Route path="/booking/datetime" element={<BookingStep2DateTime />} />
-      <Route path="/booking/confirm" element={<BookingStep3Confirm />} />
-      <Route path="/booking/success" element={<BookingSuccessPage />} />
-      <Route path="/dashboard" element={<UserDashboard />} />
-      <Route path="/staff" element={<StaffDashboard />} />
-      <Route path="/admin/*" element={<AdminLayout />}>
+
+      {/* === User Routes - Phải đăng nhập mới vào được === */}
+      <Route path="/booking" element={<ProtectedRoute><BookingStep1Service /></ProtectedRoute>} />
+      <Route path="/booking/datetime" element={<ProtectedRoute><BookingStep2DateTime /></ProtectedRoute>} />
+      <Route path="/booking/confirm" element={<ProtectedRoute><BookingStep3Confirm /></ProtectedRoute>} />
+      <Route path="/booking/success" element={<ProtectedRoute><BookingSuccessPage /></ProtectedRoute>} />
+      <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
+
+      {/* === Staff Routes - Chỉ STAFF và ADMIN mới vào được === */}
+      <Route path="/staff" element={<ProtectedRoute allowedRoles={['STAFF', 'ADMIN']}><StaffDashboard /></ProtectedRoute>} />
+
+      {/* === Admin Routes - Chỉ ADMIN mới vào được === */}
+      <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="booking-schedule" element={<BookingSlotDashboard />} />
         <Route path="staff-schedule" element={<StaffScheduleDashboard />} />
@@ -45,7 +54,9 @@ export default function App() {
         <Route path="reports" element={<ReportDashboard />} />
         <Route path="settings" element={<SystemSettings />} />
       </Route>
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
+
