@@ -1,7 +1,7 @@
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom'
 import { 
   LayoutDashboard, CalendarDays, Users, Wrench, UserCog, 
-  CreditCard, Tag, Settings, BarChart3, LogOut, ChevronRight, Menu, X 
+  CreditCard, Tag, Settings, BarChart3, LogOut, ChevronRight, Menu, X, User
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { key: 'payments', icon: CreditCard, label: 'Thanh toán', to: '/admin/payments' },
   { key: 'promotions', icon: Tag, label: 'Khuyến mãi', to: '/admin/promotions' },
   { key: 'reports', icon: BarChart3, label: 'Báo cáo', to: '/admin/reports' },
+  { key: 'profile', icon: User, label: 'Hồ sơ cá nhân', to: '/admin/profile' },
   { key: 'settings', icon: Settings, label: 'Cài đặt', to: '/admin/settings' },
 ]
 
