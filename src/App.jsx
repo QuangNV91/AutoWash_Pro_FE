@@ -11,6 +11,7 @@ import BookingSuccessPage from './pages/user/booking/BookingSuccessPage.jsx'
 import UserDashboard from './pages/user/UserDashboard.jsx'
 import StaffDashboard from './pages/staff/StaffDashboard.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
+import StaffLayout from './components/staff/StaffLayout.jsx'
 import AdminDashboard from './pages/admin/AdminDashboard.jsx'
 import BookingSlotDashboard from './pages/admin/BookingSlotDashboard.jsx'
 import StaffScheduleDashboard from './pages/admin/StaffScheduleDashboard.jsx'
@@ -35,7 +36,9 @@ export default function App() {
       <Route path="/booking/confirm" element={<BookingStep3Confirm />} />
       <Route path="/booking/success" element={<BookingSuccessPage />} />
       <Route path="/dashboard" element={<UserDashboard />} />
-      <Route path="/staff" element={<StaffDashboard />} />
+      <Route path="/staff/*" element={<StaffLayout />}>
+        <Route index element={<StaffDashboard />} />
+      </Route>
       <Route path="/admin/*" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="booking-schedule" element={<BookingSlotDashboard />} />
