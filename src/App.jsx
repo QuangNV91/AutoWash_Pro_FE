@@ -10,6 +10,13 @@ import BookingStep3Confirm from './pages/user/booking/BookingStep3Confirm.jsx'
 import BookingSuccessPage from './pages/user/booking/BookingSuccessPage.jsx'
 import UserDashboard from './pages/user/UserDashboard.jsx'
 import StaffDashboard from './pages/staff/StaffDashboard.jsx'
+import StaffBookings from './pages/staff/StaffBookings.jsx'
+import StaffCheckin from './pages/staff/StaffCheckin.jsx'
+import StaffPayment from './pages/staff/StaffPayment.jsx'
+import StaffSchedule from './pages/staff/StaffSchedule.jsx'
+import StaffStats from './pages/staff/StaffStats.jsx'
+import StaffProfile from './pages/staff/StaffProfile.jsx'
+import StaffNotifications from './pages/staff/StaffNotifications.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
 import StaffLayout from './components/staff/StaffLayout.jsx'
 import AdminDashboard from './pages/admin/AdminDashboard.jsx'
@@ -38,6 +45,13 @@ export default function App() {
       <Route path="/dashboard" element={<UserDashboard />} />
       <Route path="/staff/*" element={<StaffLayout />}>
         <Route index element={<StaffDashboard />} />
+        <Route path="bookings" element={<StaffBookings />} />
+        <Route path="checkin" element={<StaffCheckin />} />
+        <Route path="payment" element={<StaffPayment />} />
+        <Route path="schedule" element={<StaffSchedule />} />
+        <Route path="stats" element={<StaffStats />} />
+        <Route path="profile" element={<StaffProfile />} />
+        <Route path="notifications" element={<StaffNotifications />} />
       </Route>
       <Route path="/admin/*" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
