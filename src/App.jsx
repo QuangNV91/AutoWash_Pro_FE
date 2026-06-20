@@ -14,12 +14,14 @@ import AdminLayout from './components/admin/AdminLayout.jsx'
 import AdminDashboard from './pages/admin/AdminDashboard.jsx'
 import BookingSlotDashboard from './pages/admin/BookingSlotDashboard.jsx'
 import StaffScheduleDashboard from './pages/admin/StaffScheduleDashboard.jsx'
-import ServiceManagement from './pages/admin/ServiceManagement.jsx'
+import AdminProfile from './pages/admin/AdminProfile.jsx'
 import CustomerManagement from './pages/admin/CustomerManagement.jsx'
 import PaymentManagement from './pages/admin/PaymentManagement.jsx'
 import PromotionManagement from './pages/admin/PromotionManagement.jsx'
 import ReportDashboard from './pages/admin/ReportDashboard.jsx'
+import ServiceManagement from './pages/admin/ServiceManagement.jsx'
 import SystemSettings from './pages/admin/SystemSettings.jsx'
+
 export default function App() {
   return (
     <Routes>
@@ -38,6 +40,7 @@ export default function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="booking-schedule" element={<BookingSlotDashboard />} />
         <Route path="staff-schedule" element={<StaffScheduleDashboard />} />
+        <Route path="profile" element={<AdminProfile />} />
         <Route path="services" element={<ServiceManagement />} />
         <Route path="customers" element={<CustomerManagement />} />
         <Route path="payments" element={<PaymentManagement />} />
