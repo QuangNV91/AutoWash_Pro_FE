@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 import {
   ScanLine, LogIn, Play, CheckCircle2, RefreshCw, Car,
   Clock, User, CreditCard, ArrowRight, ChevronLeft,
   AlertTriangle, Timer, Check, X
 } from 'lucide-react'
-
-const SERVICES_MAP = {
-  'Eco Wash': { price: 40000, duration: 15 },
-  'Premium Care': { price: 150000, duration: 30 },
-  'Detailing & Shine': { price: 350000, duration: 60 },
-  'Ceramic Shield': { price: 800000, duration: 120 }
-};
 
 const MOCK_BOOKINGS = [
   { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',   phone: '0912345678', service: 'Detailing & Shine', duration: 60,  status: 'WORKING',   payment: 'UNPAID', price: 350000, startedAt: Date.now() - 22 * 60 * 1000 },
@@ -68,6 +62,33 @@ export default function StaffCheckin() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [plateInput, setPlateInput] = useState('')
   const [selectedService, setSelectedService] = useState('')
+  
+  const [servicesMap, setServicesMap] = useState({
+    'Eco Wash': { price: 40000, duration: 15 },
+    'Premium Care': { price: 150000, duration: 30 },
+    'Detailing & Shine': { price: 350000, duration: 60 },
+    'Ceramic Shield': { price: 800000, duration: 120 }
+  })
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        // Assuming api is accessible or we can use fetch if we don't import api.
+        // Wait, I need to import api from '../../services/api'. I'll add it to the imports chunk.
+        const res = await api.get('/api/services/active');
+        if (res.data?.success && res.data.data && res.data.data.length > 0) {
+          const newMap = {};
+          res.data.data.forEach(s => {
+            newMap[s.serviceName] = { price: s.basePrice, duration: s.duration };
+          });
+          setServicesMap(newMap);
+        }
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      }
+    };
+    fetchServices();
+  }, []);
 
   const handleAction = (id) => {
     setBookings(prev => prev.map(b => {
@@ -77,10 +98,10 @@ export default function StaffCheckin() {
       if (next) {
         updatedBooking = { ...updatedBooking, status: next, startedAt: next === 'WORKING' ? Date.now() : b.startedAt }
       }
-      if (selectedService && selectedService !== b.service) {
+      if (selectedService && selectedService !== b.service && servicesMap[selectedService]) {
         updatedBooking.service = selectedService;
-        updatedBooking.price = SERVICES_MAP[selectedService].price;
-        updatedBooking.duration = SERVICES_MAP[selectedService].duration;
+        updatedBooking.price = servicesMap[selectedService].price;
+        updatedBooking.duration = servicesMap[selectedService].duration;
       }
       return updatedBooking
     }))
@@ -206,17 +227,17 @@ export default function StaffCheckin() {
                     onChange={(e) => setSelectedService(e.target.value)}
                     className="bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:outline-none focus:border-cyan-500"
                   >
-                    {Object.keys(SERVICES_MAP).map(svc => (
+                    {Object.keys(servicesMap).map(svc => (
                       <option key={svc} value={svc}>{svc}</option>
                     ))}
                   </select>
                 </div>
-                {selectedService !== selected.service && (
+                {selectedService !== selected.service && servicesMap[selectedService] && (
                   <div className="flex justify-between items-center text-sm bg-cyan-500/10 border border-cyan-500/20 p-2 rounded-lg mt-2">
                     <span className="text-cyan-400 text-xs">Giá mới (chênh lệch):</span>
                     <span className="text-cyan-400 font-mono">
-                      {SERVICES_MAP[selectedService].price.toLocaleString('vi-VN')}đ 
-                      <span className="text-white/50 ml-1">({(SERVICES_MAP[selectedService].price - selected.price) > 0 ? '+' : ''}{(SERVICES_MAP[selectedService].price - selected.price).toLocaleString('vi-VN')}đ)</span>
+                      {servicesMap[selectedService].price.toLocaleString('vi-VN')}đ 
+                      <span className="text-white/50 ml-1">({(servicesMap[selectedService].price - selected.price) > 0 ? '+' : ''}{(servicesMap[selectedService].price - selected.price).toLocaleString('vi-VN')}đ)</span>
                     </span>
                   </div>
                 )}
