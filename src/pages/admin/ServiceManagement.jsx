@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Check, X, Power, GripVertical, Settings2, ShieldCheck, Zap, Server } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, Check, X, Power, GripVertical, Settings2, ShieldCheck, Zap, Server, Loader2 } from 'lucide-react';
+import api from '../../services/api';
 
 const THEME_COLORS = {
   cyan: { name: 'Cyan', main: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', dot: 'bg-cyan-400', shadow: 'shadow-[0_0_20px_rgba(6,182,212,0.15)]' },
@@ -9,7 +10,7 @@ const THEME_COLORS = {
   slate: { name: 'Slate', main: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/30', dot: 'bg-slate-400', shadow: 'shadow-[0_0_20px_rgba(100,116,139,0.15)]' },
 };
 
-const INITIAL_SERVICES = [
+const FALLBACK_SERVICES = [
   { id: 'SRV-01', name: 'Eco Wash', duration: 15, price: 40000, color: 'cyan', isActive: true, features: ['Rửa bọt tuyết', 'Lau khô cơ bản', 'Hút bụi sàn'] },
   { id: 'SRV-02', name: 'Premium Care', duration: 30, price: 150000, color: 'purple', isActive: true, features: ['Quy trình Eco Wash', 'Phủ sáp nhanh', 'Vệ sinh nội thất', 'Khử mùi ozone'] },
   { id: 'SRV-03', name: 'Detailing & Shine', duration: 60, price: 350000, color: 'emerald', isActive: true, features: ['Quy trình Premium Care', 'Tẩy bụi sơn', 'Dưỡng nhựa/da', 'Đánh bóng nhẹ'] },
@@ -17,8 +18,37 @@ const INITIAL_SERVICES = [
   { id: 'SRV-05', name: 'Odor Eliminator', duration: 30, price: 100000, color: 'slate', isActive: false, features: ['Xông tinh dầu', 'Vệ sinh giàn lạnh', 'Khử mùi sinh học'] },
 ];
 
+// Map color & features by service name (BE doesn't store these, FE manages locally)
+const SERVICE_EXTRAS = {
+  'Eco Wash': { color: 'cyan', features: ['Rửa bọt tuyết', 'Lau khô cơ bản', 'Hút bụi sàn'] },
+  'Premium Care': { color: 'purple', features: ['Quy trình Eco Wash', 'Phủ sáp nhanh', 'Vệ sinh nội thất', 'Khử mùi ozone'] },
+  'Detailing & Shine': { color: 'emerald', features: ['Quy trình Premium Care', 'Tẩy bụi sơn', 'Dưỡng nhựa/da', 'Đánh bóng nhẹ'] },
+  'Ceramic Shield': { color: 'amber', features: ['Quy trình Detailing', 'Phủ Ceramic 9H', 'Bảo hành 12 tháng', 'Làm sạch khoang máy'] },
+  'Odor Eliminator': { color: 'slate', features: ['Xông tinh dầu', 'Vệ sinh giàn lạnh', 'Khử mùi sinh học'] },
+};
+const COLORS_ORDER = ['cyan', 'purple', 'emerald', 'amber', 'slate'];
+
+// Transform BE response to FE format
+const mapApiToLocal = (apiService) => {
+  const extras = SERVICE_EXTRAS[apiService.serviceName] || {};
+  return {
+    id: apiService.id,
+    name: apiService.serviceName,
+    duration: apiService.duration,
+    price: Number(apiService.basePrice),
+    color: extras.color || COLORS_ORDER[apiService.id % COLORS_ORDER.length] || 'cyan',
+    isActive: apiService.status === 'ACTIVE',
+    features: extras.features || (apiService.description ? apiService.description.split(',').map(s => s.trim()) : ['Dịch vụ rửa xe']),
+    basePoints: apiService.basePoints || 0,
+    description: apiService.description || '',
+  };
+};
+
 export default function ServiceManagement() {
-  const [services, setServices] = useState(INITIAL_SERVICES);
+  const [services, setServices] = useState(FALLBACK_SERVICES);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,12 +58,61 @@ export default function ServiceManagement() {
     name: '', duration: 15, price: 0, color: 'cyan', isActive: true, features: ['']
   });
 
-  const handleToggleActive = (id) => {
-    setServices(prev => prev.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s));
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Hủy kích hoạt hoặc xóa vĩnh viễn dịch vụ này? Hành động này không thể hoàn tác.")) {
+  // Fetch all services from BE on mount
+  const fetchServices = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/api/services');
+      if (res.data?.success && res.data.data && res.data.data.length > 0) {
+        setServices(res.data.data.map(mapApiToLocal));
+      }
+    } catch (err) {
+      console.error('Fetch services failed, using fallback:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchServices(); }, []);
+
+  const handleToggleActive = async (id) => {
+    const service = services.find(s => s.id === id);
+    if (!service) return;
+
+    try {
+      if (service.isActive) {
+        // Deactivate: BE doesn't have a deactivate for services, use delete then re-add
+        // Actually BE has DELETE and PATCH activate. Let's use DELETE to deactivate and PATCH to activate.
+        await api.delete(`/api/services/${id}`);
+        showToast(`Đã tắt dịch vụ "${service.name}"`);
+      } else {
+        await api.patch(`/api/services/${id}/activate`);
+        showToast(`Đã kích hoạt "${service.name}"`);
+      }
+      await fetchServices();
+    } catch (err) {
+      console.error('Toggle active failed:', err);
+      showToast(err.response?.data?.message || 'Thao tác thất bại', 'error');
+      // Fallback: update local state
+      setServices(prev => prev.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s));
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Xóa vĩnh viễn dịch vụ này? Hành động này không thể hoàn tác.")) return;
+    try {
+      await api.delete(`/api/services/${id}`);
+      showToast('Đã xóa dịch vụ thành công');
+      await fetchServices();
+    } catch (err) {
+      console.error('Delete failed:', err);
+      showToast(err.response?.data?.message || 'Xóa thất bại', 'error');
+      // Fallback
       setServices(prev => prev.filter(s => s.id !== id));
     }
   };
@@ -69,18 +148,48 @@ export default function ServiceManagement() {
     setFormData({ ...formData, features: newFeatures });
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     const cleanFeatures = formData.features.filter(f => f.trim() !== '');
     const finalData = { ...formData, features: cleanFeatures, price: Number(formData.price) };
-    
-    if (modalMode === 'add') {
-      const newId = `SRV-0${services.length + 1}`;
-      setServices([...services, { id: newId, ...finalData }]);
-    } else {
-      setServices(services.map(s => s.id === editingId ? { ...s, ...finalData } : s));
+
+    // Build BE payload
+    const payload = {
+      serviceName: finalData.name,
+      description: cleanFeatures.join(', '),
+      duration: finalData.duration,
+      basePrice: finalData.price,
+      basePoints: Math.floor(finalData.price / 10000), // Auto-calc points
+      status: finalData.isActive ? 'ACTIVE' : 'INACTIVE',
+    };
+
+    setSaving(true);
+    try {
+      if (modalMode === 'add') {
+        await api.post('/api/services', payload);
+        showToast(`Tạo dịch vụ "${finalData.name}" thành công`);
+      } else {
+        await api.put(`/api/services/${editingId}`, payload);
+        showToast(`Cập nhật "${finalData.name}" thành công`);
+      }
+      // Save color + features to local map for future reference
+      SERVICE_EXTRAS[finalData.name] = { color: finalData.color, features: cleanFeatures };
+      setIsModalOpen(false);
+      await fetchServices();
+    } catch (err) {
+      console.error('Save failed:', err);
+      showToast(err.response?.data?.message || 'Lưu thất bại', 'error');
+      // Fallback: update local
+      if (modalMode === 'add') {
+        const newId = `SRV-0${services.length + 1}`;
+        setServices([...services, { id: newId, ...finalData }]);
+      } else {
+        setServices(services.map(s => s.id === editingId ? { ...s, ...finalData } : s));
+      }
+      setIsModalOpen(false);
+    } finally {
+      setSaving(false);
     }
-    setIsModalOpen(false);
   };
 
   return (
@@ -105,7 +214,25 @@ export default function ServiceManagement() {
         </button>
       </div>
 
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={`fixed top-6 right-6 z-[100] px-5 py-3 rounded-xl border flex items-center gap-3 text-sm font-medium shadow-2xl animate-[fadeIn_0.3s_ease] ${
+          toast.type === 'error' 
+            ? 'bg-red-500/10 border-red-500/30 text-red-400' 
+            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+        }`}>
+          {toast.type === 'error' ? <X size={16} /> : <Check size={16} />}
+          {toast.message}
+        </div>
+      )}
+
       {/* Services Grid */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="animate-spin text-cyan-400" size={32} />
+          <span className="ml-3 text-white/40 font-mono text-sm">Đang tải dữ liệu từ server...</span>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {services.map((service) => {
           const theme = THEME_COLORS[service.color];
@@ -194,6 +321,7 @@ export default function ServiceManagement() {
           );
         })}
       </div>
+      )}
 
       {/* Modal Overlay */}
       {isModalOpen && (
@@ -332,9 +460,11 @@ export default function ServiceManagement() {
               <button 
                 form="serviceForm"
                 type="submit"
-                className="px-6 py-2.5 text-sm font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                disabled={saving}
+                className="px-6 py-2.5 text-sm font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all shadow-[0_0_15px_rgba(6,182,212,0.15)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {modalMode === 'add' ? 'INITIALIZE' : 'SAVE_CHANGES'}
+                {saving && <Loader2 size={14} className="animate-spin" />}
+                {saving ? 'ĐANG LƯU...' : (modalMode === 'add' ? 'INITIALIZE' : 'SAVE_CHANGES')}
               </button>
             </div>
           </div>
