@@ -17,6 +17,13 @@ const TODAY_BOOKINGS = [
   { id: 'BKG-10318', time: '15:00', plate: '—',          customer: 'Ngô Minh Tuấn',   service: 'Detailing & Shine',  duration: 60,  status: 'PENDING',   payment: 'UNPAID', price: 350000 },
 ]
 
+const SERVICES_MAP = {
+  'Eco Wash': { price: 40000, duration: 15 },
+  'Premium Care': { price: 150000, duration: 30 },
+  'Detailing & Shine': { price: 350000, duration: 60 },
+  'Ceramic Shield': { price: 800000, duration: 120 }
+};
+
 const STATUS_CONFIG = {
   PENDING:   { label: 'Chờ đến',  color: 'text-yellow-400  bg-yellow-500/10  border-yellow-500/20',  icon: Clock        },
   ARRIVED:   { label: 'Đã đến',   color: 'text-orange-400  bg-orange-500/10  border-orange-500/20',  icon: LogIn        },
@@ -41,24 +48,46 @@ function bookingHour(b)  { return parseInt(b.time.split(':')[0]) }
 
 export default function StaffBookings() {
   const navigate = useNavigate()
+  const [bookings, setBookings] = useState(TODAY_BOOKINGS)
   const [filter, setFilter]   = useState('ALL')
   const [search, setSearch]   = useState('')
+  const [selectedBooking, setSelectedBooking] = useState(null)
+  const [editService, setEditService] = useState('')
 
   const filtered = useMemo(() =>
-    TODAY_BOOKINGS.filter(b => {
+    bookings.filter(b => {
       if (filter !== 'ALL' && b.status !== filter) return false
       if (search && !b.customer.toLowerCase().includes(search.toLowerCase()) &&
           !b.plate.includes(search) && !b.id.includes(search)) return false
       return true
-    }), [filter, search])
+    }), [filter, search, bookings])
 
   const counts = {
-    total: TODAY_BOOKINGS.length,
-    pending:   TODAY_BOOKINGS.filter(b => b.status === 'PENDING').length,
-    arrived:   TODAY_BOOKINGS.filter(b => b.status === 'ARRIVED').length,
-    working:   TODAY_BOOKINGS.filter(b => b.status === 'WORKING').length,
-    completed: TODAY_BOOKINGS.filter(b => b.status === 'COMPLETED').length,
+    total: bookings.length,
+    pending:   bookings.filter(b => b.status === 'PENDING').length,
+    arrived:   bookings.filter(b => b.status === 'ARRIVED').length,
+    working:   bookings.filter(b => b.status === 'WORKING').length,
+    completed: bookings.filter(b => b.status === 'COMPLETED').length,
   }
+
+  const openDetails = (b) => {
+    setSelectedBooking(b);
+    setEditService(b.service);
+  };
+
+  const handleSaveEdit = () => {
+    if (!selectedBooking) return;
+    setBookings(prev => prev.map(b => {
+      if (b.id !== selectedBooking.id) return b;
+      return {
+        ...b,
+        service: editService,
+        price: SERVICES_MAP[editService].price,
+        duration: SERVICES_MAP[editService].duration
+      };
+    }));
+    setSelectedBooking(null);
+  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto font-body text-white">
@@ -133,7 +162,7 @@ export default function StaffBookings() {
                       const Icon = STATUS_CONFIG[b.status].icon
                       return (
                         <div key={b.id}
-                          onClick={() => navigate('/staff/checkin')}
+                          onClick={() => openDetails(b)}
                           className="bg-neutral-950 border border-white/5 hover:border-white/15 rounded-xl p-4 cursor-pointer transition-all group"
                         >
                           <div className="flex items-start justify-between mb-2">
@@ -160,6 +189,83 @@ export default function StaffBookings() {
           )
         })}
       </div>
+
+      {/* Edit Booking Modal */}
+      {selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedBooking(null)} />
+          <div className="relative bg-neutral-950 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
+              <h3 className="font-medium text-white">Chi tiết lịch hẹn</h3>
+              <button onClick={() => setSelectedBooking(null)} className="text-white/40 hover:text-white">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-white/50">Khách hàng</span>
+                  <span className="text-white font-medium">{selectedBooking.customer}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-white/50">Giờ hẹn</span>
+                  <span className="text-white font-mono">{selectedBooking.time}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-white/50">Trạng thái</span>
+                  <span className={`font-mono px-2 py-0.5 rounded border ${STATUS_CONFIG[selectedBooking.status].color} text-xs`}>
+                    {STATUS_CONFIG[selectedBooking.status].label}
+                  </span>
+                </div>
+              </div>
+
+              {selectedBooking.status !== 'COMPLETED' && (
+                <div>
+                  <label className="text-sm text-white/70 font-medium mb-2 block">Cập nhật gói dịch vụ</label>
+                  <select 
+                    value={editService}
+                    onChange={(e) => setEditService(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 focus:border-cyan-500 focus:outline-none rounded-xl px-4 py-2.5 text-white text-sm"
+                  >
+                    {Object.keys(SERVICES_MAP).map(svc => (
+                      <option key={svc} value={svc}>{svc}</option>
+                    ))}
+                  </select>
+                  {editService !== selectedBooking.service && (
+                    <div className="mt-3 text-sm bg-cyan-500/10 border border-cyan-500/20 p-3 rounded-xl">
+                      <p className="text-cyan-400 mb-1 text-xs">Dịch vụ sẽ thay đổi, giá mới cập nhật:</p>
+                      <p className="text-white font-mono">
+                        {SERVICES_MAP[editService].price.toLocaleString('vi-VN')}đ 
+                        <span className="text-white/50 ml-2">({SERVICES_MAP[editService].duration} phút)</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4 border-t border-white/5">
+                <button onClick={() => setSelectedBooking(null)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white hover:bg-white/5 text-sm transition-colors">Đóng</button>
+                {selectedBooking.status !== 'COMPLETED' && editService !== selectedBooking.service && (
+                  <button
+                    onClick={handleSaveEdit}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-cyan-500 hover:bg-cyan-400 text-black transition-colors"
+                  >
+                    Lưu thay đổi
+                  </button>
+                )}
+                {selectedBooking.status !== 'COMPLETED' && editService === selectedBooking.service && (
+                  <button
+                    onClick={() => navigate('/staff/checkin')}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  >
+                    Đến Check-in
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
