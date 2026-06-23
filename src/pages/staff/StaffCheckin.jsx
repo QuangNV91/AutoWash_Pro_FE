@@ -6,6 +6,13 @@ import {
   AlertTriangle, Timer, Check, X
 } from 'lucide-react'
 
+const SERVICES_MAP = {
+  'Eco Wash': { price: 40000, duration: 15 },
+  'Premium Care': { price: 150000, duration: 30 },
+  'Detailing & Shine': { price: 350000, duration: 60 },
+  'Ceramic Shield': { price: 800000, duration: 120 }
+};
+
 const MOCK_BOOKINGS = [
   { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',   phone: '0912345678', service: 'Detailing & Shine', duration: 60,  status: 'WORKING',   payment: 'UNPAID', price: 350000, startedAt: Date.now() - 22 * 60 * 1000 },
   { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   phone: '0933444555', service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 40000,  startedAt: null },
@@ -60,19 +67,33 @@ export default function StaffCheckin() {
   const [selected, setSelected] = useState(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [plateInput, setPlateInput] = useState('')
+  const [selectedService, setSelectedService] = useState('')
 
   const handleAction = (id) => {
     setBookings(prev => prev.map(b => {
       if (b.id !== id) return b
       const next = STATUS_NEXT[b.status]
-      if (!next) return b
-      return { ...b, status: next, startedAt: next === 'WORKING' ? Date.now() : b.startedAt }
+      let updatedBooking = { ...b }
+      if (next) {
+        updatedBooking = { ...updatedBooking, status: next, startedAt: next === 'WORKING' ? Date.now() : b.startedAt }
+      }
+      if (selectedService && selectedService !== b.service) {
+        updatedBooking.service = selectedService;
+        updatedBooking.price = SERVICES_MAP[selectedService].price;
+        updatedBooking.duration = SERVICES_MAP[selectedService].duration;
+      }
+      return updatedBooking
     }))
     setConfirmOpen(false)
     if (STATUS_NEXT[selected?.status] === 'DONE') navigate('/staff/payment')
   }
 
-  const openConfirm = (b) => { setSelected(b); setPlateInput(b.plate !== '—' ? b.plate : ''); setConfirmOpen(true) }
+  const openConfirm = (b) => { 
+    setSelected(b); 
+    setPlateInput(b.plate !== '—' ? b.plate : ''); 
+    setSelectedService(b.service);
+    setConfirmOpen(true); 
+  }
 
   const activeBooking = bookings.find(b => b.status === 'WORKING')
 
@@ -173,10 +194,38 @@ export default function StaffCheckin() {
               <button onClick={() => setConfirmOpen(false)} className="text-white/40 hover:text-white"><X size={20} /></button>
             </div>
             <div className="p-6 space-y-4">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2">
-                <div className="flex justify-between text-sm"><span className="text-white/50">Khách hàng</span><span className="text-white font-medium">{selected.customer}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-white/50">Dịch vụ</span><span className={`font-medium ${SERVICE_COLOR[selected.service].split(' ')[0]}`}>{selected.service}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-white/50">Thanh toán</span><span className={selected.payment === 'PAID' ? 'text-emerald-400' : 'text-red-400'}>{selected.payment === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}</span></div>
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-white/50">Khách hàng</span>
+                  <span className="text-white font-medium">{selected.customer}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-white/50">Dịch vụ</span>
+                  <select 
+                    value={selectedService}
+                    onChange={(e) => setSelectedService(e.target.value)}
+                    className="bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:outline-none focus:border-cyan-500"
+                  >
+                    {Object.keys(SERVICES_MAP).map(svc => (
+                      <option key={svc} value={svc}>{svc}</option>
+                    ))}
+                  </select>
+                </div>
+                {selectedService !== selected.service && (
+                  <div className="flex justify-between items-center text-sm bg-cyan-500/10 border border-cyan-500/20 p-2 rounded-lg mt-2">
+                    <span className="text-cyan-400 text-xs">Giá mới (chênh lệch):</span>
+                    <span className="text-cyan-400 font-mono">
+                      {SERVICES_MAP[selectedService].price.toLocaleString('vi-VN')}đ 
+                      <span className="text-white/50 ml-1">({(SERVICES_MAP[selectedService].price - selected.price) > 0 ? '+' : ''}{(SERVICES_MAP[selectedService].price - selected.price).toLocaleString('vi-VN')}đ)</span>
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-white/50">Thanh toán</span>
+                  <span className={selected.payment === 'PAID' ? 'text-emerald-400' : 'text-red-400'}>
+                    {selected.payment === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                  </span>
+                </div>
               </div>
               {selected.status === 'PENDING' && (
                 <div>

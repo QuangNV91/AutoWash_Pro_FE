@@ -46,7 +46,7 @@ export default function LoginPage() {
           } else if (role === 'STAFF') {
             navigate('/staff');
           } else {
-            navigate('/dashboard');
+            navigate('/');
           }
         } else {
           setApiError('Đăng nhập thành công nhưng không tìm thấy token.');

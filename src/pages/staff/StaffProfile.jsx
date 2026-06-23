@@ -4,7 +4,8 @@ import { User, ChevronLeft, Camera, Mail, Phone, Key, Shield, Check } from 'luci
 
 export default function StaffProfile() {
   const navigate = useNavigate()
-  const [profile, setProfile] = useState({ fullName: 'Nguyễn Văn Tèo', email: 'teo.nv@autowash.com', phone: '0901234567' })
+  const storedPhone = localStorage.getItem('username') || '0901234567';
+  const [profile, setProfile] = useState({ fullName: 'Chưa cập nhật tên', email: 'chua_cap_nhat@email.com', phone: storedPhone })
   const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' })
   const [savedProfile, setSavedProfile] = useState(false)
   const [savedPwd, setSavedPwd] = useState(false)

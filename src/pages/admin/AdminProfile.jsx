@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { Camera, Mail, Phone, User, Shield, Key } from 'lucide-react';
 
 export default function AdminProfile() {
+  const storedPhone = localStorage.getItem('username') || '0987654321';
+  const storedRole = localStorage.getItem('role') || 'Administrator';
+
   const [profileData, setProfileData] = useState({
-    fullName: 'Admin User',
-    email: 'admin@autowash.com',
-    phone: '0987654321',
-    role: 'Administrator',
+    fullName: 'Chưa cập nhật tên',
+    email: 'chua_cap_nhat@email.com',
+    phone: storedPhone,
+    role: storedRole,
   });
 
   const [passwords, setPasswords] = useState({
