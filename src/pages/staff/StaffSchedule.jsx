@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 import { CalendarClock, ChevronLeft, Plus, Check, X, Clock, AlertTriangle, Sun, Sunset } from 'lucide-react'
 
 const today = new Date()
@@ -44,17 +45,86 @@ const LEAVE_HISTORY = [
 export default function StaffSchedule() {
   const navigate = useNavigate()
   const [leaveModal, setLeaveModal] = useState(false)
-  const [form, setForm] = useState({ date: WEEK[0].fullDate, duration: 1, reason: '' })
+  const [form, setForm] = useState({ date: WEEK[0].fullDate, shiftId: '', reason: '' })
   const [submitted, setSubmitted] = useState(false)
+  
+  const [myLeaves, setMyLeaves] = useState([])
+  const [staffId, setStaffId] = useState(null)
+  const [shifts, setShifts] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        const username = localStorage.getItem('username');
+        if (!username) return;
+
+        // Fetch staff info to get ID
+        const staffRes = await api.get('/api/staffs');
+        const staffList = staffRes.data?.data || [];
+        const me = staffList.find(s => s.username === username);
+        
+        if (me) {
+          setStaffId(me.id);
+          // Fetch my leave requests
+          const leaveRes = await api.get(`/api/leave-requests/staff/${me.id}`);
+          if (leaveRes.data?.data) {
+            setMyLeaves(leaveRes.data.data);
+          }
+        }
+
+        // Fetch shifts for the dropdown
+        const shiftRes = await api.get('/api/shifts');
+        if (shiftRes.data?.data) {
+          setShifts(shiftRes.data.data);
+          if (shiftRes.data.data.length > 0) {
+            setForm(prev => ({ ...prev, shiftId: shiftRes.data.data[0].id }));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching schedule data:', err);
+      }
+    };
+    initData();
+  }, []);
 
   const totalShifts = Object.values(MY_SCHEDULE).flat().length
   const totalHours  = totalShifts * 5
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
-    setLeaveModal(false)
-    setTimeout(() => setSubmitted(false), 3000)
+    if (!staffId || !form.shiftId) {
+      setError('Vui lòng chọn ca làm việc');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      await api.post('/api/leave-requests', {
+        staffId: staffId,
+        shiftId: Number(form.shiftId),
+        leaveDate: form.date, // format YYYY-MM-DD
+        reason: form.reason
+      });
+      
+      setSubmitted(true)
+      setLeaveModal(false)
+      
+      // Refresh list
+      const leaveRes = await api.get(`/api/leave-requests/staff/${staffId}`);
+      if (leaveRes.data?.data) {
+        setMyLeaves(leaveRes.data.data);
+      }
+      
+      setTimeout(() => setSubmitted(false), 3000)
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gửi thất bại');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -156,10 +226,10 @@ export default function StaffSchedule() {
           <h3 className="font-medium text-white text-sm flex items-center gap-2"><Clock size={16} className="text-white/40" /> Lịch sử đơn nghỉ</h3>
         </div>
         <div className="p-5 space-y-3">
-          {[...MY_LEAVES, ...LEAVE_HISTORY].map(l => (
+          {myLeaves.length > 0 ? myLeaves.map(l => (
             <div key={l.id} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
               <div>
-                <p className="text-sm font-medium text-white">{l.startDate || l.date} · {l.duration} ngày</p>
+                <p className="text-sm font-medium text-white">{l.leaveDate} · {l.shift?.shiftName}</p>
                 <p className="text-xs text-white/40 font-mono mt-0.5">{l.reason}</p>
               </div>
               <span className={`text-[10px] font-mono px-2.5 py-1 rounded border ${
@@ -170,7 +240,9 @@ export default function StaffSchedule() {
                 {l.status === 'APPROVED' ? 'ĐÃ DUYỆT' : l.status === 'REJECTED' ? 'TỪ CHỐI' : 'CHỜ DUYỆT'}
               </span>
             </div>
-          ))}
+          )) : (
+            <div className="text-center py-6 text-white/40 text-sm font-mono">Chưa có lịch sử nghỉ phép</div>
+          )}
         </div>
       </div>
 
@@ -192,12 +264,10 @@ export default function StaffSchedule() {
                 </select>
               </div>
               <div>
-                <label className="text-xs text-white/50 font-mono mb-1.5 block">Số ngày nghỉ</label>
-                <select value={form.duration} onChange={e => setForm({ ...form, duration: Number(e.target.value) })}
+                <label className="text-xs text-white/50 font-mono mb-1.5 block">Chọn Ca nghỉ</label>
+                <select value={form.shiftId} onChange={e => setForm({ ...form, shiftId: e.target.value })}
                   className="w-full bg-black/50 border border-white/10 focus:border-cyan-500 focus:outline-none rounded-xl px-4 py-2.5 text-sm text-white appearance-none">
-                  <option value={1}>1 ngày</option>
-                  <option value={2}>2 ngày</option>
-                  <option value={3}>3 ngày</option>
+                  {shifts.map(s => <option key={s.id} value={s.id}>{s.shiftName} ({s.startTime} - {s.endTime})</option>)}
                 </select>
               </div>
               <div>
@@ -206,9 +276,12 @@ export default function StaffSchedule() {
                   placeholder="Lý do nghỉ phép..."
                   className="w-full bg-black/50 border border-white/10 focus:border-cyan-500 focus:outline-none rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/30" />
               </div>
+              {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setLeaveModal(false)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-white text-sm transition-colors">Hủy</button>
-                <button type="submit" className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition-colors">Gửi đơn</button>
+                <button type="submit" disabled={loading} className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-sm transition-colors disabled:opacity-50 flex items-center justify-center">
+                  {loading ? 'Đang gửi...' : 'Gửi đơn'}
+                </button>
               </div>
             </form>
           </div>

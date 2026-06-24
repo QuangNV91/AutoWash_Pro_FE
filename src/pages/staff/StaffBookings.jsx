@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from '../../services/api'
 import {
   CalendarDays, Clock, LogIn, RefreshCw, CheckCircle2,
   Car, Filter, Search, ChevronRight, Coffee, CreditCard, AlertTriangle
@@ -16,13 +17,6 @@ const TODAY_BOOKINGS = [
   { id: 'BKG-10317', time: '14:00', plate: '—',          customer: 'Bùi Văn Khánh',   service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'PAID',   price: 150000 },
   { id: 'BKG-10318', time: '15:00', plate: '—',          customer: 'Ngô Minh Tuấn',   service: 'Detailing & Shine',  duration: 60,  status: 'PENDING',   payment: 'UNPAID', price: 350000 },
 ]
-
-const SERVICES_MAP = {
-  'Eco Wash': { price: 40000, duration: 15 },
-  'Premium Care': { price: 150000, duration: 30 },
-  'Detailing & Shine': { price: 350000, duration: 60 },
-  'Ceramic Shield': { price: 800000, duration: 120 }
-};
 
 const STATUS_CONFIG = {
   PENDING:   { label: 'Chờ đến',  color: 'text-yellow-400  bg-yellow-500/10  border-yellow-500/20',  icon: Clock        },
@@ -48,11 +42,74 @@ function bookingHour(b)  { return parseInt(b.time.split(':')[0]) }
 
 export default function StaffBookings() {
   const navigate = useNavigate()
-  const [bookings, setBookings] = useState(TODAY_BOOKINGS)
+  const [bookings, setBookings] = useState([])
+  const [loadingBookings, setLoadingBookings] = useState(true)
   const [filter, setFilter]   = useState('ALL')
   const [search, setSearch]   = useState('')
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [editService, setEditService] = useState('')
+
+  const [servicesMap, setServicesMap] = useState({
+    'Eco Wash': { price: 40000, duration: 15 },
+    'Premium Care': { price: 150000, duration: 30 },
+    'Detailing & Shine': { price: 350000, duration: 60 },
+    'Ceramic Shield': { price: 800000, duration: 120 }
+  })
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let currentServicesMap = {
+        'Eco Wash': { price: 40000, duration: 15 },
+        'Premium Care': { price: 150000, duration: 30 },
+        'Detailing & Shine': { price: 350000, duration: 60 },
+        'Ceramic Shield': { price: 800000, duration: 120 }
+      };
+
+      try {
+        const res = await api.get('/api/services/active');
+        if (res.data?.success && res.data.data && res.data.data.length > 0) {
+          const newMap = {};
+          res.data.data.forEach(s => {
+            newMap[s.serviceName] = { price: s.basePrice, duration: s.duration };
+          });
+          setServicesMap(newMap);
+          currentServicesMap = newMap;
+        }
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      }
+
+      try {
+        setLoadingBookings(true);
+        const today = new Date().toISOString().split('T')[0];
+        const res = await api.get(`/api/bookings/date?date=${today}`);
+        
+        if (res.data?.success && res.data.data && res.data.data.length > 0) {
+          const formattedBookings = res.data.data.map(b => ({
+            id: `BKG-${b.id}`,
+            realId: b.id,
+            time: b.startTime ? b.startTime.substring(0, 5) : '00:00',
+            plate: b.licensePlate || '—',
+            customer: b.customerName || 'Khách vãng lai',
+            service: b.serviceName || 'Eco Wash',
+            duration: currentServicesMap[b.serviceName]?.duration || 30,
+            price: currentServicesMap[b.serviceName]?.price || 0,
+            status: b.status || 'PENDING',
+            payment: b.paymentMethod ? 'PAID' : 'UNPAID',
+          }));
+          setBookings(formattedBookings);
+        } else {
+          setBookings([]);
+        }
+      } catch (err) {
+        console.error('Error fetching bookings:', err);
+        setBookings(TODAY_BOOKINGS);
+      } finally {
+        setLoadingBookings(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const filtered = useMemo(() =>
     bookings.filter(b => {
@@ -79,12 +136,15 @@ export default function StaffBookings() {
     if (!selectedBooking) return;
     setBookings(prev => prev.map(b => {
       if (b.id !== selectedBooking.id) return b;
-      return {
-        ...b,
-        service: editService,
-        price: SERVICES_MAP[editService].price,
-        duration: SERVICES_MAP[editService].duration
-      };
+      if (editService && editService !== b.service && servicesMap[editService]) {
+        return {
+          ...b,
+          service: editService,
+          price: servicesMap[editService].price,
+          duration: servicesMap[editService].duration
+        };
+      }
+      return b;
     }));
     setSelectedBooking(null);
   };
@@ -227,16 +287,16 @@ export default function StaffBookings() {
                     onChange={(e) => setEditService(e.target.value)}
                     className="w-full bg-black/50 border border-white/10 focus:border-cyan-500 focus:outline-none rounded-xl px-4 py-2.5 text-white text-sm"
                   >
-                    {Object.keys(SERVICES_MAP).map(svc => (
+                    {Object.keys(servicesMap).map(svc => (
                       <option key={svc} value={svc}>{svc}</option>
                     ))}
                   </select>
-                  {editService !== selectedBooking.service && (
+                  {editService !== selectedBooking.service && servicesMap[editService] && (
                     <div className="mt-3 text-sm bg-cyan-500/10 border border-cyan-500/20 p-3 rounded-xl">
                       <p className="text-cyan-400 mb-1 text-xs">Dịch vụ sẽ thay đổi, giá mới cập nhật:</p>
                       <p className="text-white font-mono">
-                        {SERVICES_MAP[editService].price.toLocaleString('vi-VN')}đ 
-                        <span className="text-white/50 ml-2">({SERVICES_MAP[editService].duration} phút)</span>
+                        {servicesMap[editService].price.toLocaleString('vi-VN')}đ 
+                        <span className="text-white/50 ml-2">({servicesMap[editService].duration} phút)</span>
                       </p>
                     </div>
                   )}
