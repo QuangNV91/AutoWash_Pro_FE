@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   AlertTriangle, Clock, TrendingUp, TrendingDown, DollarSign, 
-  Car, CheckCircle2, ShieldAlert, ArrowUpRight, Zap, CreditCard,
-  Gauge, Activity, Play, CheckCircle
+  Car, ShieldAlert, ArrowUpRight, CreditCard,
+  Gauge, Activity, Play
 } from 'lucide-react';
 
 // ============ MOCK DATA ============

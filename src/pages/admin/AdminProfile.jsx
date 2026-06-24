@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Camera, Mail, Phone, User, Shield, Key } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function AdminProfile() {
   const storedPhone = localStorage.getItem('username') || '0987654321';
@@ -29,17 +30,17 @@ export default function AdminProfile() {
   const handleSaveProfile = (e) => {
     e.preventDefault();
     // Simulate API call
-    alert('Profile updated successfully!');
+    toast.success('Profile updated successfully!');
   };
 
   const handleSavePassword = (e) => {
     e.preventDefault();
     if (passwords.new !== passwords.confirm) {
-      alert('New passwords do not match!');
+      toast.error('New passwords do not match!');
       return;
     }
     // Simulate API call
-    alert('Password updated successfully!');
+    toast.success('Password updated successfully!');
     setPasswords({ current: '', new: '', confirm: '' });
   };
 

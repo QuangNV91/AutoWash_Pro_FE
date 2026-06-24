@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Footer from '../../components/layout/Footer';
 import { Clock, ShieldCheck, PenTool, Award, Star, User } from 'lucide-react';

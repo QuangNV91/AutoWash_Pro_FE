@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  CreditCard, ChevronLeft, CheckCircle2, Banknote,
+import { ChevronLeft, CheckCircle2, Banknote,
   Smartphone, Building2, Check, AlertTriangle, Receipt, Gift
 } from 'lucide-react'
 

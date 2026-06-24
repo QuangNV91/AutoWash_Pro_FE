@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PageWrapper from '../../../components/layout/PageWrapper';
 import useBookingStore from '../../../store/bookingStore';
-import { CheckCircle2, Calendar, Clock, Car, MapPin, Star, Plus } from 'lucide-react';
+import { CheckCircle2, Clock, Car, MapPin, Star, Plus } from 'lucide-react';
 
 export default function BookingSuccessPage() {
   const navigate = useNavigate();

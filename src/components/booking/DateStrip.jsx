@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function DateStrip({ selectedDate, onSelectDate, maxDays = 7 }) {
   // Generate next 'maxDays' days

@@ -1,9 +1,10 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import LeaveRequestModal from '../../components/admin/modals/LeaveRequestModal';
+import toast from 'react-hot-toast';
 import { 
-  Users, CalendarDays, AlertTriangle, Check, X,
-  Clock, ArrowUpRight, UserCheck, Plus, ShieldAlert,
-  RefreshCw, Briefcase, CalendarClock, History, UserX
+  Users, AlertTriangle, Check, X, UserCheck, Plus,
+  RefreshCw
 } from 'lucide-react';
 
 // ============ NATIVE DATE HELPERS ============
@@ -36,12 +37,7 @@ const SHIFT_DEFINITIONS = [
   { key: 'afternoon', label: '13:00 - 18:00', alias: 'CA 2' },
 ];
 
-const INITIAL_STAFF = [
-  { id: 'NV-01', name: 'Nguyễn Văn Tèo', weeklyHours: 0, shiftsAssigned: 0, leaveDays: 0, avatarBg: 'bg-cyan-500', color: 'text-cyan-400' },
-  { id: 'NV-02', name: 'Trần Văn Tí', weeklyHours: 0, shiftsAssigned: 0, leaveDays: 0, avatarBg: 'bg-purple-500', color: 'text-purple-400' },
-  { id: 'NV-03', name: 'Phạm Thị Tủn', weeklyHours: 0, shiftsAssigned: 0, leaveDays: 0, avatarBg: 'bg-emerald-500', color: 'text-emerald-400' },
-  { id: 'NV-04', name: 'Lê Hoàng Cường', weeklyHours: 0, shiftsAssigned: 0, leaveDays: 0, avatarBg: 'bg-amber-500', color: 'text-amber-400' },
-];
+const INITIAL_STAFF = [];
 
 export default function StaffScheduleDashboard() {
   const [staffProfiles, setStaffProfiles] = useState(INITIAL_STAFF);
@@ -61,13 +57,16 @@ export default function StaffScheduleDashboard() {
   const pendingRequests = leaveRequests.filter(r => r.status === 'pending');
   const requestHistory = leaveRequests.filter(r => r.status !== 'pending');
 
-  const createStaffSchedule = (opts = { notify: true }, leavesOverride = null) => {
+  const createStaffSchedule = (opts = { notify: true }, leavesOverride = null, staffDataOverride = null) => {
     const leaves = leavesOverride || approvedLeaves;
+    const currentStaffs = staffDataOverride || staffProfiles;
+    if (currentStaffs.length === 0) return;
+    
     let fullShifts = 0;
     let missingShifts = 0;
     let totalShifts = 0;
 
-    const workers = staffProfiles.map((staff, index) => ({
+    const workers = currentStaffs.map((staff, index) => ({
       ...staff,
       currentHours: 0,
       currentShifts: 0,
@@ -124,11 +123,41 @@ export default function StaffScheduleDashboard() {
     setStaffProfiles(updatedProfiles);
     setScheduleData(newSchedule);
     setSummary({ fullShifts, missingShifts, totalShifts });
-    setRotationPointer((prev) => (prev + 1) % staffProfiles.length);
+    setRotationPointer((prev) => (prev + 1) % currentStaffs.length);
   };
 
   useEffect(() => {
-    createStaffSchedule({ notify: false });
+    // Fetch Staffs
+    const fetchStaffsAndInit = async () => {
+      try {
+        const staffRes = await api.get('/api/staffs');
+        if (staffRes.data?.success && staffRes.data.data) {
+          const colors = [
+            { bg: 'bg-cyan-500', text: 'text-cyan-400' },
+            { bg: 'bg-purple-500', text: 'text-purple-400' },
+            { bg: 'bg-emerald-500', text: 'text-emerald-400' },
+            { bg: 'bg-amber-500', text: 'text-amber-400' },
+          ];
+          const mappedStaffs = staffRes.data.data
+            .filter(s => s.status === 'ACTIVE') // Only active staff
+            .map((s, idx) => ({
+              id: s.id,
+              name: s.fullName,
+              weeklyHours: 0,
+              shiftsAssigned: 0,
+              leaveDays: 0,
+              avatarBg: colors[idx % colors.length].bg,
+              color: colors[idx % colors.length].text
+          }));
+          setStaffProfiles(mappedStaffs);
+          createStaffSchedule({ notify: false }, null, mappedStaffs);
+        }
+      } catch (err) {
+        console.error('Fetch staffs failed:', err);
+      }
+    };
+    
+    fetchStaffsAndInit();
     
     // Fetch pending leave requests from API
     const fetchLeaves = async () => {
@@ -176,7 +205,7 @@ export default function StaffScheduleDashboard() {
       createStaffSchedule({ notify: false }, updatedApproved);
     } catch (err) {
       console.error('Approve failed:', err);
-      alert('Phê duyệt thất bại!');
+      toast.error('Phê duyệt thất bại!');
     }
   };
 
@@ -188,7 +217,7 @@ export default function StaffScheduleDashboard() {
       setLeaveRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'rejected', processedAt: new Date().toLocaleTimeString('vi-VN') } : r));
     } catch (err) {
       console.error('Reject failed:', err);
-      alert('Từ chối thất bại!');
+      toast.error('Từ chối thất bại!');
     }
   };
 
@@ -462,66 +491,16 @@ export default function StaffScheduleDashboard() {
         </div>
       </div>
 
-      {/* 2. Create Leave Request Modal */}
-      {isNewRequestModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsNewRequestModalOpen(false)} />
-          <div className="relative w-full max-w-md bg-neutral-950 border border-white/10 shadow-2xl flex flex-col">
-            <div className="px-6 py-4 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-              <h2 className="text-lg font-mono text-white tracking-widest uppercase">Tạo Đơn nghỉ phép</h2>
-              <button onClick={() => setIsNewRequestModalOpen(false)} className="text-white/40 hover:text-white transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            <form onSubmit={submitNewLeaveRequest} className="p-6 space-y-5">
-              
-              <div className="space-y-2">
-                <label className="text-[10px] text-white/40 tracking-widest uppercase">Nhân viên</label>
-                <select 
-                  value={reqForm.staffId}
-                  onChange={e => setReqForm({...reqForm, staffId: e.target.value})}
-                  className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none appearance-none"
-                >
-                  {staffProfiles.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] text-white/40 tracking-widest uppercase">Ngày bắt đầu</label>
-                <select 
-                  value={reqForm.startDate}
-                  onChange={e => setReqForm({...reqForm, startDate: e.target.value})}
-                  className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none appearance-none"
-                >
-                  {WEEK_DAYS.map(d => <option key={d.id} value={d.fullDate}>{d.name} ({d.dateStr})</option>)}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] text-white/40 tracking-widest uppercase">Số ngày nghỉ</label>
-                <select 
-                  value={reqForm.duration}
-                  onChange={e => setReqForm({...reqForm, duration: e.target.value})}
-                  className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none appearance-none"
-                >
-                  <option value={1}>1 Ngày</option>
-                  <option value={2}>2 Ngày</option>
-                  <option value={3}>3 Ngày</option>
-                </select>
-              </div>
-
-              <div className="pt-4 border-t border-white/5 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsNewRequestModalOpen(false)} className="px-5 py-2 text-sm font-mono text-white/40 hover:text-white transition-colors">
-                  HỦY
-                </button>
-                <button type="submit" className="px-5 py-2 rounded border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-sm font-mono tracking-widest hover:bg-cyan-500/20 transition-colors">
-                  GỬI ĐƠN
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* 2. Create Leave Request Modal via Component */}
+      <LeaveRequestModal
+        isOpen={isNewRequestModalOpen}
+        onClose={() => setIsNewRequestModalOpen(false)}
+        onSubmit={submitNewLeaveRequest}
+        reqForm={reqForm}
+        setReqForm={setReqForm}
+        staffProfiles={staffProfiles}
+        WEEK_DAYS={WEEK_DAYS}
+      />
 
     </div>
   );

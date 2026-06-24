@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Search, Plus, ShieldAlert, CheckCircle2, UserX, X } from 'lucide-react';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 export default function StaffManagement() {
   const [staffs, setStaffs] = useState([]);
@@ -44,7 +45,7 @@ export default function StaffManagement() {
         fetchStaffs();
       } catch (err) {
         console.error('Deactivate failed:', err);
-        alert(err.response?.data?.message || 'Lỗi khi vô hiệu hóa');
+        toast.error(err.response?.data?.message || 'Lỗi khi vô hiệu hóa');
       }
     }
   };
@@ -60,7 +61,7 @@ export default function StaffManagement() {
       fetchStaffs();
     } catch (err) {
       console.error('Create staff failed:', err);
-      alert(err.response?.data?.message || 'Lỗi khi tạo nhân viên');
+      toast.error(err.response?.data?.message || 'Lỗi khi tạo nhân viên');
     }
   };
 

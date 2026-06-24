@@ -1,4 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
+import ProtectedRoute from './components/common/ProtectedRoute.jsx'
 import HomePage from './pages/guest/HomePage.jsx'
 import ServicesPage from './pages/guest/ServicesPage.jsx'
 import PricingPage from './pages/guest/PricingPage.jsx'
@@ -33,41 +35,57 @@ import SystemSettings from './pages/admin/SystemSettings.jsx'
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/services" element={<ServicesPage />} />
-      <Route path="/pricing" element={<PricingPage />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/auth/*" element={<Auth />} />
-      <Route path="/booking" element={<BookingStep1Service />} />
-      <Route path="/booking/datetime" element={<BookingStep2DateTime />} />
-      <Route path="/booking/confirm" element={<BookingStep3Confirm />} />
-      <Route path="/booking/success" element={<BookingSuccessPage />} />
-      <Route path="/dashboard" element={<UserDashboard />} />
-      <Route path="/staff/*" element={<StaffLayout />}>
-        <Route index element={<StaffDashboard />} />
-        <Route path="bookings" element={<StaffBookings />} />
-        <Route path="checkin" element={<StaffCheckin />} />
-        <Route path="payment" element={<StaffPayment />} />
-        <Route path="schedule" element={<StaffSchedule />} />
-        <Route path="stats" element={<StaffStats />} />
-        <Route path="profile" element={<StaffProfile />} />
-        <Route path="notifications" element={<StaffNotifications />} />
-      </Route>
-      <Route path="/admin/*" element={<AdminLayout />}>
-        <Route index element={<AdminDashboard />} />
-        <Route path="booking-schedule" element={<BookingSlotDashboard />} />
-        <Route path="staffs" element={<StaffManagement />} />
-        <Route path="staff-schedule" element={<StaffScheduleDashboard />} />
-        <Route path="profile" element={<AdminProfile />} />
-        <Route path="services" element={<ServiceManagement />} />
-        <Route path="customers" element={<CustomerManagement />} />
-        <Route path="payments" element={<PaymentManagement />} />
-        <Route path="promotions" element={<PromotionManagement />} />
-        <Route path="reports" element={<ReportDashboard />} />
-        <Route path="settings" element={<SystemSettings />} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          className: 'font-mono text-sm',
+          style: { background: '#171717', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }
+        }} 
+      />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/auth/*" element={<Auth />} />
+        
+        {/* Protected User Routes */}
+        <Route path="/booking" element={<BookingStep1Service />} />
+        <Route path="/booking/datetime" element={<BookingStep2DateTime />} />
+        <Route path="/booking/confirm" element={<BookingStep3Confirm />} />
+        <Route path="/booking/success" element={<BookingSuccessPage />} />
+        <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['USER']}><UserDashboard /></ProtectedRoute>} />
+        
+        {/* Protected Staff Routes */}
+        <Route path="/staff/*" element={<ProtectedRoute allowedRoles={['STAFF', 'ADMIN']}><StaffLayout /></ProtectedRoute>}>
+          <Route index element={<StaffDashboard />} />
+          <Route path="bookings" element={<StaffBookings />} />
+          <Route path="checkin" element={<StaffCheckin />} />
+          <Route path="payment" element={<StaffPayment />} />
+          <Route path="schedule" element={<StaffSchedule />} />
+          <Route path="stats" element={<StaffStats />} />
+          <Route path="profile" element={<StaffProfile />} />
+          <Route path="notifications" element={<StaffNotifications />} />
+        </Route>
+        
+        {/* Protected Admin Routes */}
+        <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLayout /></ProtectedRoute>}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="booking-schedule" element={<BookingSlotDashboard />} />
+          <Route path="staffs" element={<StaffManagement />} />
+          <Route path="staff-schedule" element={<StaffScheduleDashboard />} />
+          <Route path="profile" element={<AdminProfile />} />
+          <Route path="services" element={<ServiceManagement />} />
+          <Route path="customers" element={<CustomerManagement />} />
+          <Route path="payments" element={<PaymentManagement />} />
+          <Route path="promotions" element={<PromotionManagement />} />
+          <Route path="reports" element={<ReportDashboard />} />
+          <Route path="settings" element={<SystemSettings />} />
+        </Route>
+        
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   )
 }

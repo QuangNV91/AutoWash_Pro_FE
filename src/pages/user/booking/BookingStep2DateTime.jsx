@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../../../components/layout/PageWrapper';
 import StepIndicator from '../../../components/ui/StepIndicator';

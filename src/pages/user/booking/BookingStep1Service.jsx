@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../../../components/layout/PageWrapper';
 import StepIndicator from '../../../components/ui/StepIndicator';
 import ServiceCard from '../../../components/booking/ServiceCard';
 import BookingSummaryCard from '../../../components/booking/BookingSummaryCard';
-import useBookingStore, { TIER_VEHICLE_LIMITS } from '../../../store/bookingStore';
+import useBookingStore from '../../../store/bookingStore';
 import { getServices } from '../../../services/bookingService';
 import { Plus, X, Car, AlertCircle, Crown } from 'lucide-react';
 

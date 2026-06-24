@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { CreditCard, Search, DollarSign, Download, Filter, CheckCircle2, AlertCircle, ArrowUpRight, Receipt } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Download, CheckCircle2, AlertCircle, Receipt } from 'lucide-react';
 
 const PAYMENTS = [
   { id: 'INV-260614-01', date: '14/06/2026 14:30', customer: 'Nguyễn Văn An', service: 'Premium Care', amount: 150000, method: 'BANK_TRANSFER', status: 'PAID' },

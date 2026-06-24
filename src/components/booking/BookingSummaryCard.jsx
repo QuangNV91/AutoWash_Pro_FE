@@ -1,6 +1,5 @@
-import React from 'react';
 import { Calendar, Clock, Car, Star } from 'lucide-react';
-import useBookingStore, { TIER_DISCOUNTS } from '../../store/bookingStore';
+import useBookingStore from '../../store/bookingStore';
 
 export default function BookingSummaryCard({ onNext, canProceed = true }) {
   const { 

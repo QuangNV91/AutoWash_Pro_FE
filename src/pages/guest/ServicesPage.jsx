@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import { Clock, ShieldCheck, PenTool, Award, Gem, Sparkles } from 'lucide-react';
+import { Clock, ShieldCheck, PenTool, Award } from 'lucide-react';
 
 // Dữ liệu dịch vụ chi tiết — đồng bộ với bookingService.js
 const SERVICE_BLOCKS = [

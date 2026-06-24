@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import {
-  CalendarDays, Clock, LogIn, RefreshCw, CheckCircle2,
-  Car, Filter, Search, ChevronRight, Coffee, CreditCard, AlertTriangle
+  CalendarDays, Clock, LogIn, RefreshCw, CheckCircle2, Search, Coffee
 } from 'lucide-react'
 
 const TODAY_BOOKINGS = [

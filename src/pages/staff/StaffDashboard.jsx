@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import {
   Clock, Car, CheckCircle2, AlertTriangle, Play,
-  RefreshCw, LogIn, Zap, ArrowRight, User, CalendarDays,
+  RefreshCw, LogIn, Zap, ArrowRight, CalendarDays,
   Timer, Gauge, TrendingUp, Coffee
 } from 'lucide-react'
 
