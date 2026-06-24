@@ -42,7 +42,8 @@ function bookingHour(b)  { return parseInt(b.time.split(':')[0]) }
 
 export default function StaffBookings() {
   const navigate = useNavigate()
-  const [bookings, setBookings] = useState(TODAY_BOOKINGS)
+  const [bookings, setBookings] = useState([])
+  const [loadingBookings, setLoadingBookings] = useState(true)
   const [filter, setFilter]   = useState('ALL')
   const [search, setSearch]   = useState('')
   const [selectedBooking, setSelectedBooking] = useState(null)
@@ -56,7 +57,14 @@ export default function StaffBookings() {
   })
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchData = async () => {
+      let currentServicesMap = {
+        'Eco Wash': { price: 40000, duration: 15 },
+        'Premium Care': { price: 150000, duration: 30 },
+        'Detailing & Shine': { price: 350000, duration: 60 },
+        'Ceramic Shield': { price: 800000, duration: 120 }
+      };
+
       try {
         const res = await api.get('/api/services/active');
         if (res.data?.success && res.data.data && res.data.data.length > 0) {
@@ -65,12 +73,42 @@ export default function StaffBookings() {
             newMap[s.serviceName] = { price: s.basePrice, duration: s.duration };
           });
           setServicesMap(newMap);
+          currentServicesMap = newMap;
         }
       } catch (err) {
         console.error('Error fetching services:', err);
       }
+
+      try {
+        setLoadingBookings(true);
+        const today = new Date().toISOString().split('T')[0];
+        const res = await api.get(`/api/bookings/date?date=${today}`);
+        
+        if (res.data?.success && res.data.data && res.data.data.length > 0) {
+          const formattedBookings = res.data.data.map(b => ({
+            id: `BKG-${b.id}`,
+            realId: b.id,
+            time: b.startTime ? b.startTime.substring(0, 5) : '00:00',
+            plate: b.licensePlate || '—',
+            customer: b.customerName || 'Khách vãng lai',
+            service: b.serviceName || 'Eco Wash',
+            duration: currentServicesMap[b.serviceName]?.duration || 30,
+            price: currentServicesMap[b.serviceName]?.price || 0,
+            status: b.status || 'PENDING',
+            payment: b.paymentMethod ? 'PAID' : 'UNPAID',
+          }));
+          setBookings(formattedBookings);
+        } else {
+          setBookings([]);
+        }
+      } catch (err) {
+        console.error('Error fetching bookings:', err);
+        setBookings(TODAY_BOOKINGS);
+      } finally {
+        setLoadingBookings(false);
+      }
     };
-    fetchServices();
+    fetchData();
   }, []);
 
   const filtered = useMemo(() =>

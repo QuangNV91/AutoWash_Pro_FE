@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import api from '../../services/api';
 import { 
   Users, CalendarDays, AlertTriangle, Check, X,
   Clock, ArrowUpRight, UserCheck, Plus, ShieldAlert,
@@ -48,17 +49,7 @@ export default function StaffScheduleDashboard() {
   const [rotationPointer, setRotationPointer] = useState(0);
   const [summary, setSummary] = useState({ fullShifts: 0, missingShifts: 0, totalShifts: 0 });
   
-  const [leaveRequests, setLeaveRequests] = useState([
-    {
-      id: 'lr-demo-1',
-      staffId: 'NV-02',
-      staffName: 'Trần Văn Tí',
-      startDate: WEEK_DAYS[2].fullDate,
-      duration: 2,
-      status: 'pending',
-      createdAt: '09:30 10/06'
-    },
-  ]);
+  const [leaveRequests, setLeaveRequests] = useState([]);
   const [approvedLeaves, setApprovedLeaves] = useState([]); // [{ staffId, date }]
 
   // Modals
@@ -138,29 +129,67 @@ export default function StaffScheduleDashboard() {
 
   useEffect(() => {
     createStaffSchedule({ notify: false });
+    
+    // Fetch pending leave requests from API
+    const fetchLeaves = async () => {
+      try {
+        const res = await api.get('/api/leave-requests/pending');
+        if (res.data?.success && res.data.data) {
+          const mappedLeaves = res.data.data.map(l => ({
+            id: l.id,
+            staffId: l.staff?.id || 'NV-01',
+            staffName: l.staff?.fullName || l.staff?.username || 'Nhân viên',
+            startDate: l.leaveDate,
+            duration: 1, // BE doesn't support multi-day yet
+            status: l.status.toLowerCase(),
+            createdAt: l.createdAt ? new Date(l.createdAt).toLocaleString('vi-VN') : ''
+          }));
+          setLeaveRequests(mappedLeaves);
+        }
+      } catch (err) {
+        console.error('Fetch pending leaves failed:', err);
+      }
+    };
+    fetchLeaves();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleApproveLeave = (req) => {
-    // Generate dates for the duration
-    const startDateObj = new Date(req.startDate);
-    const newLeaves = [];
-    for (let i = 0; i < req.duration; i++) {
-      const d = new Date(startDateObj);
-      d.setDate(startDateObj.getDate() + i);
-      const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      newLeaves.push({ staffId: req.staffId, date: dateStr });
-    }
+  const handleApproveLeave = async (req) => {
+    try {
+      if (typeof req.id === 'number') {
+        await api.patch(`/api/leave-requests/${req.id}/approve`);
+      }
+      
+      const startDateObj = new Date(req.startDate);
+      const newLeaves = [];
+      for (let i = 0; i < req.duration; i++) {
+        const d = new Date(startDateObj);
+        d.setDate(startDateObj.getDate() + i);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        newLeaves.push({ staffId: req.staffId, date: dateStr });
+      }
 
-    const updatedApproved = [...approvedLeaves, ...newLeaves];
-    setApprovedLeaves(updatedApproved);
-    
-    setLeaveRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'approved', processedAt: new Date().toLocaleTimeString('vi-VN') } : r));
-    createStaffSchedule({ notify: false }, updatedApproved);
+      const updatedApproved = [...approvedLeaves, ...newLeaves];
+      setApprovedLeaves(updatedApproved);
+      
+      setLeaveRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'approved', processedAt: new Date().toLocaleTimeString('vi-VN') } : r));
+      createStaffSchedule({ notify: false }, updatedApproved);
+    } catch (err) {
+      console.error('Approve failed:', err);
+      alert('Phê duyệt thất bại!');
+    }
   };
 
-  const handleRejectLeave = (id) => {
-    setLeaveRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'rejected', processedAt: new Date().toLocaleTimeString('vi-VN') } : r));
+  const handleRejectLeave = async (id) => {
+    try {
+      if (typeof id === 'number') {
+        await api.patch(`/api/leave-requests/${id}/reject`);
+      }
+      setLeaveRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'rejected', processedAt: new Date().toLocaleTimeString('vi-VN') } : r));
+    } catch (err) {
+      console.error('Reject failed:', err);
+      alert('Từ chối thất bại!');
+    }
   };
 
   const submitNewLeaveRequest = (e) => {
