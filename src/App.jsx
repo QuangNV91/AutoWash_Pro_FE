@@ -22,6 +22,7 @@ import StaffLayout from './components/staff/StaffLayout.jsx'
 import AdminDashboard from './pages/admin/AdminDashboard.jsx'
 import BookingSlotDashboard from './pages/admin/BookingSlotDashboard.jsx'
 import StaffScheduleDashboard from './pages/admin/StaffScheduleDashboard.jsx'
+import StaffManagement from './pages/admin/StaffManagement.jsx'
 import AdminProfile from './pages/admin/AdminProfile.jsx'
 import CustomerManagement from './pages/admin/CustomerManagement.jsx'
 import PaymentManagement from './pages/admin/PaymentManagement.jsx'
@@ -56,6 +57,7 @@ export default function App() {
       <Route path="/admin/*" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="booking-schedule" element={<BookingSlotDashboard />} />
+        <Route path="staffs" element={<StaffManagement />} />
         <Route path="staff-schedule" element={<StaffScheduleDashboard />} />
         <Route path="profile" element={<AdminProfile />} />
         <Route path="services" element={<ServiceManagement />} />

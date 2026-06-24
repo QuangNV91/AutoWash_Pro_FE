@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import api from '../../services/api';
 import {
   Calendar as CalendarIcon, Clock, CheckCircle2, ChevronLeft, ChevronRight,
   Plus, User, Edit2, Car, CreditCard, ArrowRight, LogIn, RefreshCw, X, Trash2, CalendarDays
@@ -76,16 +77,60 @@ const generateWeekDays = (startDate) => {
 // Initial state data
 const today = new Date();
 const todayStr = formatDate(today);
-const initialBookings = [
-  { id: 'BKG-10312', date: todayStr, slotKey: 'slot-1', customer: 'Nguyễn Văn A', plate: '30A-123.45', service: 'Premium Care', status: 'PENDING', payment: 'UNPAID' },
-  { id: 'BKG-10313', date: todayStr, slotKey: 'slot-1', customer: 'Đặng Quốc Bảo', plate: '29C-888.88', service: 'Detailing & Shine', status: 'WORKING', payment: 'PAID' },
-  { id: 'BKG-10314', date: todayStr, slotKey: 'slot-3', customer: 'Trần Văn B', plate: '51K-999.99', service: 'Eco Wash', status: 'COMPLETED', payment: 'PAID' },
-];
+
+const mapTimeToSlot = (timeStr) => {
+  if (!timeStr) return 'slot-1';
+  const hour = parseInt(timeStr.split(':')[0], 10);
+  if (hour === 8) return 'slot-1';
+  if (hour === 9) return 'slot-2';
+  if (hour === 10) return 'slot-3';
+  if (hour === 11) return 'slot-4';
+  if (hour === 13) return 'slot-5';
+  if (hour === 14) return 'slot-6';
+  if (hour === 15) return 'slot-7';
+  if (hour === 16) return 'slot-8';
+  if (hour === 17) return 'slot-9';
+  if (hour === 18) return 'slot-10';
+  return 'slot-1'; // fallback
+};
 
 export default function BookingSlotDashboard() {
   const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
-  const [bookings, setBookings] = useState(initialBookings);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch all bookings
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/api/bookings');
+      if (res.data?.success && res.data.data) {
+        const mapped = res.data.data.map(b => ({
+          id: `BKG-${b.id}`,
+          realId: b.id,
+          customerId: b.customerId,
+          date: b.bookingDate,
+          slotKey: mapTimeToSlot(b.startTime),
+          customer: b.customerName || 'Vãng lai',
+          plate: b.licensePlate || 'N/A',
+          service: b.serviceName || 'Eco Wash',
+          status: b.status || 'PENDING',
+          payment: b.paymentMethod ? 'PAID' : 'UNPAID'
+        }));
+        // Filter out CANCELLED and FAILED
+        setBookings(mapped.filter(b => b.status !== 'CANCELLED' && b.status !== 'FAILED'));
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
   // Week navigation
   const handlePrevWeek = () => {
@@ -206,8 +251,35 @@ export default function BookingSlotDashboard() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteBooking = () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa đơn đặt lịch này?")) {
+  const handleDeleteBooking = async () => {
+    if (window.confirm("Bạn có chắc chắn muốn hủy đơn đặt lịch này?")) {
+      const booking = bookings.find(b => b.id === editingBookingId);
+      if (booking?.realId && booking?.customerId) {
+        try {
+          await api.patch(`/api/bookings/${booking.realId}/cancel?customerId=${booking.customerId}`);
+        } catch (err) {
+          console.error('Cancel error:', err);
+          alert(err.response?.data?.message || 'Lỗi khi hủy lịch');
+          return;
+        }
+      }
+      setBookings((prev) => prev.filter((b) => b.id !== editingBookingId));
+      setIsModalOpen(false);
+    }
+  };
+
+  const handleNoShow = async () => {
+    if (window.confirm("Đánh dấu khách hàng này không đến (No-show) và phạt điểm?")) {
+      const booking = bookings.find(b => b.id === editingBookingId);
+      if (booking?.realId) {
+        try {
+          await api.post(`/api/bookings/${booking.realId}/no-show`);
+        } catch (err) {
+          console.error('No-show error:', err);
+          alert(err.response?.data?.message || 'Lỗi khi đánh dấu No-show. Lưu ý chỉ có thể đánh dấu PENDING và quá 30p.');
+          return;
+        }
+      }
       setBookings((prev) => prev.filter((b) => b.id !== editingBookingId));
       setIsModalOpen(false);
     }
@@ -556,34 +628,38 @@ export default function BookingSlotDashboard() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/5 mt-6 flex justify-between items-center">
-                {modalMode === 'edit' ? (
-                  <button
-                    type="button"
-                    onClick={handleDeleteBooking}
-                    className="p-2 text-red-400/60 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
-                    title="Xóa lịch hẹn"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                ) : <div />}
-                
-                <div className="flex gap-3">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-5 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    Hủy
-                  </button>
-                  <button 
-                    type="submit"
-                    disabled={!isFormValid}
-                    className="px-5 py-2.5 rounded-xl text-sm font-medium bg-cyan-500 text-black hover:bg-cyan-400 disabled:opacity-50 disabled:hover:bg-cyan-500 disabled:cursor-not-allowed transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] cursor-pointer"
-                  >
-                    {modalMode === 'add' ? 'Thêm mới' : 'Lưu cập nhật'}
-                  </button>
-                </div>
+              <div className="flex gap-4 pt-4 border-t border-white/10">
+                {modalMode === 'edit' && (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleDeleteBooking}
+                      className="px-6 py-2.5 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Trash2 size={18} /> Hủy lịch
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNoShow}
+                      className="px-6 py-2.5 rounded-xl border border-orange-500/30 text-orange-400 hover:bg-orange-500/10 font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      No-show
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-white/10 text-white/60 hover:text-white font-medium transition-colors"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold transition-colors"
+                >
+                  Lưu thay đổi
+                </button>
               </div>
             </form>
           </div>
