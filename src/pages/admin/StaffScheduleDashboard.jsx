@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import LeaveRequestModal from '../../components/admin/modals/LeaveRequestModal';
+import toast from 'react-hot-toast';
 import { 
   Users, AlertTriangle, Check, X, UserCheck, Plus,
   RefreshCw
@@ -204,7 +205,7 @@ export default function StaffScheduleDashboard() {
       createStaffSchedule({ notify: false }, updatedApproved);
     } catch (err) {
       console.error('Approve failed:', err);
-      alert('Phê duyệt thất bại!');
+      toast.error('Phê duyệt thất bại!');
     }
   };
 
@@ -216,7 +217,7 @@ export default function StaffScheduleDashboard() {
       setLeaveRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'rejected', processedAt: new Date().toLocaleTimeString('vi-VN') } : r));
     } catch (err) {
       console.error('Reject failed:', err);
-      alert('Từ chối thất bại!');
+      toast.error('Từ chối thất bại!');
     }
   };
 

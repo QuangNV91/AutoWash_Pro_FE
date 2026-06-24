@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import api from '../../services/api';
 import { Clock, CheckCircle2, ChevronLeft, ChevronRight,
-  Plus, Edit2, Car, CreditCard, LogIn, RefreshCw, X, Trash2, CalendarDays
+  Plus, Edit2, Car, CreditCard, LogIn, RefreshCw, X, Trash2, CalendarDays, Loader2
 } from 'lucide-react';
 import BookingSlotModal from '../../components/admin/modals/BookingSlotModal';
+import toast from 'react-hot-toast';
 
 const SERVICE_CONFIG = {
   'Eco Wash': { duration: 15, badge: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
@@ -259,7 +260,7 @@ export default function BookingSlotDashboard() {
           await api.patch(`/api/bookings/${booking.realId}/cancel?customerId=${booking.customerId}`);
         } catch (err) {
           console.error('Cancel error:', err);
-          alert(err.response?.data?.message || 'Lỗi khi hủy lịch');
+          toast.error(err.response?.data?.message || 'Lỗi khi hủy lịch');
           return;
         }
       }
@@ -276,7 +277,7 @@ export default function BookingSlotDashboard() {
           await api.post(`/api/bookings/${booking.realId}/no-show`);
         } catch (err) {
           console.error('No-show error:', err);
-          alert(err.response?.data?.message || 'Lỗi khi đánh dấu No-show. Lưu ý chỉ có thể đánh dấu PENDING và quá 30p.');
+          toast.error(err.response?.data?.message || 'Lỗi khi đánh dấu No-show. Lưu ý chỉ có thể đánh dấu PENDING và quá 30p.');
           return;
         }
       }
@@ -289,7 +290,7 @@ export default function BookingSlotDashboard() {
     e.preventDefault();
     
     if (!isFormValid) {
-      alert("Không đủ năng suất phục vụ cho gói dịch vụ này trong khung giờ hiện tại.");
+      toast.error("Không đủ năng suất phục vụ cho gói dịch vụ này trong khung giờ hiện tại.");
       return;
     }
 
@@ -406,6 +407,12 @@ export default function BookingSlotDashboard() {
         </div>
       </div>
 
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="animate-spin text-cyan-400" size={32} />
+          <span className="ml-3 text-white/40 font-mono text-sm">Đang đồng bộ dữ liệu...</span>
+        </div>
+      ) : (
       {/* Slots List */}
       <div className="space-y-6">
         {computedDayData.map((slot) => {
