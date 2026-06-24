@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Users, Search, Filter, Shield, MoreVertical, Mail, Phone, Car } from 'lucide-react';
+import { useState } from 'react';
+import { Users, Search, Filter, Shield, Phone, Car } from 'lucide-react';
 
 const CUSTOMERS = [
   { id: 'CUST-001', name: 'Lê Hoàng Cường', phone: '0901234567', plate: '51F-111.11', tier: 'PLATINUM', points: 1500, spent: 15000000, lastVisit: '12/06/2026' },

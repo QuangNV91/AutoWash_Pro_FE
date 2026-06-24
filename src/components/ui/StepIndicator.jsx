@@ -1,4 +1,3 @@
-import React from 'react';
 
 const steps = [
   { id: 1, label: 'Chọn dịch vụ' },

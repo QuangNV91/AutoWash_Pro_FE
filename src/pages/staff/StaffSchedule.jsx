@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
-import { CalendarClock, ChevronLeft, Plus, Check, X, Clock, AlertTriangle, Sun, Sunset } from 'lucide-react'
+import { CalendarClock, ChevronLeft, Plus, Check, X, Clock, Sun, Sunset } from 'lucide-react'
 
 const today = new Date()
 const getWeekDays = () => {

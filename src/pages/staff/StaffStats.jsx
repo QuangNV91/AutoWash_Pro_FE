@@ -1,4 +1,3 @@
-import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart3, ChevronLeft, TrendingUp, TrendingDown, Car, Clock, Star, Zap, Award } from 'lucide-react'
 

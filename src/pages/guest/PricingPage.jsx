@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
-import { Clock, Star, Percent, Crown, Award, Sparkles, CheckCircle2, Zap } from 'lucide-react';
+import { Clock, Star, Percent, Crown, Award, Sparkles } from 'lucide-react';
 
 // Dữ liệu gói dịch vụ — đồng bộ với MOCK_SERVICES trong bookingService.js
 const PRICING_PLANS = [

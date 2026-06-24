@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Tag, Plus, Ticket, Percent, Power, Search, Clock, DollarSign } from 'lucide-react';
+import { useState } from 'react';
+import { Tag, Plus, Ticket, Percent, Power, DollarSign } from 'lucide-react';
 
 const PROMOS = [
   { id: 'PRM-001', code: 'SUMMER2026', type: 'PERCENT', value: 20, maxDiscount: 100000, usage: 45, limit: 100, isActive: true },

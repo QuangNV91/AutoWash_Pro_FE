@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import {
-  ScanLine, LogIn, Play, CheckCircle2, RefreshCw, Car,
-  Clock, User, CreditCard, ArrowRight, ChevronLeft,
-  AlertTriangle, Timer, Check, X
+  ScanLine, LogIn, Play, CheckCircle2, ChevronLeft, Check, X
 } from 'lucide-react'
 
 const MOCK_BOOKINGS = [

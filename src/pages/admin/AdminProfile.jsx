@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Camera, Mail, Phone, User, Shield, Key } from 'lucide-react';
 
 export default function AdminProfile() {

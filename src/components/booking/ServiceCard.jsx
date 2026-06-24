@@ -1,4 +1,3 @@
-import React from 'react';
 import { Clock, Star, CheckCircle2 } from 'lucide-react';
 
 // Màu theme cho từng gói dịch vụ

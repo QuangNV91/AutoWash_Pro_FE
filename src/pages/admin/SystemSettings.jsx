@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Settings, Save, Bell, Shield, Server, Globe, Power, Lock } from 'lucide-react';
+import { Settings, Save, Bell, Shield, Server, Globe } from 'lucide-react';
 
 export default function SystemSettings() {
   return (

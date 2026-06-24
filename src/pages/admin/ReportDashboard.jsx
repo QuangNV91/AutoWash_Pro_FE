@@ -1,5 +1,4 @@
-import React from 'react';
-import { BarChart3, TrendingUp, DollarSign, Users, Activity, Car, Calendar } from 'lucide-react';
+import { BarChart3, TrendingUp, Calendar } from 'lucide-react';
 
 export default function ReportDashboard() {
   return (
