@@ -36,12 +36,7 @@ const SHIFT_DEFINITIONS = [
   { key: 'afternoon', label: '13:00 - 18:00', alias: 'CA 2' },
 ];
 
-const INITIAL_STAFF = [
-  { id: 'NV-01', name: 'Nguyễn Văn Tèo', weeklyHours: 0, shiftsAssigned: 0, leaveDays: 0, avatarBg: 'bg-cyan-500', color: 'text-cyan-400' },
-  { id: 'NV-02', name: 'Trần Văn Tí', weeklyHours: 0, shiftsAssigned: 0, leaveDays: 0, avatarBg: 'bg-purple-500', color: 'text-purple-400' },
-  { id: 'NV-03', name: 'Phạm Thị Tủn', weeklyHours: 0, shiftsAssigned: 0, leaveDays: 0, avatarBg: 'bg-emerald-500', color: 'text-emerald-400' },
-  { id: 'NV-04', name: 'Lê Hoàng Cường', weeklyHours: 0, shiftsAssigned: 0, leaveDays: 0, avatarBg: 'bg-amber-500', color: 'text-amber-400' },
-];
+const INITIAL_STAFF = [];
 
 export default function StaffScheduleDashboard() {
   const [staffProfiles, setStaffProfiles] = useState(INITIAL_STAFF);
@@ -61,13 +56,16 @@ export default function StaffScheduleDashboard() {
   const pendingRequests = leaveRequests.filter(r => r.status === 'pending');
   const requestHistory = leaveRequests.filter(r => r.status !== 'pending');
 
-  const createStaffSchedule = (opts = { notify: true }, leavesOverride = null) => {
+  const createStaffSchedule = (opts = { notify: true }, leavesOverride = null, staffDataOverride = null) => {
     const leaves = leavesOverride || approvedLeaves;
+    const currentStaffs = staffDataOverride || staffProfiles;
+    if (currentStaffs.length === 0) return;
+    
     let fullShifts = 0;
     let missingShifts = 0;
     let totalShifts = 0;
 
-    const workers = staffProfiles.map((staff, index) => ({
+    const workers = currentStaffs.map((staff, index) => ({
       ...staff,
       currentHours: 0,
       currentShifts: 0,
@@ -124,11 +122,41 @@ export default function StaffScheduleDashboard() {
     setStaffProfiles(updatedProfiles);
     setScheduleData(newSchedule);
     setSummary({ fullShifts, missingShifts, totalShifts });
-    setRotationPointer((prev) => (prev + 1) % staffProfiles.length);
+    setRotationPointer((prev) => (prev + 1) % currentStaffs.length);
   };
 
   useEffect(() => {
-    createStaffSchedule({ notify: false });
+    // Fetch Staffs
+    const fetchStaffsAndInit = async () => {
+      try {
+        const staffRes = await api.get('/api/staffs');
+        if (staffRes.data?.success && staffRes.data.data) {
+          const colors = [
+            { bg: 'bg-cyan-500', text: 'text-cyan-400' },
+            { bg: 'bg-purple-500', text: 'text-purple-400' },
+            { bg: 'bg-emerald-500', text: 'text-emerald-400' },
+            { bg: 'bg-amber-500', text: 'text-amber-400' },
+          ];
+          const mappedStaffs = staffRes.data.data
+            .filter(s => s.status === 'ACTIVE') // Only active staff
+            .map((s, idx) => ({
+              id: s.id,
+              name: s.fullName,
+              weeklyHours: 0,
+              shiftsAssigned: 0,
+              leaveDays: 0,
+              avatarBg: colors[idx % colors.length].bg,
+              color: colors[idx % colors.length].text
+          }));
+          setStaffProfiles(mappedStaffs);
+          createStaffSchedule({ notify: false }, null, mappedStaffs);
+        }
+      } catch (err) {
+        console.error('Fetch staffs failed:', err);
+      }
+    };
+    
+    fetchStaffsAndInit();
     
     // Fetch pending leave requests from API
     const fetchLeaves = async () => {
