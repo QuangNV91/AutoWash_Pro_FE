@@ -189,3 +189,31 @@ export async function getBookingHistory() {
     throw err;
   }
 }
+
+/**
+ * Hủy lịch hẹn
+ * PATCH /api/v1/bookings/{bookingId}/cancel
+ */
+export async function cancelBooking(bookingId) {
+  try {
+    const res = await api.patch(`/api/v1/bookings/${bookingId}/cancel`);
+    return res.data;
+  } catch (err) {
+    console.error('cancelBooking API error:', err);
+    throw err;
+  }
+}
+
+/**
+ * Cập nhật trạng thái và dịch vụ cho lịch hẹn (Dành cho Staff/Admin)
+ * PATCH /api/v1/bookings/{bookingId}/status
+ */
+export async function updateBookingStatus(bookingId, updateData) {
+  try {
+    const res = await api.patch(`/api/v1/bookings/${bookingId}/status`, updateData);
+    return res.data;
+  } catch (err) {
+    console.error('updateBookingStatus API error:', err);
+    throw err;
+  }
+}

@@ -4,6 +4,8 @@ import api from '../../services/api'
 import {
   CalendarDays, Clock, LogIn, RefreshCw, CheckCircle2, Search, Coffee
 } from 'lucide-react'
+import { updateBookingStatus } from '../../services/bookingService'
+import toast from 'react-hot-toast'
 
 const TODAY_BOOKINGS = [
   { id: 'BKG-10310', time: '08:00', plate: '30A-123.45', customer: 'Nguyễn Văn An',   service: 'Eco Wash',          duration: 15,  status: 'COMPLETED', payment: 'PAID',   price: 40000  },
@@ -131,20 +133,29 @@ export default function StaffBookings() {
     setEditService(b.service);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!selectedBooking) return;
-    setBookings(prev => prev.map(b => {
-      if (b.id !== selectedBooking.id) return b;
-      if (editService && editService !== b.service && servicesMap[editService]) {
-        return {
-          ...b,
-          service: editService,
-          price: servicesMap[editService].price,
-          duration: servicesMap[editService].duration
-        };
+    
+    if (editService && editService !== selectedBooking.service && servicesMap[editService]) {
+      try {
+        if (selectedBooking.realId) {
+          await updateBookingStatus(selectedBooking.realId, { serviceName: editService });
+        }
+        
+        setBookings(prev => prev.map(b => {
+          if (b.id !== selectedBooking.id) return b;
+          return {
+            ...b,
+            service: editService,
+            price: servicesMap[editService].price,
+            duration: servicesMap[editService].duration
+          };
+        }));
+        toast.success('Cập nhật dịch vụ thành công');
+      } catch (err) {
+        toast.error('Lỗi khi cập nhật dịch vụ');
       }
-      return b;
-    }));
+    }
     setSelectedBooking(null);
   };
 

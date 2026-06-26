@@ -105,7 +105,7 @@ export default function BookingSlotDashboard() {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/api/bookings');
+      const res = await api.get('/api/v1/bookings/admin/all');
       if (res.data?.success && res.data.data) {
         const mapped = res.data.data.map(b => ({
           id: `BKG-${b.id}`,
@@ -119,8 +119,8 @@ export default function BookingSlotDashboard() {
           status: b.status || 'PENDING',
           payment: b.paymentMethod ? 'PAID' : 'UNPAID'
         }));
-        // Filter out CANCELLED and FAILED
-        setBookings(mapped.filter(b => b.status !== 'CANCELLED' && b.status !== 'FAILED'));
+        // Strictly filter to valid statuses for the dashboard
+        setBookings(mapped.filter(b => ['PENDING', 'ARRIVED', 'WORKING', 'COMPLETED'].includes(b.status)));
       }
     } catch (err) {
       console.error(err);
@@ -257,7 +257,7 @@ export default function BookingSlotDashboard() {
       const booking = bookings.find(b => b.id === editingBookingId);
       if (booking?.realId && booking?.customerId) {
         try {
-          await api.patch(`/api/bookings/${booking.realId}/cancel?customerId=${booking.customerId}`);
+          await api.patch(`/api/v1/bookings/${booking.realId}/cancel?customerId=${booking.customerId}`);
         } catch (err) {
           console.error('Cancel error:', err);
           toast.error(err.response?.data?.message || 'Lỗi khi hủy lịch');
@@ -476,7 +476,8 @@ export default function BookingSlotDashboard() {
               {/* Slot Bookings Grid */}
               <div className="flex-1 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
                 {slot.bookingsList.map((item) => {
-                  const StatusIcon = WORK_STATUS[item.status].icon;
+                  const statusConfig = WORK_STATUS[item.status] || WORK_STATUS['PENDING'];
+                  const StatusIcon = statusConfig.icon;
                   const isCeramic = item.service === 'Ceramic Shield';
                   return (
                     <div key={item.id} className={`bg-neutral-950 border rounded-2xl p-5 relative group hover:border-white/10 transition-colors ${isCeramic ? 'border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.05)]' : 'border-white/5'}`}>
@@ -495,9 +496,9 @@ export default function BookingSlotDashboard() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 mb-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${WORK_STATUS[item.status].color}`}>
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${statusConfig.color}`}>
                           <StatusIcon size={12} />
-                          {WORK_STATUS[item.status].label}
+                          {statusConfig.label}
                         </span>
                         <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${PAYMENT_STATUS[item.payment].color}`}>
                           {PAYMENT_STATUS[item.payment].label}
