@@ -4,6 +4,8 @@ import api from '../../services/api'
 import {
   ScanLine, LogIn, Play, CheckCircle2, ChevronLeft, Check, X
 } from 'lucide-react'
+import { updateBookingStatus } from '../../services/bookingService'
+import toast from 'react-hot-toast'
 
 const MOCK_BOOKINGS = [
   { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',   phone: '0912345678', service: 'Detailing & Shine', duration: 60,  status: 'WORKING',   payment: 'UNPAID', price: 350000, startedAt: Date.now() - 22 * 60 * 1000 },
@@ -127,23 +129,44 @@ export default function StaffCheckin() {
     fetchData();
   }, []);
 
-  const handleAction = (id) => {
-    setBookings(prev => prev.map(b => {
-      if (b.id !== id) return b
-      const next = STATUS_NEXT[b.status]
-      let updatedBooking = { ...b }
-      if (next) {
-        updatedBooking = { ...updatedBooking, status: next, startedAt: next === 'WORKING' ? Date.now() : b.startedAt }
+  const handleAction = async (id) => {
+    const b = bookings.find(x => x.id === id);
+    if (!b) return;
+
+    const next = STATUS_NEXT[b.status];
+    const updateData = {
+      status: next === 'DONE' ? 'COMPLETED' : next,
+      licensePlate: selected?.status === 'PENDING' ? plateInput : undefined,
+      serviceName: (selectedService && selectedService !== b.service) ? selectedService : undefined
+    };
+
+    try {
+      if (b.realId) {
+        await updateBookingStatus(b.realId, updateData);
       }
-      if (selectedService && selectedService !== b.service && servicesMap[selectedService]) {
-        updatedBooking.service = selectedService;
-        updatedBooking.price = servicesMap[selectedService].price;
-        updatedBooking.duration = servicesMap[selectedService].duration;
-      }
-      return updatedBooking
-    }))
-    setConfirmOpen(false)
-    if (STATUS_NEXT[selected?.status] === 'DONE') navigate('/staff/payment')
+      
+      setBookings(prev => prev.map(item => {
+        if (item.id !== id) return item;
+        let updatedBooking = { ...item };
+        if (next) {
+          updatedBooking = { ...updatedBooking, status: next === 'DONE' ? 'COMPLETED' : next, startedAt: next === 'WORKING' ? Date.now() : item.startedAt };
+        }
+        if (selectedService && selectedService !== item.service && servicesMap[selectedService]) {
+          updatedBooking.service = selectedService;
+          updatedBooking.price = servicesMap[selectedService].price;
+          updatedBooking.duration = servicesMap[selectedService].duration;
+        }
+        if (selected?.status === 'PENDING') {
+          updatedBooking.plate = plateInput || '—';
+        }
+        return updatedBooking;
+      }));
+      toast.success('Cập nhật trạng thái thành công');
+      setConfirmOpen(false);
+      if (next === 'DONE') navigate('/staff/payment');
+    } catch (err) {
+      toast.error('Lỗi khi cập nhật trạng thái');
+    }
   }
 
   const openConfirm = (b) => { 

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/layout/PageWrapper';
 import { User, Calendar, History, Star, Settings, LogOut, Car, Clock, MapPin, ChevronRight, CheckCircle2, Clock3, Loader2 } from 'lucide-react';
-import { getBookingHistory } from '../../services/bookingService';
+import { getBookingHistory, cancelBooking } from '../../services/bookingService';
+import toast from 'react-hot-toast';
 
 // MOCK DATA
 const MOCK_USER = {
@@ -105,20 +106,31 @@ export default function UserDashboard() {
     setCancelModal({ isOpen: true, booking, policy });
   };
 
-  const confirmCancel = () => {
+  const confirmCancel = async () => {
     const { booking, policy } = cancelModal;
 
-    // Cập nhật state bookings
-    setBookings(prev => prev.map(b =>
-      b.id === booking.id ? { ...b, status: 'CANCELLED' } : b
-    ));
+    try {
+      if (booking.bookingId) {
+        await cancelBooking(booking.bookingId);
+      }
+      
+      // Cập nhật state bookings
+      setBookings(prev => prev.map(b => {
+        const isMatch = (b.bookingId && b.bookingId === booking.bookingId) || (!b.bookingId && b.id === booking.id);
+        return isMatch ? { ...b, status: 'CANCELLED' } : b;
+      }));
 
-    // Cập nhật điểm user nếu bị phạt
-    if (policy.penaltyPoints > 0) {
-      setUser(prev => ({ ...prev, points: Math.max(0, prev.points - policy.penaltyPoints) }));
+      // Cập nhật điểm user nếu bị phạt
+      if (policy.penaltyPoints > 0) {
+        setUser(prev => ({ ...prev, points: Math.max(0, prev.points - policy.penaltyPoints) }));
+      }
+
+      toast.success('Hủy lịch thành công');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi hủy lịch');
+    } finally {
+      setCancelModal({ isOpen: false, booking: null, policy: null });
     }
-
-    setCancelModal({ isOpen: false, booking: null, policy: null });
   };
 
   const TIERS = [
@@ -313,7 +325,7 @@ export default function UserDashboard() {
                       </button>
                     </div>
                   ) : bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').map(booking => (
-                    <div key={booking.id} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
+                    <div key={booking.bookingId || booking.id} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
@@ -395,7 +407,7 @@ export default function UserDashboard() {
                       <p>Đang tải dữ liệu...</p>
                     </div>
                   ) : bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED').map(booking => (
-                    <div key={booking.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
+                    <div key={booking.bookingId || booking.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
@@ -434,10 +446,75 @@ export default function UserDashboard() {
             )}
 
             {activeTab === 'profile' && (
-              <div className="bg-neutral-950 border border-white/5 rounded-2xl p-8 flex flex-col items-center justify-center text-center h-64">
-                <Settings size={48} className="text-white/20 mb-4" />
-                <h3 className="font-medium text-xl text-white mb-2">Tính năng đang phát triển</h3>
-                <p className="text-white/60">Phần cài đặt thông tin cá nhân sẽ sớm ra mắt.</p>
+              <div className="space-y-6">
+                <div className="mb-6">
+                  <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Cài đặt tài khoản</h2>
+                  <p className="text-white/60 mt-1">Quản lý thông tin cá nhân và bảo mật của bạn.</p>
+                </div>
+
+                <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 sm:p-8">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8 pb-8 border-b border-white/5">
+                    <div className="relative">
+                      <div className="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white text-3xl">
+                        <User size={40} />
+                      </div>
+                      <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-neutral-200 transition-colors">
+                        <Settings size={16} />
+                      </button>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-medium text-white mb-1">{user.fullName}</h3>
+                      <p className="text-white/60 text-sm">Cập nhật ảnh đại diện và chi tiết cá nhân của bạn ở đây.</p>
+                    </div>
+                  </div>
+
+                  <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); toast.success('Đã cập nhật thông tin thành công!'); }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white/80">Họ và tên</label>
+                        <input
+                          type="text"
+                          defaultValue={user.fullName}
+                          className="w-full bg-black/50 border border-white/10 focus:border-white/30 focus:outline-none rounded-xl px-4 py-3 text-white text-sm transition-colors"
+                          placeholder="Nhập họ và tên"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-white/80">Số điện thoại</label>
+                        <input
+                          type="tel"
+                          defaultValue={user.phone}
+                          className="w-full bg-black/50 border border-white/10 focus:border-white/30 focus:outline-none rounded-xl px-4 py-3 text-white text-sm transition-colors"
+                          placeholder="Nhập số điện thoại"
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-sm font-medium text-white/80">Email</label>
+                        <input
+                          type="email"
+                          defaultValue="khachhangvip@gmail.com"
+                          className="w-full bg-black/50 border border-white/10 focus:border-white/30 focus:outline-none rounded-xl px-4 py-3 text-white text-sm transition-colors"
+                          placeholder="Nhập địa chỉ email"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-6 border-t border-white/5 flex justify-end gap-3">
+                      <button
+                        type="button"
+                        className="px-6 py-2.5 rounded-xl border border-white/10 text-white/80 hover:bg-white/5 hover:text-white text-sm font-medium transition-colors"
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-sm font-medium transition-colors"
+                      >
+                        Lưu thay đổi
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             )}
 
