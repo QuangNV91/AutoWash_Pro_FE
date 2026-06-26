@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import api from '../../services/api';
 import { Clock, CheckCircle2, ChevronLeft, ChevronRight,
-  Plus, Edit2, Car, CreditCard, LogIn, RefreshCw, X, Trash2, CalendarDays, Loader2
+  Plus, Edit2, Car, CreditCard, LogIn, RefreshCw, X, Trash2, CalendarDays, Loader2, Shield
 } from 'lucide-react';
 import BookingSlotModal from '../../components/admin/modals/BookingSlotModal';
 import toast from 'react-hot-toast';
@@ -413,8 +413,8 @@ export default function BookingSlotDashboard() {
           <span className="ml-3 text-white/40 font-mono text-sm">Đang đồng bộ dữ liệu...</span>
         </div>
       ) : (
-      {/* Slots List */}
       <div className="space-y-6">
+        {/* Slots List */}
         {computedDayData.map((slot) => {
           if (slot.isBreak) {
             return (
@@ -539,6 +539,7 @@ export default function BookingSlotDashboard() {
           );
         })}
       </div>
+      )}
 
       {/* Modal Overlay via Component */}
       <BookingSlotModal

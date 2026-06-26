@@ -56,7 +56,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
                   <>
                     <p className="font-medium text-white truncate">{item.service.name}</p>
                     <p className="text-xs text-white/60">
-                      {item.service.duration_minutes ?? item.service.duration} phút
+                      {item.service.durationMinutes ?? item.service.duration_minutes ?? item.service.duration} phút
                     </p>
                   </>
                 ) : (
@@ -65,7 +65,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
               </div>
               {item.service && (
                 <p className="font-medium text-white text-sm whitespace-nowrap">
-                  {(item.service.base_price ?? item.service.price).toLocaleString('vi-VN')}đ
+                  {(item.service.basePrice ?? item.service.base_price ?? item.service.price).toLocaleString('vi-VN')}đ
                 </p>
               )}
             </div>

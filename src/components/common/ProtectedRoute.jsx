@@ -1,24 +1,31 @@
+import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import useAuthStore from '../../store/authStore';
 import toast from 'react-hot-toast';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
-  const { user, isAuthenticated } = useAuthStore();
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
   const location = useLocation();
 
-  if (!isAuthenticated) {
-    toast.error('Vui lòng đăng nhập để tiếp tục.');
+  useEffect(() => {
+    if (!token) {
+      toast.error('Vui lòng đăng nhập để tiếp tục.');
+    } else if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(role)) {
+      toast.error('Bạn không có quyền truy cập trang này.');
+    }
+  }, [token, role, allowedRoles]);
+
+  if (!token) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
   // Check roles if allowedRoles is specified
   if (allowedRoles && allowedRoles.length > 0) {
-    if (!allowedRoles.includes(user?.role)) {
-      toast.error('Bạn không có quyền truy cập trang này.');
+    if (!allowedRoles.includes(role)) {
       // Redirect to a safe page based on their role
-      if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
-      if (user?.role === 'STAFF') return <Navigate to="/staff" replace />;
-      return <Navigate to="/dashboard" replace />;
+      if (role === 'ADMIN') return <Navigate to="/admin" replace />;
+      if (role === 'STAFF') return <Navigate to="/staff" replace />;
+      return <Navigate to="/" replace />;
     }
   }
 

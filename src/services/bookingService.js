@@ -138,14 +138,11 @@ function generateMockSlots(dateStr, serviceId) {
  */
 export async function getServices() {
   try {
-    const res = await api.get('/services');
+    const res = await api.get('/api/v1/services');
     return res.data.data || res.data;
   } catch (err) {
-    // Fallback to mock khi chưa có Backend
-    console.warn('[MOCK] Sử dụng dữ liệu dịch vụ giả lập');
-    return new Promise(resolve => {
-      setTimeout(() => resolve(MOCK_SERVICES), 600);
-    });
+    console.error('getServices API error:', err);
+    throw err;
   }
 }
 
@@ -155,67 +152,40 @@ export async function getServices() {
  */
 export async function getAvailableSlots(bookingDate, serviceId) {
   try {
-    const res = await api.get('/bookings/available-slots', {
+    const res = await api.get('/api/v1/bookings/available-slots', {
       params: { booking_date: bookingDate, service_id: serviceId },
     });
     return res.data.data || res.data;
   } catch (err) {
-    // Fallback to mock
-    console.warn('[MOCK] Sử dụng dữ liệu slot giả lập');
-    return new Promise(resolve => {
-      setTimeout(() => resolve(generateMockSlots(bookingDate, serviceId)), 500);
-    });
-  }
-}
-
-/**
- * Tạo 1 booking
- * POST /bookings
- */
-export async function createBooking(bookingData) {
-  try {
-    const res = await api.post('/bookings', bookingData);
-    return res.data;
-  } catch (err) {
-    // Fallback mock cho CASH
-    if (bookingData.payment_method === 'CASH') {
-      console.warn('[MOCK] Tạo booking giả lập');
-      return new Promise(resolve => {
-        setTimeout(() => resolve({
-          success: true,
-          data: {
-            booking_id: `BKG-${Date.now().toString().slice(-5)}`,
-            status: 'PENDING',
-          },
-        }), 800);
-      });
-    }
-    // Re-throw nếu không phải mock scenario
+    console.error('getAvailableSlots API error:', err);
     throw err;
   }
 }
 
 /**
- * Tạo payment session cho nhiều bookings (VNPAY)
- * POST /payments/vnpay/create
+ * Gọi API checkout để tạo bookings và lấy link thanh toán (nếu ONLINE)
+ * POST /api/v1/bookings/checkout
  */
-export async function createPaymentSession(bookingIds, totalAmount) {
+export async function checkoutBookings(checkoutData) {
   try {
-    const res = await api.post('/payments/vnpay/create', {
-      booking_ids: bookingIds,
-      total_amount: totalAmount,
-    });
+    const res = await api.post('/api/v1/bookings/checkout', checkoutData);
     return res.data;
   } catch (err) {
-    // Mock fallback
-    console.warn('[MOCK] Tạo payment session giả lập');
-    return new Promise(resolve => {
-      setTimeout(() => resolve({
-        success: true,
-        data: {
-          vnpay_url: `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?mock=true&amount=${totalAmount}`,
-        },
-      }), 500);
-    });
+    console.error('Checkout API error:', err);
+    throw err;
+  }
+}
+
+/**
+ * Lấy danh sách lịch hẹn của user đang đăng nhập
+ * GET /api/v1/bookings/history
+ */
+export async function getBookingHistory() {
+  try {
+    const res = await api.get('/api/v1/bookings/history');
+    return res.data.data || res.data;
+  } catch (err) {
+    console.error('getBookingHistory API error:', err);
+    throw err;
   }
 }
