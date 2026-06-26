@@ -4,7 +4,7 @@ import PageWrapper from '../../../components/layout/PageWrapper';
 import StepIndicator from '../../../components/ui/StepIndicator';
 import BookingSummaryCard from '../../../components/booking/BookingSummaryCard';
 import useBookingStore from '../../../store/bookingStore';
-import { createBooking, createPaymentSession } from '../../../services/bookingService';
+import { checkoutBookings } from '../../../services/bookingService';
 import { ArrowLeft, CreditCard, Banknote, Car, Calendar, Clock, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function BookingStep3Confirm() {
@@ -42,70 +42,63 @@ export default function BookingStep3Confirm() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setSubmitResults([]);
-    setSubmitProgress(0);
+    setSubmitProgress(1); // Mới bắt đầu
 
-    const results = [];
-    const successBookingIds = [];
+    try {
+      const checkoutPayload = {
+        bookingDate: selectedDate,
+        paymentMethod: paymentMethod,
+        voucherCode: "", // Có thể thêm sau nếu có tính năng nhập voucher
+        items: bookingItems.map(item => ({
+          serviceId: item.service.id,
+          licensePlate: item.licensePlate,
+          brand: item.brand || '',
+          model: item.model || '',
+          startTime: item.selectedTime
+        }))
+      };
 
-    // Gọi POST /bookings lần lượt cho từng xe
-    for (let i = 0; i < bookingItems.length; i++) {
-      const item = bookingItems[i];
-      setSubmitProgress(i + 1);
+      const res = await checkoutBookings(checkoutPayload);
+      
+      // Thành công toàn bộ (Backend xử lý giao dịch nguyên tử)
+      const results = bookingItems.map(item => ({
+        itemId: item.id,
+        success: true,
+        bookingId: res.transactionRef || 'N/A', // Tạm lưu transactionRef
+        error: null
+      }));
+      setSubmitResults(results);
 
-      try {
-        const res = await createBooking({
-          service_id: item.service.id,
-          booking_date: selectedDate,
-          start_time: item.selectedTime,
-          payment_method: paymentMethod,
-        });
-
-        const bookingId = res.data?.booking_id || res.booking_id || `BKG-${Date.now()}`;
-        results.push({ itemId: item.id, success: true, bookingId, error: null });
-        successBookingIds.push(bookingId);
-      } catch (err) {
-        const status = err.response?.status;
-        let errorMsg = 'Lỗi không xác định';
-
-        if (status === 409) {
-          errorMsg = 'Khung giờ này vừa hết chỗ, vui lòng chọn giờ khác';
-        } else if (status === 401) {
-          navigate('/auth/login');
-          return;
-        } else if (status === 400) {
-          errorMsg = err.response?.data?.message || 'Dữ liệu không hợp lệ';
-        } else if (status === 500) {
-          errorMsg = 'Hệ thống đang bận, vui lòng thử lại';
-        }
-
-        results.push({ itemId: item.id, success: false, bookingId: null, error: errorMsg });
+      // Nếu ONLINE có link VNPay -> redirect
+      if (paymentMethod === 'ONLINE' && res.paymentRedirectUrl) {
+        window.location.href = res.paymentRedirectUrl;
+        return;
       }
-    }
 
-    setSubmitResults(results);
-
-    // Xử lý thanh toán ONLINE
-    if (paymentMethod === 'ONLINE' && successBookingIds.length > 0) {
-      try {
-        const paymentRes = await createPaymentSession(successBookingIds, getDiscountedTotal());
-        const vnpayUrl = paymentRes.data?.vnpay_url || paymentRes.vnpay_url;
-        if (vnpayUrl) {
-          window.location.href = vnpayUrl;
-          return;
-        }
-      } catch (err) {
-        console.error('Lỗi tạo payment session:', err);
-      }
-    }
-
-    setIsSubmitting(false);
-
-    // Nếu tất cả thành công (CASH) → chuyển sang success
-    const allSuccess = results.every(r => r.success);
-    if (allSuccess) {
+      // Xử lý CASH -> Chuyển hướng Success
       navigate('/booking/success');
+
+    } catch (err) {
+      console.error('Lỗi checkout:', err);
+      const status = err.response?.status;
+      let errorMsg = err.response?.data?.message || 'Hệ thống đang bận, vui lòng thử lại';
+      
+      if (status === 401) {
+        navigate('/auth/login');
+        return;
+      }
+
+      // Đánh dấu thất bại cho tất cả (Vì giao dịch nguyên tử)
+      const results = bookingItems.map(item => ({
+        itemId: item.id,
+        success: false,
+        bookingId: null,
+        error: errorMsg
+      }));
+      setSubmitResults(results);
+    } finally {
+      setIsSubmitting(false);
     }
-    // Nếu partial failure → giữ nguyên trang để user xem kết quả
   };
 
   if (!bookingItems.length || !bookingItems[0].service) return null;
@@ -147,9 +140,9 @@ export default function BookingStep3Confirm() {
 
               <div className="space-y-4">
                 {bookingItems.map((item, index) => {
-                  const price = item.service.base_price ?? item.service.price;
-                  const duration = item.service.duration_minutes ?? item.service.duration;
-                  const points = item.service.base_points ?? item.service.points;
+                  const price = item.service.basePrice ?? item.service.base_price ?? item.service.price;
+                  const duration = item.service.durationMinutes ?? item.service.duration_minutes ?? item.service.duration;
+                  const points = item.service.basePoints ?? item.service.base_points ?? item.service.points;
                   const result = submitResults.find(r => r.itemId === item.id);
 
                   return (

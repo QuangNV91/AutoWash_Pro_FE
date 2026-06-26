@@ -29,7 +29,7 @@ export default function BookingStep1Service() {
 
   // Tính validity inline (không dùng isStep1Valid vì Zustand get() không trigger re-render)
   const step1Valid = bookingItems.length > 0 && bookingItems.every(
-    item => !!item.service
+    item => !!item.service && item.licensePlate.trim().length > 0
   );
 
   // Lấy danh sách dịch vụ từ API
@@ -112,6 +112,40 @@ export default function BookingStep1Service() {
                       <X size={16} />
                     </button>
                   )}
+                </div>
+
+                {/* Nhập thông tin xe */}
+                <div className="mb-6 space-y-4">
+                  <span className="text-white/60 font-medium text-sm block">Thông tin xe *</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Biển số xe *"
+                        value={item.licensePlate}
+                        onChange={(e) => updateItem(item.id, { licensePlate: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 transition-colors placeholder-white/30 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Hãng xe (Vd: Toyota)"
+                        value={item.brand}
+                        onChange={(e) => updateItem(item.id, { brand: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 transition-colors placeholder-white/30 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Dòng xe (Vd: Camry)"
+                        value={item.model}
+                        onChange={(e) => updateItem(item.id, { model: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 transition-colors placeholder-white/30 text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Chọn dịch vụ */}

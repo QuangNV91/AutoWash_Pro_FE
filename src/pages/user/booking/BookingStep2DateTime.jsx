@@ -138,7 +138,7 @@ export default function BookingStep2DateTime() {
                         Xe {index + 1}
                       </h3>
                       <p className="text-sm text-white/60">
-                        {item.service.name} — {item.service.duration_minutes ?? item.service.duration} phút
+                        {item.service.name} — {item.service.durationMinutes ?? item.service.duration_minutes ?? item.service.duration} phút
                       </p>
                     </div>
                     {item.selectedTime && (

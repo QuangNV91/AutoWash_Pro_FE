@@ -29,6 +29,9 @@ const generateId = () => crypto.randomUUID ? crypto.randomUUID() : `item-${Date.
 const createEmptyItem = () => ({
   id: generateId(),
   service: null,
+  licensePlate: '',
+  brand: '',
+  model: '',
   selectedTime: null,
   customerNote: '',
   availableSlots: [],
@@ -43,7 +46,7 @@ const useBookingStore = create((set, get) => ({
   // === Thông tin chung ===
   selectedDate: null,
   paymentMethod: 'CASH',
-  userTier: 'SILVER', // Đồng bộ với MOCK_USER trong UserDashboard
+  userTier: 'MEMBER', // Khởi tạo là MEMBER để khớp với dữ liệu thực tế của User mới
 
   // === Kết quả submit ===
   submitResults: [],
@@ -56,12 +59,12 @@ const useBookingStore = create((set, get) => ({
 
   getTotalPrice: () => {
     const items = get().bookingItems;
-    return items.reduce((sum, item) => sum + (item.service?.base_price ?? item.service?.price ?? 0), 0);
+    return items.reduce((sum, item) => sum + (item.service?.basePrice ?? item.service?.base_price ?? item.service?.price ?? 0), 0);
   },
 
   getTotalPoints: () => {
     const items = get().bookingItems;
-    const basePoints = items.reduce((sum, item) => sum + (item.service?.base_points ?? item.service?.points ?? 0), 0);
+    const basePoints = items.reduce((sum, item) => sum + (item.service?.basePoints ?? item.service?.base_points ?? item.service?.points ?? 0), 0);
     const onlineBonus = get().paymentMethod === 'ONLINE' ? 10 * items.filter(i => i.service).length : 0;
     return basePoints + onlineBonus;
   },
@@ -81,11 +84,11 @@ const useBookingStore = create((set, get) => ({
     if (!currentItem) return conflictSlots;
 
     const otherItems = bookingItems.filter(i => i.id !== itemId && i.selectedTime && i.service);
-    const currentDuration = currentItem.service?.duration_minutes || 15;
+    const currentDuration = currentItem.service?.durationMinutes ?? currentItem.service?.duration_minutes ?? 15;
 
     for (const other of otherItems) {
       const otherStartMinutes = timeToMinutes(other.selectedTime);
-      const otherDuration = other.service.duration_minutes;
+      const otherDuration = other.service?.durationMinutes ?? other.service?.duration_minutes ?? 15;
       const otherEndMinutes = otherStartMinutes + otherDuration;
 
       // Xe hiện tại không được phép bắt đầu ở bất kỳ slot nào (m) sao cho:
@@ -188,7 +191,7 @@ const useBookingStore = create((set, get) => ({
   isStep1Valid: () => {
     const { bookingItems } = get();
     return bookingItems.length > 0 && bookingItems.every(
-      item => !!item.service
+      item => !!item.service && item.licensePlate.trim().length > 0
     );
   },
 

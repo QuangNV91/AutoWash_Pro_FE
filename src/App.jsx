@@ -10,6 +10,7 @@ import BookingStep1Service from './pages/user/booking/BookingStep1Service.jsx'
 import BookingStep2DateTime from './pages/user/booking/BookingStep2DateTime.jsx'
 import BookingStep3Confirm from './pages/user/booking/BookingStep3Confirm.jsx'
 import BookingSuccessPage from './pages/user/booking/BookingSuccessPage.jsx'
+import BookingVnpayReturn from './pages/user/booking/BookingVnpayReturn.jsx'
 import UserDashboard from './pages/user/UserDashboard.jsx'
 import StaffDashboard from './pages/staff/StaffDashboard.jsx'
 import StaffBookings from './pages/staff/StaffBookings.jsx'
@@ -55,7 +56,8 @@ export default function App() {
         <Route path="/booking/datetime" element={<BookingStep2DateTime />} />
         <Route path="/booking/confirm" element={<BookingStep3Confirm />} />
         <Route path="/booking/success" element={<BookingSuccessPage />} />
-        <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['USER']}><UserDashboard /></ProtectedRoute>} />
+        <Route path="/booking/vnpay-return" element={<BookingVnpayReturn />} />
+        <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['USER', 'CUSTOMER']}><UserDashboard /></ProtectedRoute>} />
         
         {/* Protected Staff Routes */}
         <Route path="/staff/*" element={<ProtectedRoute allowedRoles={['STAFF', 'ADMIN']}><StaffLayout /></ProtectedRoute>}>

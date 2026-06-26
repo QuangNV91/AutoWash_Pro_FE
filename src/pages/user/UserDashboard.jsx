@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/layout/PageWrapper';
-import { User, Calendar, History, Star, Settings, LogOut, Car, Clock, MapPin, ChevronRight, CheckCircle2, Clock3 } from 'lucide-react';
+import { User, Calendar, History, Star, Settings, LogOut, Car, Clock, MapPin, ChevronRight, CheckCircle2, Clock3, Loader2 } from 'lucide-react';
+import { getBookingHistory } from '../../services/bookingService';
 
 // MOCK DATA
 const MOCK_USER = {
@@ -44,8 +45,24 @@ export default function UserDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('bookings'); // bookings, history, profile
   const [user, setUser] = useState(MOCK_USER);
-  const [bookings, setBookings] = useState(MOCK_BOOKINGS);
+  const [bookings, setBookings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [cancelModal, setCancelModal] = useState({ isOpen: false, booking: null, policy: null });
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getBookingHistory();
+        setBookings(data);
+      } catch (error) {
+        console.error("Failed to fetch bookings", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchHistory();
+  }, []);
 
   // Status Badge Component
   const StatusBadge = ({ status }) => {
@@ -280,7 +297,12 @@ export default function UserDashboard() {
                 </div>
 
                 <div className="space-y-4">
-                  {bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').length === 0 ? (
+                  {isLoading ? (
+                    <div className="flex flex-col items-center justify-center p-12 text-white/60">
+                      <Loader2 size={32} className="animate-spin mb-4" />
+                      <p>Đang tải dữ liệu...</p>
+                    </div>
+                  ) : bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').length === 0 ? (
                     <div className="bg-neutral-950 border border-white/5 rounded-2xl p-12 text-center">
                       <p className="text-white/60 mb-4">Bạn chưa có lịch hẹn nào sắp tới.</p>
                       <button
@@ -367,7 +389,12 @@ export default function UserDashboard() {
                 </div>
 
                 <div className="space-y-4">
-                  {bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED').map(booking => (
+                  {isLoading ? (
+                    <div className="flex flex-col items-center justify-center p-12 text-white/60">
+                      <Loader2 size={32} className="animate-spin mb-4" />
+                      <p>Đang tải dữ liệu...</p>
+                    </div>
+                  ) : bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED').map(booking => (
                     <div key={booking.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div>
