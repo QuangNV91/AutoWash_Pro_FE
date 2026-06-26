@@ -1,16 +1,17 @@
-/* --- Global Overrides & Variables --- */
 :root {
-  --primary-color: #0050b3; /* Deep Blue */
+  --primary-color: #0050b3;
+  /* Deep Blue */
   --bg-color: #f0f2f5;
   --card-bg: #ffffff;
   --text-main: #000000;
   --text-secondary: rgba(0, 0, 0, 0.65);
   --border-radius-base: 16px;
   --box-shadow-neumorph: 6px 6px 12px rgba(0, 0, 0, 0.05), -6px -6px 12px rgba(255, 255, 255, 0.8);
-  
+
   /* Icon colors from image */
   --icon-green: #52c41a;
-  --icon-orange: #f5222d; /* Adjust based on exact hue */
+  --icon-orange: #f5222d;
+  /* Adjust based on exact hue */
   --icon-blue: #1890ff;
 }
 
@@ -160,9 +161,20 @@ h4.ant-typography.aw-action-title {
 }
 
 /* Color variations for stat icons */
-.aw-stat-icon-green { background-color: #f6ffed; color: var(--icon-green); }
-.aw-stat-icon-orange { background-color: #fff1f0; color: var(--icon-orange); }
-.aw-stat-icon-blue { background-color: #e6f7ff; color: var(--icon-blue); }
+.aw-stat-icon-green {
+  background-color: #f6ffed;
+  color: var(--icon-green);
+}
+
+.aw-stat-icon-orange {
+  background-color: #fff1f0;
+  color: var(--icon-orange);
+}
+
+.aw-stat-icon-blue {
+  background-color: #e6f7ff;
+  color: var(--icon-blue);
+}
 
 .aw-stat-content {
   flex: 1;
@@ -197,7 +209,8 @@ h1.ant-typography.aw-stat-value {
 .aw-action-desc {
   font-size: 14px;
   line-height: 1.6;
-  height: 44px; /* Fixed height to align icons */
+  height: 44px;
+  /* Fixed height to align icons */
   margin-bottom: 0;
   overflow: hidden;
 }
@@ -210,14 +223,27 @@ h1.ant-typography.aw-stat-value {
   align-items: center;
   justify-content: center;
   font-size: 32px;
-  margin: 0 auto; /* Center horizontal */
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05); /* Extra drop shadow for icon */
+  margin: 0 auto;
+  /* Center horizontal */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  /* Extra drop shadow for icon */
 }
 
 /* Color variations for action icons */
-.aw-action-icon-green { background: linear-gradient(135deg, #f6ffed 0%, #b7eb8f 100%); color: var(--icon-green); }
-.aw-action-icon-orange { background: linear-gradient(135deg, #fff1f0 0%, #ffbb96 100%); color: var(--icon-orange); }
-.aw-action-icon-blue { background: linear-gradient(135deg, #e6f7ff 0%, #91d5ff 100%); color: var(--icon-blue); }
+.aw-action-icon-green {
+  background: linear-gradient(135deg, #f6ffed 0%, #b7eb8f 100%);
+  color: var(--icon-green);
+}
+
+.aw-action-icon-orange {
+  background: linear-gradient(135deg, #fff1f0 0%, #ffbb96 100%);
+  color: var(--icon-orange);
+}
+
+.aw-action-icon-blue {
+  background: linear-gradient(135deg, #e6f7ff 0%, #91d5ff 100%);
+  color: var(--icon-blue);
+}
 
 .aw-action-card-footer {
   padding: 16px 32px;
@@ -245,7 +271,8 @@ h1.ant-typography.aw-stat-value {
 }
 
 .aw-info-grid {
-  margin-top: -12px; /* Pull grid up to account for extra padding */
+  margin-top: -12px;
+  /* Pull grid up to account for extra padding */
 }
 
 .aw-info-item {
@@ -313,22 +340,65 @@ h1.ant-typography.aw-stat-value {
 
 /* --- Responsive Layout --- */
 @media (max-width: 1599px) {
-    h1.ant-typography.aw-hero-title { font-size: 48px; }
-    .aw-hero-illustration { width: 400px; right: -80px; }
+  h1.ant-typography.aw-hero-title {
+    font-size: 48px;
+  }
+
+  .aw-hero-illustration {
+    width: 400px;
+    right: -80px;
+  }
 }
 
 @media (max-width: 1199px) {
-    .aw-hero-section { padding: 40px; }
-    h1.ant-typography.aw-hero-title { font-size: 40px; }
-    .aw-hero-illustration { position: relative; width: 100%; top: 0; right: 0; transform: none; padding-top: 24px; opacity: 1; text-align: center;}
-    .aw-hero-illustration img { max-width: 300px;}
+  .aw-hero-section {
+    padding: 40px;
+  }
+
+  h1.ant-typography.aw-hero-title {
+    font-size: 40px;
+  }
+
+  .aw-hero-illustration {
+    position: relative;
+    width: 100%;
+    top: 0;
+    right: 0;
+    transform: none;
+    padding-top: 24px;
+    opacity: 1;
+    text-align: center;
+  }
+
+  .aw-hero-illustration img {
+    max-width: 300px;
+  }
 }
 
 @media (max-width: 767px) {
-  .aw-content { padding: 20px; }
-  .aw-hero-section { padding: 24px; }
-  h1.ant-typography.aw-hero-title { font-size: 32px; }
-  .aw-stat-card .ant-card-body { flex-direction: column; text-align: center; gap: 12px;}
-  .aw-action-card-inner { padding: 24px;}
-  .aw-info-card { padding: 24px; }
+  .aw-content {
+    padding: 20px;
+  }
+
+  .aw-hero-section {
+    padding: 24px;
+  }
+
+  h1.ant-typography.aw-hero-title {
+    font-size: 32px;
+  }
+
+  .aw-stat-card .ant-card-body {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .aw-action-card-inner {
+    padding: 24px;
+  }
+
+  .aw-info-card {
+    padding: 24px;
+  }
 }
