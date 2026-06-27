@@ -4,11 +4,10 @@ import { ChevronLeft, CheckCircle2, Banknote,
   Smartphone, Building2, Check, AlertTriangle, Receipt, Gift
 } from 'lucide-react'
 
-const UNPAID_BOOKINGS = [
-  { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',  service: 'Detailing & Shine', duration: 60,  price: 350000, tier: 'SILVER', tierDiscount: 0.05, loyaltyPoints: 350, paymentMethod: null },
-  { id: 'BKG-10314', time: '10:30', plate: '51A-456.78', customer: 'Võ Thị Em',      service: 'Premium Care',       duration: 30,  price: 150000, tier: 'MEMBER', tierDiscount: 0,    loyaltyPoints: 150, paymentMethod: null },
-  { id: 'BKG-10318', time: '15:00', plate: '—',          customer: 'Ngô Minh Tuấn',  service: 'Detailing & Shine',  duration: 60,  price: 350000, tier: 'GOLD',   tierDiscount: 0.10, loyaltyPoints: 350, paymentMethod: null },
-]
+import { useEffect } from 'react'
+import api from '../../services/api'
+import { updateBookingStatus } from '../../services/bookingService'
+import toast from 'react-hot-toast'
 
 const METHOD_OPTIONS = [
   { key: 'CASH',          label: 'Tiền mặt',     icon: Banknote,    color: 'text-amber-400  border-amber-500/30  bg-amber-500/10' },
@@ -23,10 +22,72 @@ const TIER_COLOR = { MEMBER: 'text-gray-400', SILVER: 'text-slate-300', GOLD: 't
 
 export default function StaffPayment() {
   const navigate = useNavigate()
-  const [bookings, setBookings] = useState(UNPAID_BOOKINGS)
-  const [selected, setSelected] = useState(bookings[0] || null)
+  const [bookings, setBookings] = useState([])
+  const [selected, setSelected] = useState(null)
   const [method, setMethod]   = useState(null)
   const [paid, setPaid]       = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let currentServicesMap = {
+        'Eco Wash': { price: 40000, points: 40 },
+        'Premium Care': { price: 150000, points: 150 },
+        'Detailing & Shine': { price: 350000, points: 350 },
+        'Ceramic Shield': { price: 800000, points: 800 }
+      };
+
+      try {
+        const resServices = await api.get('/api/v1/services');
+        if (resServices.data?.success && resServices.data.data) {
+          const newMap = {};
+          resServices.data.data.forEach(s => {
+            newMap[s.serviceName] = { price: s.basePrice, points: s.basePoints || (s.basePrice / 1000) };
+          });
+          currentServicesMap = newMap;
+        }
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      }
+
+      try {
+        const res = await api.get('/api/v1/bookings/admin/all');
+        if (res.data?.success && res.data.data) {
+          // Filter for COMPLETED and not paid
+          // We assume paymentStatus !== 'PAID' or paymentMethod === 'CASH'
+          const unpaid = res.data.data.filter(b => b.status === 'COMPLETED' && (!b.paymentStatus || b.paymentStatus !== 'PAID'));
+          
+          const formatted = unpaid.map(b => ({
+            id: `BKG-${b.id}`,
+            realId: b.id,
+            time: b.startTime ? b.startTime.substring(0, 5) : '00:00',
+            plate: b.licensePlate || '—',
+            customer: b.customerName || 'Khách hàng',
+            service: b.serviceName || 'Eco Wash',
+            price: currentServicesMap[b.serviceName]?.price || 0,
+            loyaltyPoints: currentServicesMap[b.serviceName]?.points || 50,
+            tier: 'MEMBER',
+            tierDiscount: 0
+          }));
+          
+          setBookings(formatted);
+          if (formatted.length > 0) setSelected(formatted[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching bookings:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center h-[60vh] text-white/40 gap-4">
+      <div className="animate-spin w-8 h-8 border-2 border-white/20 border-t-cyan-500 rounded-full" />
+      <p>Đang tải dữ liệu...</p>
+    </div>
+  )
 
   if (!selected) return (
     <div className="flex flex-col items-center justify-center h-[60vh] text-white/20 gap-4">
@@ -43,16 +104,31 @@ export default function StaffPayment() {
   const finalPrice = selected.price - discount
   const totalPts   = selected.loyaltyPoints + bonusPts
 
-  const handleConfirmPayment = () => {
-    if (!method) return
-    setPaid(true)
-    setBookings(prev => prev.filter(b => b.id !== selected.id))
-    setTimeout(() => {
-      setPaid(false)
-      setMethod(null)
-      const remaining = bookings.filter(b => b.id !== selected.id)
-      setSelected(remaining[0] || null)
-    }, 2000)
+  const handleConfirmPayment = async () => {
+    if (!method || !selected) return;
+    
+    // Call API to mark as PAID
+    try {
+      // We assume there's a way to mark payment as PAID. 
+      // If the backend doesn't have a specific payment endpoint, we might patch the status.
+      // Assuming updateBookingStatus can update paymentStatus or paymentMethod
+      await updateBookingStatus(selected.realId, { 
+        status: 'COMPLETED',
+        paymentMethod: method, 
+        paymentStatus: 'PAID' 
+      });
+      
+      setPaid(true)
+      setBookings(prev => prev.filter(b => b.id !== selected.id))
+      setTimeout(() => {
+        setPaid(false)
+        setMethod(null)
+        const remaining = bookings.filter(b => b.id !== selected.id)
+        setSelected(remaining[0] || null)
+      }, 2000)
+    } catch (err) {
+      toast.error('Lỗi khi cập nhật thanh toán');
+    }
   }
 
   return (

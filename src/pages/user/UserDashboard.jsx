@@ -65,6 +65,11 @@ export default function UserDashboard() {
     fetchHistory();
   }, []);
 
+  // DEBUG
+  useEffect(() => {
+    console.log("Bookings fetched:", bookings);
+  }, [bookings]);
+
   // Status Badge Component
   const StatusBadge = ({ status }) => {
     const statusConfig = {
@@ -295,6 +300,8 @@ export default function UserDashboard() {
 
             {activeTab === 'bookings' && (
               <div className="space-y-6">
+                {/* Debug Dump */}
+                {bookings.length > 0 && <div style={{ display: 'none' }} id="debug-bookings">{JSON.stringify(bookings)}</div>}
                 <div className="flex justify-between items-end mb-2">
                   <div>
                     <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Lịch hẹn sắp tới</h2>
@@ -324,8 +331,8 @@ export default function UserDashboard() {
                         Đặt lịch ngay
                       </button>
                     </div>
-                  ) : bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').map(booking => (
-                    <div key={booking.bookingId || booking.id} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
+                  ) : bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').map((booking, index) => (
+                    <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
@@ -406,8 +413,8 @@ export default function UserDashboard() {
                       <Loader2 size={32} className="animate-spin mb-4" />
                       <p>Đang tải dữ liệu...</p>
                     </div>
-                  ) : bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED').map(booking => (
-                    <div key={booking.bookingId || booking.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
+                  ) : bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED').map((booking, index) => (
+                    <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
