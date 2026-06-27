@@ -210,7 +210,7 @@ export async function cancelBooking(bookingId) {
  */
 export async function updateBookingStatus(bookingId, updateData) {
   try {
-    const res = await api.patch(`/api/v1/bookings/${bookingId}/status`, updateData);
+    const res = await api.patch(`/api/v1/bookings/${bookingId}/status`, updateData, { params: updateData });
     return res.data;
   } catch (err) {
     console.error('updateBookingStatus API error:', err);
