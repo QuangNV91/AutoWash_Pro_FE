@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { Clock, ShieldCheck, PenTool, Award } from 'lucide-react';
+import { getServices } from '../../services/bookingService';
 
 // Dữ liệu dịch vụ chi tiết — đồng bộ với bookingService.js
 const SERVICE_BLOCKS = [
@@ -138,6 +139,17 @@ export default function ServicesPage() {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('token');
   const location = useLocation();
+  const [apiServices, setApiServices] = useState({});
+
+  useEffect(() => {
+    getServices().then(data => {
+      const map = {};
+      if (Array.isArray(data)) {
+        data.forEach(s => map[s.name || s.serviceName] = s);
+      }
+      setApiServices(map);
+    }).catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (location.hash) {
@@ -184,6 +196,11 @@ export default function ServicesPage() {
             {SERVICE_BLOCKS.map((svc) => {
               const t = THEME[svc.themeColor];
               const isReverse = svc.direction === 'reverse';
+              
+              const apiData = apiServices[svc.name];
+              const displayPrice = apiData ? (apiData.basePrice ?? apiData.base_price ?? apiData.price).toLocaleString('vi-VN') + 'đ' : svc.price;
+              const displayTime = apiData ? (apiData.durationMinutes ?? apiData.duration_minutes ?? apiData.duration) + ' phút' : svc.duration;
+              const displayPoints = apiData ? '+' + (apiData.basePoints ?? apiData.base_points ?? apiData.points) + ' điểm tích lũy' : svc.points;
 
               return (
                 <div
@@ -225,13 +242,13 @@ export default function ServicesPage() {
 
                     {/* Price row */}
                     <div className="flex items-center gap-5 flex-wrap mb-8">
-                      <span className="text-white text-3xl font-medium">{svc.price}</span>
+                      <span className="text-white text-3xl font-medium">{displayPrice}</span>
                       <div className="flex items-center gap-2 text-white/60">
                         <Clock size={18} />
-                        <span>{svc.duration}</span>
+                        <span>{displayTime}</span>
                       </div>
                       <div className={`px-3 py-1 text-sm font-medium rounded-full ${t.pointsClass}`}>
-                        {svc.points}
+                        {displayPoints}
                       </div>
                     </div>
 

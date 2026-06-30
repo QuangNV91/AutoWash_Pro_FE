@@ -6,6 +6,7 @@ import ServiceCard from '../../../components/booking/ServiceCard';
 import BookingSummaryCard from '../../../components/booking/BookingSummaryCard';
 import useBookingStore from '../../../store/bookingStore';
 import { getServices } from '../../../services/bookingService';
+import api from '../../../services/api';
 import { Plus, X, Car, AlertCircle, Crown } from 'lucide-react';
 
 export default function BookingStep1Service() {
@@ -31,6 +32,19 @@ export default function BookingStep1Service() {
   const step1Valid = bookingItems.length > 0 && bookingItems.every(
     item => !!item.service && item.licensePlate.trim().length > 0
   );
+
+  // Fetch user tier context
+  useEffect(() => {
+    api.get('/api/v1/bookings/context')
+      .then(res => {
+        if (res.data?.tierName) {
+          useBookingStore.getState().setUserTier(res.data.tierName);
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching booking context:', err);
+      });
+  }, []);
 
   // Lấy danh sách dịch vụ từ API
   useEffect(() => {
@@ -68,7 +82,7 @@ export default function BookingStep1Service() {
     return currentIdx < tiers.length - 1 ? tiers[currentIdx + 1] : null;
   };
 
-  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Bạch kim' };
+  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Kim Cương' };
 
   return (
     <PageWrapper title="Chọn dịch vụ">
@@ -83,7 +97,7 @@ export default function BookingStep1Service() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
           {/* Left Column: Danh sách xe & Chọn dịch vụ */}
           <div className="lg:col-span-2 space-y-8">
-            
+
             {bookingItems.map((item, index) => (
               <div key={item.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 relative">
                 {/* Header xe */}
@@ -151,7 +165,7 @@ export default function BookingStep1Service() {
                 {/* Chọn dịch vụ */}
                 <div>
                   <span className="text-white/60 font-medium text-sm mb-4 block">Chọn gói dịch vụ *</span>
-                  
+
                   {servicesLoading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {[1, 2, 3].map(i => (

@@ -32,7 +32,7 @@ export default function BookingStep3Confirm() {
     }
   }, [bookingItems, selectedDate, navigate]);
 
-  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Kim Cương' };
+  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Kim  Cương' };
   const discount = getDiscount();
 
   const handleBack = () => {
@@ -42,13 +42,13 @@ export default function BookingStep3Confirm() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setSubmitResults([]);
-    setSubmitProgress(1); // Mới bắt đầu
+    setSubmitProgress(1);
 
     try {
       const checkoutPayload = {
         bookingDate: selectedDate,
         paymentMethod: paymentMethod,
-        voucherCode: "", // Có thể thêm sau nếu có tính năng nhập voucher
+        voucherCode: "",
         items: bookingItems.map(item => ({
           serviceId: item.service.id,
           licensePlate: item.licensePlate,
@@ -60,22 +60,19 @@ export default function BookingStep3Confirm() {
 
       const res = await checkoutBookings(checkoutPayload);
 
-      // Thành công toàn bộ (Backend xử lý giao dịch nguyên tử)
       const results = bookingItems.map(item => ({
         itemId: item.id,
         success: true,
-        bookingId: res.transactionRef || 'N/A', // Tạm lưu transactionRef
+        bookingId: res.transactionRef || 'N/A',
         error: null
       }));
       setSubmitResults(results);
 
-      // Nếu ONLINE có link VNPay -> redirect
       if (paymentMethod === 'ONLINE' && res.paymentRedirectUrl) {
         window.location.href = res.paymentRedirectUrl;
         return;
       }
 
-      // Xử lý CASH -> Chuyển hướng Success
       navigate('/booking/success');
 
     } catch (err) {
@@ -88,7 +85,6 @@ export default function BookingStep3Confirm() {
         return;
       }
 
-      // Đánh dấu thất bại cho tất cả (Vì giao dịch nguyên tử)
       const results = bookingItems.map(item => ({
         itemId: item.id,
         success: false,

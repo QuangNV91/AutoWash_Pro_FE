@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/layout/PageWrapper';
 import { User, Calendar, History, Star, Settings, LogOut, Car, Clock, MapPin, ChevronRight, CheckCircle2, Clock3, Loader2 } from 'lucide-react';
 import { getBookingHistory, cancelBooking } from '../../services/bookingService';
+import { TIER_DISCOUNTS } from '../../store/bookingStore';
 import toast from 'react-hot-toast';
 
 // MOCK DATA
@@ -347,7 +348,17 @@ export default function UserDashboard() {
                         </div>
                         <div className="text-left sm:text-right">
                           <p className="text-sm text-white/40 mb-1">Tổng thanh toán</p>
-                          <p className="font-medium text-lg text-white">{booking.price.toLocaleString('vi-VN')}đ</p>
+                          <div className="flex flex-col sm:items-end">
+                            {TIER_DISCOUNTS[user.tier] > 0 && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
+                                <p className="text-sm text-white/40 line-through">{booking.price.toLocaleString('vi-VN')}đ</p>
+                              </div>
+                            )}
+                            <p className="font-medium text-lg text-cyan-400">
+                              {(booking.price * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                            </p>
+                          </div>
                           <p className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded inline-block mt-1">
                             {booking.paymentMethod === 'ONLINE' ? 'Đã thanh toán Online' : 'Thanh toán tại cửa hàng'}
                           </p>
@@ -434,7 +445,17 @@ export default function UserDashboard() {
                           </div>
                         </div>
                         <div className="text-left sm:text-right">
-                          <p className="font-medium text-lg text-white">{booking.price.toLocaleString('vi-VN')}đ</p>
+                          <div className="flex flex-col sm:items-end">
+                            {TIER_DISCOUNTS[user.tier] > 0 && (
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="text-[10px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
+                                <p className="text-xs text-white/40 line-through">{booking.price.toLocaleString('vi-VN')}đ</p>
+                              </div>
+                            )}
+                            <p className="font-medium text-lg text-cyan-400">
+                              {(booking.price * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                            </p>
+                          </div>
                           {booking.status === 'CANCELLED' && booking.penaltyPoints > 0 && (
                             <p className="text-xs text-red-400 mt-1">Đã trừ {booking.penaltyPoints} điểm</p>
                           )}

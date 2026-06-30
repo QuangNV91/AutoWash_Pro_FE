@@ -43,9 +43,9 @@ export default function BookingStep2DateTime() {
 
     for (const item of bookingItems) {
       if (!item.service) continue;
-      
+
       setItemSlotsLoading(item.id, true);
-      
+
       try {
         const slots = await getAvailableSlots(date, item.service.id);
         setItemSlots(item.id, slots, false, null);
@@ -83,7 +83,7 @@ export default function BookingStep2DateTime() {
   };
 
   // Tier labels
-  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Bạch kim' };
+  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Kim Cương' };
 
   // Check nếu không có service nào
   if (bookingItems.length === 0 || !bookingItems[0].service) return null;
@@ -92,7 +92,7 @@ export default function BookingStep2DateTime() {
     <PageWrapper title="Chọn thời gian">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="mb-8 relative">
-          <button 
+          <button
             onClick={handleBack}
             className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
           >
@@ -115,8 +115,8 @@ export default function BookingStep2DateTime() {
                   Hạng {tierLabels[userTier]} (Tối đa {maxDays} ngày tới)
                 </span>
               </div>
-              <DateStrip 
-                selectedDate={selectedDate} 
+              <DateStrip
+                selectedDate={selectedDate}
                 onSelectDate={handleDateSelect}
                 maxDays={maxDays}
               />
@@ -125,7 +125,7 @@ export default function BookingStep2DateTime() {
             {/* Time Selection — riêng cho từng xe */}
             {bookingItems.map((item, index) => {
               const conflictSlots = getConflictingSlots(item.id);
-              
+
               return (
                 <div key={item.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6">
                   {/* Header xe */}
@@ -189,7 +189,7 @@ export default function BookingStep2DateTime() {
 
           {/* Right Column: Booking Summary */}
           <div className="lg:col-span-1 lg:mt-[56px] lg:sticky lg:top-28 lg:self-start z-10">
-            <BookingSummaryCard 
+            <BookingSummaryCard
               onNext={handleNext}
               canProceed={step2Valid}
             />
