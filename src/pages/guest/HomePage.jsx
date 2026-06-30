@@ -1,12 +1,24 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Footer from '../../components/layout/Footer';
 import { Clock, ShieldCheck, PenTool, Award, Star, User } from 'lucide-react';
+import { getServices } from '../../services/bookingService';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('token');
   const location = useLocation();
+  const [apiServices, setApiServices] = useState({});
+
+  useEffect(() => {
+    getServices().then(data => {
+      const map = {};
+      if (Array.isArray(data)) {
+        data.forEach(s => map[s.name || s.serviceName] = s);
+      }
+      setApiServices(map);
+    }).catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (location.hash) {
@@ -206,7 +218,12 @@ export default function HomePage() {
                   desc: 'Chăm sóc toàn diện sơn xe, kính & nội thất',
                   img: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=2070&auto=format&fit=crop'
                 }
-              ].map((service, idx) => (
+              ].map((service, idx) => {
+                const apiData = apiServices[service.title];
+                const displayPrice = apiData ? (apiData.basePrice ?? apiData.base_price ?? apiData.price).toLocaleString('vi-VN') + 'đ' : service.price;
+                const displayTime = apiData ? (apiData.durationMinutes ?? apiData.duration_minutes ?? apiData.duration) + ' phút' : service.time;
+
+                return (
                 <div key={idx} className="bg-neutral-900/40 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.1)] transition-all duration-300 group">
                   <div className="aspect-[4/3] relative overflow-hidden">
                     <div className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700" style={{ backgroundImage: `url(${service.img})` }}></div>
@@ -220,10 +237,10 @@ export default function HomePage() {
                   <div className="p-6">
                     <h3 className="font-hero text-xl font-medium text-white mb-2 group-hover:text-cyan-400 transition-colors">{service.title}</h3>
                     <div className="flex items-center gap-3 mb-4">
-                      <span className="text-white font-medium">{service.price}</span>
+                      <span className="text-white font-medium">{displayPrice}</span>
                       <span className="text-white/30">•</span>
                       <span className="text-white/60 text-sm flex items-center gap-1">
-                        <Clock size={14} /> {service.time}
+                        <Clock size={14} /> {displayTime}
                       </span>
                     </div>
                     <p className="text-white/60 text-sm mb-6 leading-relaxed">{service.desc}</p>
@@ -235,7 +252,7 @@ export default function HomePage() {
                     </button>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         </section>

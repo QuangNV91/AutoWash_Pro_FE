@@ -2,12 +2,12 @@ import { Calendar, Clock, Car, Star } from 'lucide-react';
 import useBookingStore from '../../store/bookingStore';
 
 export default function BookingSummaryCard({ onNext, canProceed = true }) {
-  const { 
-    bookingItems, 
-    selectedDate, 
+  const {
+    bookingItems,
+    selectedDate,
     paymentMethod,
     userTier,
-    getTotalPrice, 
+    getTotalPrice,
     getTotalPoints,
     getDiscount,
     getDiscountedTotal,
@@ -20,7 +20,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
   const discountedTotal = getDiscountedTotal();
   const discountAmount = totalPrice - discountedTotal;
 
-  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Bạch kim' };
+  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Kim Cương' };
 
   // Empty state
   if (!hasAnyService && !selectedDate) {
@@ -29,7 +29,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
         <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-white/40 mb-4 border border-white/10">
           <Car size={32} />
         </div>
-        <p className="text-white/40">Chưa có thông tin đặt lịch.<br/>Vui lòng chọn dịch vụ để bắt đầu.</p>
+        <p className="text-white/40">Chưa có thông tin đặt lịch.<br />Vui lòng chọn dịch vụ để bắt đầu.</p>
       </div>
     );
   }
@@ -42,7 +42,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
         </h3>
         <p className="text-xs text-white/40 mt-1">{bookingItems.length} xe trong đơn</p>
       </div>
-      
+
       <div className="p-6 space-y-4 max-h-[400px] overflow-y-auto scrollbar-hide">
         {/* Danh sách xe */}
         {bookingItems.map((item, index) => (
@@ -69,7 +69,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
                 </p>
               )}
             </div>
-            
+
             {/* Giờ đã chọn */}
             {item.selectedTime && (
               <div className="flex items-center gap-2 mt-2 text-xs text-white/60">
@@ -106,7 +106,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
                 {totalPrice.toLocaleString('vi-VN')}đ
               </span>
             </div>
-            
+
             <div className={`flex justify-between items-center text-sm ${discount > 0 ? 'text-green-400' : 'text-white/60'}`}>
               <span>Chiết khấu hạng {tierLabels[userTier]} ({discount * 100}%):</span>
               <span className="font-medium">
@@ -130,14 +130,14 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
               </span>
             </div>
           </div>
-          
+
           {onNext && (
             <button
               onClick={onNext}
               disabled={!canProceed}
               className={`w-full py-3.5 font-medium rounded-full transition-all duration-300 text-sm
-                ${canProceed 
-                  ? 'bg-white text-black hover:bg-neutral-200' 
+                ${canProceed
+                  ? 'bg-white text-black hover:bg-neutral-200'
                   : 'bg-white/5 text-white/40 cursor-not-allowed border border-white/10'}
               `}
             >
