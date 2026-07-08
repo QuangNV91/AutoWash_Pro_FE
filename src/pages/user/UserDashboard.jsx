@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/layout/PageWrapper';
 import { User, Calendar, History, Star, Settings, LogOut, Car, Clock, MapPin, ChevronRight, CheckCircle2, Clock3, Loader2 } from 'lucide-react';
 import { getBookingHistory, cancelBooking } from '../../services/bookingService';
+import api from '../../services/api';
 import { TIER_DISCOUNTS } from '../../store/bookingStore';
 import toast from 'react-hot-toast';
 
@@ -45,25 +46,44 @@ const MOCK_BOOKINGS = [
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('bookings'); // bookings, history, profile
+  const [activeTab, setActiveTab] = useState('bookings'); // bookings, history, profile, loyalty
   const [user, setUser] = useState(MOCK_USER);
   const [bookings, setBookings] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cancelModal, setCancelModal] = useState({ isOpen: false, booking: null, policy: null });
 
   useEffect(() => {
-    const fetchHistory = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
         const data = await getBookingHistory();
         setBookings(data);
+
+        // Fetch User Loyalty Info
+        try {
+          const myRes = await api.get('/api/loyalty/my');
+          if (myRes.data?.success) {
+            setUser(prev => ({ 
+              ...prev, 
+              points: myRes.data.data.points, 
+              tier: myRes.data.data.tier 
+            }));
+          }
+          const transRes = await api.get('/api/loyalty/transactions');
+          if (transRes.data?.success) {
+            setTransactions(transRes.data.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch loyalty info", err);
+        }
       } catch (error) {
         console.error("Failed to fetch bookings", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchHistory();
+    fetchData();
   }, []);
 
   // DEBUG
@@ -280,6 +300,18 @@ export default function UserDashboard() {
                 <div className="flex items-center gap-3">
                   <Settings size={18} />
                   <span className="font-medium">Cài đặt tài khoản</span>
+                </div>
+                <ChevronRight size={16} />
+              </button>
+
+              <button
+                onClick={() => setActiveTab('loyalty')}
+                className={`w-full flex items-center justify-between px-6 py-4 text-left transition-colors border-l-2
+                  ${activeTab === 'loyalty' ? 'bg-white/5 border-white text-white' : 'border-transparent text-white/60 hover:bg-white/5 hover:text-white'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <Star size={18} />
+                  <span className="font-medium">Lịch sử điểm thưởng</span>
                 </div>
                 <ChevronRight size={16} />
               </button>
@@ -542,6 +574,52 @@ export default function UserDashboard() {
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'loyalty' && (
+              <div className="space-y-6">
+                <div className="mb-6">
+                  <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Lịch sử điểm thưởng</h2>
+                  <p className="text-white/60 mt-1">Theo dõi quá trình tích lũy và sử dụng điểm của bạn.</p>
+                </div>
+
+                <div className="space-y-4">
+                  {isLoading ? (
+                    <div className="flex flex-col items-center justify-center p-12 text-white/60">
+                      <Loader2 size={32} className="animate-spin mb-4" />
+                      <p>Đang tải dữ liệu...</p>
+                    </div>
+                  ) : transactions.length === 0 ? (
+                    <div className="bg-neutral-950 border border-white/5 rounded-2xl p-12 text-center">
+                      <p className="text-white/60">Bạn chưa có giao dịch điểm nào.</p>
+                    </div>
+                  ) : (
+                    transactions.map((txn, index) => (
+                      <div key={txn.id || index} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 flex justify-between items-center hover:border-white/10 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${txn.transactionType === 'EARN' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                            <Star size={24} />
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">
+                              {txn.transactionType === 'EARN' ? 'Tích điểm dịch vụ' : 'Đổi điểm / Trừ điểm'}
+                            </p>
+                            <p className="text-sm text-white/40 mt-1">
+                              {new Date(txn.createdAt).toLocaleDateString('vi-VN')} {new Date(txn.createdAt).toLocaleTimeString('vi-VN')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-xl font-mono font-medium ${txn.transactionType === 'EARN' ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {txn.transactionType === 'EARN' ? '+' : ''}{txn.pointChange}
+                          </p>
+                          <p className="text-xs text-white/40 mt-1">Số dư: {txn.balanceAfter}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}

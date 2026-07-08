@@ -109,7 +109,7 @@ export default function StaffCheckin() {
           today = savedDate;
         }
 
-        const res = await api.get('/api/v1/bookings/admin/all');
+        const res = await api.get('/api/bookings');
         
         if (res.data?.success && res.data.data) {
           const dayBookings = res.data.data.filter(b => b.bookingDate === today);

@@ -51,7 +51,7 @@ export default function StaffPayment() {
       }
 
       try {
-        const res = await api.get('/api/v1/bookings/admin/all');
+        const res = await api.get('/api/bookings');
         if (res.data?.success && res.data.data) {
           // Filter for COMPLETED and not paid
           // We assume paymentStatus !== 'PAID' or paymentMethod === 'CASH'

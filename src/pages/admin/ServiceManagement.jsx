@@ -64,7 +64,6 @@ export default function ServiceManagement() {
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
   };
 
-  // Fetch all services from BE on mount
   const fetchServices = async () => {
     try {
       setLoading(true);

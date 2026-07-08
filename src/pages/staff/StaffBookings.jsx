@@ -115,7 +115,7 @@ export default function StaffBookings() {
         const dateStr = localDate.toISOString().split('T')[0];
         
         // Use the existing all bookings API since the date specific one might not exist
-        const res = await api.get('/api/v1/bookings/admin/all');
+        const res = await api.get('/api/bookings');
         
         if (res.data?.success && res.data.data) {
           // Filter by selected date on the frontend

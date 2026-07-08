@@ -1,7 +1,6 @@
 import api from './api';
 
-// ============ MOCK DATA ============
-// Sẽ xóa khi có Backend thật
+
 
 const MOCK_SERVICES = [
   {
