@@ -4,7 +4,7 @@ import { Tag, Plus, Ticket, Percent, Power, DollarSign } from 'lucide-react';
 const PROMOS = [
   { id: 'PRM-001', code: 'SUMMER2026', type: 'PERCENT', value: 20, maxDiscount: 100000, usage: 45, limit: 100, isActive: true },
   { id: 'PRM-002', code: 'NEWBIE50K', type: 'FIXED', value: 50000, maxDiscount: 50000, usage: 120, limit: 200, isActive: true },
-  { id: 'PRM-003', code: 'WASHFREE', type: 'PERCENT', value: 100, maxDiscount: 40000, usage: 50, limit: 50, isActive: false },
+  { id: 'PRM-003', code: 'WASHFREE', type: 'PERCENT', value: 100, maxDiscount: 50000, usage: 50, limit: 50, isActive: false },
 ];
 
 export default function PromotionManagement() {

@@ -13,10 +13,10 @@ const PRICING_PLANS = [
     subtitle: 'Gói Cơ Bản',
     label: 'GÓI CƠ BẢN',
     badge: null,
-    price: '40.000',
-    priceRaw: 40000,
+    price: '50.000',
+    priceRaw: 50000,
     duration: '15 phút',
-    points: '+40 điểm',
+    points: '+50 điểm',
     themeColor: 'cyan',
     featured: false,
     features: [

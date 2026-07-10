@@ -198,7 +198,7 @@ export default function HomePage() {
               {[
                 {
                   title: 'Eco Wash',
-                  price: '40.000đ',
+                  price: '50.000đ',
                   time: '15 phút',
                   desc: 'Nhanh gọn, sạch bóng — lý tưởng cho người bận rộn',
                   img: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?q=80&w=2069&auto=format&fit=crop'

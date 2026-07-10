@@ -37,7 +37,7 @@ const MOCK_BOOKINGS = [
     date: '2026-06-01',
     time: '14:30',
     status: 'COMPLETED',
-    price: 40000,
+    price: 50000,
     paymentMethod: 'CASH',
     paymentStatus: 'PAID',
     createdAt: '2026-05-30T16:20:00Z'
@@ -67,7 +67,9 @@ export default function UserDashboard() {
             setUser(prev => ({ 
               ...prev, 
               points: myRes.data.data.points, 
-              tier: myRes.data.data.tier 
+              tier: myRes.data.data.tier,
+              fullName: myRes.data.data.fullName || prev.fullName,
+              phone: myRes.data.data.phone || prev.phone
             }));
           }
           const transRes = await api.get('/api/loyalty/transactions');
@@ -384,11 +386,11 @@ export default function UserDashboard() {
                             {TIER_DISCOUNTS[user.tier] > 0 && (
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
-                                <p className="text-sm text-white/40 line-through">{booking.price.toLocaleString('vi-VN')}đ</p>
+                                <p className="text-sm text-white/40 line-through">{(booking.price || 0).toLocaleString('vi-VN')}đ</p>
                               </div>
                             )}
                             <p className="font-medium text-lg text-cyan-400">
-                              {(booking.price * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                              {((booking.price || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
                             </p>
                           </div>
                           <p className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded inline-block mt-1">
@@ -481,11 +483,11 @@ export default function UserDashboard() {
                             {TIER_DISCOUNTS[user.tier] > 0 && (
                               <div className="flex items-center gap-2 mb-0.5">
                                 <span className="text-[10px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
-                                <p className="text-xs text-white/40 line-through">{booking.price.toLocaleString('vi-VN')}đ</p>
+                                <p className="text-xs text-white/40 line-through">{(booking.price || 0).toLocaleString('vi-VN')}đ</p>
                               </div>
                             )}
                             <p className="font-medium text-lg text-cyan-400">
-                              {(booking.price * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                              {((booking.price || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
                             </p>
                           </div>
                           {booking.status === 'CANCELLED' && booking.penaltyPoints > 0 && (

@@ -3,7 +3,7 @@ import { Search, Download, CheckCircle2, AlertCircle, Receipt } from 'lucide-rea
 
 const PAYMENTS = [
   { id: 'INV-260614-01', date: '14/06/2026 14:30', customer: 'Nguyễn Văn An', service: 'Premium Care', amount: 150000, method: 'BANK_TRANSFER', status: 'PAID' },
-  { id: 'INV-260614-02', date: '14/06/2026 15:00', customer: 'Trần Thị Bình', service: 'Eco Wash', amount: 40000, method: 'CASH', status: 'UNPAID' },
+  { id: 'INV-260614-02', date: '14/06/2026 15:00', customer: 'Trần Thị Bình', service: 'Eco Wash', amount: 50000, method: 'CASH', status: 'UNPAID' },
   { id: 'INV-260614-03', date: '14/06/2026 13:00', customer: 'Lê Hoàng Cường', service: 'Ceramic Shield', amount: 800000, method: 'MOMO', status: 'PAID' },
   { id: 'INV-260614-04', date: '14/06/2026 11:00', customer: 'Phạm Minh Đức', service: 'Detailing & Shine', amount: 350000, method: 'CASH', status: 'PAID' },
 ];
@@ -60,7 +60,7 @@ export default function PaymentManagement() {
         <div className="bg-neutral-950 border border-white/5 rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
           <p className="text-[10px] text-white/40 font-mono tracking-widest uppercase mb-2">Chờ thu (Công nợ)</p>
-          <p className="text-3xl font-hero text-red-400">40.000<span className="text-sm ml-1 text-white/40">đ</span></p>
+          <p className="text-3xl font-hero text-red-400">50.000<span className="text-sm ml-1 text-white/40">đ</span></p>
         </div>
         <div className="bg-neutral-950 border border-white/5 rounded-2xl p-5 flex flex-col justify-between">
           <p className="text-[10px] text-white/40 font-mono tracking-widest uppercase mb-2">Tiền mặt</p>

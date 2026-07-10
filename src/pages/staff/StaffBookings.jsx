@@ -8,13 +8,13 @@ import { updateBookingStatus } from '../../services/bookingService'
 import toast from 'react-hot-toast'
 
 const TODAY_BOOKINGS = [
-  { id: 'BKG-10310', time: '08:00', plate: '30A-123.45', customer: 'Nguyễn Văn An',   service: 'Eco Wash',          duration: 15,  status: 'COMPLETED', payment: 'PAID',   price: 40000  },
+  { id: 'BKG-10310', time: '08:00', plate: '30A-123.45', customer: 'Nguyễn Văn An',   service: 'Eco Wash',          duration: 15,  status: 'COMPLETED', payment: 'PAID',   price: 50000  },
   { id: 'BKG-10311', time: '08:15', plate: '51F-111.11', customer: 'Lê Hoàng Cường',  service: 'Premium Care',       duration: 30,  status: 'COMPLETED', payment: 'PAID',   price: 150000 },
   { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',   service: 'Detailing & Shine',  duration: 60,  status: 'WORKING',   payment: 'UNPAID', price: 350000 },
-  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 40000  },
+  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 50000  },
   { id: 'BKG-10314', time: '10:30', plate: '—',          customer: 'Võ Thị Em',       service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'UNPAID', price: 150000 },
   { id: 'BKG-10315', time: '11:00', plate: '—',          customer: 'Đỗ Văn Phúc',     service: 'Ceramic Shield',     duration: 120, status: 'PENDING',   payment: 'PAID',   price: 800000 },
-  { id: 'BKG-10316', time: '13:30', plate: '—',          customer: 'Hoàng Thị Lan',   service: 'Eco Wash',          duration: 15,  status: 'PENDING',   payment: 'UNPAID', price: 40000  },
+  { id: 'BKG-10316', time: '13:30', plate: '—',          customer: 'Hoàng Thị Lan',   service: 'Eco Wash',          duration: 15,  status: 'PENDING',   payment: 'UNPAID', price: 50000  },
   { id: 'BKG-10317', time: '14:00', plate: '—',          customer: 'Bùi Văn Khánh',   service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'PAID',   price: 150000 },
   { id: 'BKG-10318', time: '15:00', plate: '—',          customer: 'Ngô Minh Tuấn',   service: 'Detailing & Shine',  duration: 60,  status: 'PENDING',   payment: 'UNPAID', price: 350000 },
 ]
@@ -52,7 +52,7 @@ export default function StaffBookings() {
   const [editService, setEditService] = useState('')
 
   const [servicesMap, setServicesMap] = useState({
-    'Eco Wash': { price: 40000, duration: 15 },
+    'Eco Wash': { price: 50000, duration: 15 },
     'Premium Care': { price: 150000, duration: 30 },
     'Detailing & Shine': { price: 350000, duration: 60 },
     'Ceramic Shield': { price: 800000, duration: 120 }
@@ -88,7 +88,7 @@ export default function StaffBookings() {
   useEffect(() => {
     const fetchData = async () => {
       let currentServicesMap = {
-        'Eco Wash': { price: 40000, duration: 15 },
+        'Eco Wash': { price: 50000, duration: 15 },
         'Premium Care': { price: 150000, duration: 30 },
         'Detailing & Shine': { price: 350000, duration: 60 },
         'Ceramic Shield': { price: 800000, duration: 120 }

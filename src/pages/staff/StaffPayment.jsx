@@ -31,7 +31,7 @@ export default function StaffPayment() {
   useEffect(() => {
     const fetchData = async () => {
       let currentServicesMap = {
-        'Eco Wash': { price: 40000, points: 40 },
+        'Eco Wash': { price: 50000, points: 50 },
         'Premium Care': { price: 150000, points: 150 },
         'Detailing & Shine': { price: 350000, points: 350 },
         'Ceramic Shield': { price: 800000, points: 800 }
@@ -53,9 +53,16 @@ export default function StaffPayment() {
       try {
         const res = await api.get('/api/bookings');
         if (res.data?.success && res.data.data) {
-          // Filter for COMPLETED and not paid
-          // We assume paymentStatus !== 'PAID' or paymentMethod === 'CASH'
-          const unpaid = res.data.data.filter(b => b.status === 'COMPLETED' && (!b.paymentStatus || b.paymentStatus !== 'PAID'));
+          const paidStr = localStorage.getItem('paidBookings');
+          const paidList = paidStr ? JSON.parse(paidStr) : [];
+          
+          const offset = new Date().getTimezoneOffset();
+          const localDate = new Date(new Date().getTime() - (offset * 60 * 1000));
+          const today = localDate.toISOString().split('T')[0];
+
+          // Filter for COMPLETED and not paid, and only show today's bookings
+          // We check if paymentMethod is absent and the booking ID is not in our local paidList
+          const unpaid = res.data.data.filter(b => b.status === 'COMPLETED' && !b.paymentMethod && !paidList.includes(b.id) && b.bookingDate === today);
           
           const formatted = unpaid.map(b => ({
             id: `BKG-${b.id}`,
@@ -117,6 +124,14 @@ export default function StaffPayment() {
         paymentMethod: method, 
         paymentStatus: 'PAID' 
       });
+
+      // Save to local storage since backend doesn't persist paymentMethod
+      const paidStr = localStorage.getItem('paidBookings');
+      let paidList = paidStr ? JSON.parse(paidStr) : [];
+      if (!paidList.includes(selected.realId)) {
+        paidList.push(selected.realId);
+        localStorage.setItem('paidBookings', JSON.stringify(paidList));
+      }
       
       setPaid(true)
       setBookings(prev => prev.filter(b => b.id !== selected.id))

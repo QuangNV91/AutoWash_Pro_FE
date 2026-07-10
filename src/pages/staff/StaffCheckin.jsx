@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 
 const MOCK_BOOKINGS = [
   { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',   phone: '0912345678', service: 'Detailing & Shine', duration: 60,  status: 'WORKING',   payment: 'UNPAID', price: 350000, startedAt: Date.now() - 22 * 60 * 1000 },
-  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   phone: '0933444555', service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 40000,  startedAt: null },
+  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   phone: '0933444555', service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 50000,  startedAt: null },
   { id: 'BKG-10314', time: '10:30', plate: '—',          customer: 'Võ Thị Em',       phone: '0977123456', service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'UNPAID', price: 150000, startedAt: null },
   { id: 'BKG-10315', time: '11:00', plate: '—',          customer: 'Đỗ Văn Phúc',     phone: '0908876543', service: 'Ceramic Shield',     duration: 120, status: 'PENDING',   payment: 'PAID',   price: 800000, startedAt: null },
 ]
@@ -66,7 +66,7 @@ export default function StaffCheckin() {
   const [selectedService, setSelectedService] = useState('')
   
   const [servicesMap, setServicesMap] = useState({
-    'Eco Wash': { price: 40000, duration: 15 },
+    'Eco Wash': { price: 50000, duration: 15 },
     'Premium Care': { price: 150000, duration: 30 },
     'Detailing & Shine': { price: 350000, duration: 60 },
     'Ceramic Shield': { price: 800000, duration: 120 }
@@ -75,7 +75,7 @@ export default function StaffCheckin() {
   useEffect(() => {
     const fetchData = async () => {
       let currentServicesMap = {
-        'Eco Wash': { price: 40000, duration: 15 },
+        'Eco Wash': { price: 50000, duration: 15 },
         'Premium Care': { price: 150000, duration: 30 },
         'Detailing & Shine': { price: 350000, duration: 60 },
         'Ceramic Shield': { price: 800000, duration: 120 }

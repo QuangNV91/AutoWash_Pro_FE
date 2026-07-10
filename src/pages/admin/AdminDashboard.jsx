@@ -17,7 +17,7 @@ const METRICS = [
   { label: 'Doanh thu', value: '3.450.000', unit: 'đ', baseline: 'Hôm qua: 3.100.000đ', change: '+11.2%', isUp: true, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   { label: 'Xe trong sân', value: '3', unit: 'xe', baseline: 'Sức chứa an toàn: 8', change: 'Ổn định', isUp: true, icon: Car, color: 'text-amber-400', bg: 'bg-amber-500/10' },
   { label: 'Tiến độ ngày', value: '18/24', unit: 'slot', baseline: 'Hoàn thành / Tổng lịch', change: '75%', isUp: true, icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-  { label: 'Chờ thu tiền', value: '2', unit: 'xe', baseline: 'Tổng giá trị: 840.000đ', change: 'Cần chú ý', isUp: false, icon: CreditCard, color: 'text-red-400', bg: 'bg-red-500/10' }
+  { label: 'Chờ thu tiền', value: '2', unit: 'xe', baseline: 'Tổng giá trị: 850.000đ', change: 'Cần chú ý', isUp: false, icon: CreditCard, color: 'text-red-400', bg: 'bg-red-500/10' }
 ];
 
 const REVENUE_BREAKDOWN = [
@@ -45,7 +45,7 @@ const LIVE_STAFF = [
 const TODAY_SCHEDULE = [
   { id: 'BKG-10310', time: '13:00 - 14:00', plate: '51F-111.11', customer: 'Lê Hoàng Cường', service: 'Ceramic Shield', status: 'COMPLETED', payment: 'UNPAID', price: 800000 },
   { id: 'BKG-10311', time: '14:00 - 15:00', plate: '30A-123.45', customer: 'Nguyễn Văn An', service: 'Premium Care', status: 'WORKING', payment: 'PAID', price: 150000 },
-  { id: 'BKG-10312', time: '14:00 - 15:00', plate: '29C-888.88', customer: 'Trần Thị Bình', service: 'Eco Wash', status: 'WORKING', payment: 'UNPAID', price: 40000 },
+  { id: 'BKG-10312', time: '14:00 - 15:00', plate: '29C-888.88', customer: 'Trần Thị Bình', service: 'Eco Wash', status: 'WORKING', payment: 'UNPAID', price: 50000 },
   { id: 'BKG-10313', time: '15:00 - 16:00', plate: '60A-999.99', customer: 'Phạm Minh Đức', service: 'Detailing & Shine', status: 'ARRIVED', payment: 'PAID', price: 350000 },
   { id: 'BKG-10314', time: '16:00 - 17:00', plate: 'Chưa cập nhật', customer: 'Võ Thị Em', service: 'Premium Care', status: 'PENDING', payment: 'UNPAID', price: 150000 },
 ];

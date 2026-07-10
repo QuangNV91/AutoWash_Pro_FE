@@ -13,7 +13,7 @@ const SERVICE_BLOCKS = [
     badgeText: null,
     name: 'Eco Wash',
     subtitle: 'Nhanh gọn, sạch bóng — lý tưởng cho người bận rộn',
-    price: '40.000đ',
+    price: '50.000đ',
     duration: '15 phút',
     points: '+40 điểm tích lũy',
     themeColor: 'cyan',
