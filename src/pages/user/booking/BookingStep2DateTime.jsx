@@ -157,6 +157,7 @@ export default function BookingStep2DateTime() {
                     loading={item.slotsLoading}
                     error={item.slotsError}
                     hasDate={!!selectedDate}
+                    selectedDate={selectedDate}
                   />
                 </div>
               );

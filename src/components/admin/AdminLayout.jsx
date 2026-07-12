@@ -13,7 +13,6 @@ const NAV_ITEMS = [
   { key: 'staff-schedule', icon: UserCog, label: 'Lịch trực & Phép', to: '/admin/staff-schedule' },
   { key: 'customers', icon: Users, label: 'Khách hàng', to: '/admin/customers' },
   { key: 'payments', icon: CreditCard, label: 'Thanh toán', to: '/admin/payments' },
-  { key: 'promotions', icon: Tag, label: 'Khuyến mãi', to: '/admin/promotions' },
   { key: 'reports', icon: BarChart3, label: 'Báo cáo', to: '/admin/reports' },
   { key: 'profile', icon: User, label: 'Hồ sơ cá nhân', to: '/admin/profile' },
   { key: 'settings', icon: Settings, label: 'Cài đặt', to: '/admin/settings' },
@@ -130,3 +129,4 @@ export default function AdminLayout() {
     </div>
   )
 }
+

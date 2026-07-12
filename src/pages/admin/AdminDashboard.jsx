@@ -1,53 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  AlertTriangle, Clock, TrendingUp, TrendingDown, DollarSign, 
+import {
+  AlertTriangle, Clock, TrendingUp, TrendingDown, DollarSign,
   Car, ShieldAlert, ArrowUpRight, CreditCard,
-  Gauge, Activity, Play
+  Gauge, Activity, Play, Loader2, Calendar
 } from 'lucide-react';
-
-// ============ MOCK DATA ============
+import api from '../../services/api';
 
 const ALERTS = [
-  { id: 1, type: 'danger', message: 'CẢNH BÁO: Xe 51F-111.11 đã hoàn thành hơn 15 phút nhưng chưa thanh toán.', time: '14:20' },
-  { id: 2, type: 'warning', message: 'VẬN HÀNH: Slot 15:00 - 16:00 đang trống 100%, có thể nhận thêm khách vãng lai.', time: '14:30' }
-];
-
-const METRICS = [
-  { label: 'Doanh thu', value: '3.450.000', unit: 'đ', baseline: 'Hôm qua: 3.100.000đ', change: '+11.2%', isUp: true, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  { label: 'Xe trong sân', value: '3', unit: 'xe', baseline: 'Sức chứa an toàn: 8', change: 'Ổn định', isUp: true, icon: Car, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-  { label: 'Tiến độ ngày', value: '18/24', unit: 'slot', baseline: 'Hoàn thành / Tổng lịch', change: '75%', isUp: true, icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-  { label: 'Chờ thu tiền', value: '2', unit: 'xe', baseline: 'Tổng giá trị: 850.000đ', change: 'Cần chú ý', isUp: false, icon: CreditCard, color: 'text-red-400', bg: 'bg-red-500/10' }
-];
-
-const REVENUE_BREAKDOWN = [
-  { name: 'Ceramic Shield', revenue: 1600000, count: 2, percent: 46, color: 'bg-amber-500', text: 'text-amber-400' },
-  { name: 'Detailing & Shine', revenue: 1050000, count: 3, percent: 30, color: 'bg-emerald-500', text: 'text-emerald-400' },
-  { name: 'Premium Care', revenue: 600000, count: 4, percent: 18, color: 'bg-purple-500', text: 'text-purple-400' },
-  { name: 'Eco Wash', revenue: 200000, count: 5, percent: 6, color: 'bg-cyan-500', text: 'text-cyan-400' },
+  { id: 1, type: 'warning', message: 'VẬN HÀNH: Đây là bảng điều khiển thời gian thực.', time: new Date().toLocaleTimeString() }
 ];
 
 const LIVE_STAFF = [
-  { 
-    id: 'NV-01', name: 'Nguyễn Văn Tèo', status: 'WORKING', 
-    car: '30A-123.45', service: 'Premium Care', 
+  {
+    id: 'NV-01', name: 'Nguyễn Văn Tèo', status: 'WORKING',
+    car: '30A-123.45', service: 'Premium Care',
     progress: 75, timeElapsed: '22', timeTotal: '30',
     accent: 'bg-cyan-500'
   },
-  { 
-    id: 'NV-02', name: 'Trần Văn Tí', status: 'WORKING', 
-    car: '29C-888.88', service: 'Eco Wash', 
+  {
+    id: 'NV-02', name: 'Trần Văn Tí', status: 'WORKING',
+    car: '29C-888.88', service: 'Eco Wash',
     progress: 33, timeElapsed: '5', timeTotal: '15',
     accent: 'bg-purple-500'
   }
-];
-
-const TODAY_SCHEDULE = [
-  { id: 'BKG-10310', time: '13:00 - 14:00', plate: '51F-111.11', customer: 'Lê Hoàng Cường', service: 'Ceramic Shield', status: 'COMPLETED', payment: 'UNPAID', price: 800000 },
-  { id: 'BKG-10311', time: '14:00 - 15:00', plate: '30A-123.45', customer: 'Nguyễn Văn An', service: 'Premium Care', status: 'WORKING', payment: 'PAID', price: 150000 },
-  { id: 'BKG-10312', time: '14:00 - 15:00', plate: '29C-888.88', customer: 'Trần Thị Bình', service: 'Eco Wash', status: 'WORKING', payment: 'UNPAID', price: 50000 },
-  { id: 'BKG-10313', time: '15:00 - 16:00', plate: '60A-999.99', customer: 'Phạm Minh Đức', service: 'Detailing & Shine', status: 'ARRIVED', payment: 'PAID', price: 350000 },
-  { id: 'BKG-10314', time: '16:00 - 17:00', plate: 'Chưa cập nhật', customer: 'Võ Thị Em', service: 'Premium Care', status: 'PENDING', payment: 'UNPAID', price: 150000 },
 ];
 
 const STATUS_CONFIG = {
@@ -62,15 +38,13 @@ const PAYMENT_CONFIG = {
   PAID: { label: 'ĐÃ TT', style: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' }
 };
 
-// ============ SUB COMPONENTS ============
-
 const LiveClock = () => {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-  
+
   return (
     <div className="font-mono text-3xl font-light tracking-tight text-cyan-400 flex items-center gap-3">
       <Clock size={24} className="text-cyan-500/50" />
@@ -85,11 +59,11 @@ const StatCard = ({ stat }) => {
     <div className="bg-neutral-950 border border-white/5 hover:border-white/10 transition-all duration-300 rounded-2xl p-5 group flex flex-col justify-between">
       <div className="flex items-start justify-between mb-4">
         <div>
-           <p className="text-[11px] text-white/40 font-mono tracking-widest uppercase mb-1">{stat.label}</p>
-           <div className="flex items-baseline gap-1">
-             <h3 className={`text-3xl font-hero tracking-tight ${stat.color}`}>{stat.value}</h3>
-             <span className="text-sm font-mono text-white/40">{stat.unit}</span>
-           </div>
+          <p className="text-[11px] text-white/40 font-mono tracking-widest uppercase mb-1">{stat.label}</p>
+          <div className="flex items-baseline gap-1">
+            <h3 className={`text-3xl font-hero tracking-tight ${stat.color}`}>{stat.value}</h3>
+            <span className="text-sm font-mono text-white/40">{stat.unit}</span>
+          </div>
         </div>
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color}`}>
           <Icon size={20} />
@@ -98,7 +72,7 @@ const StatCard = ({ stat }) => {
       <div className="flex justify-between items-end mt-2 pt-4 border-t border-white/5">
         <span className="text-[10px] text-white/30 font-mono tracking-wide">{stat.baseline}</span>
         <span className={`flex items-center gap-1 text-[10px] font-mono tracking-widest px-2 py-1 rounded bg-white/5 ${stat.isUp ? 'text-emerald-400' : 'text-red-400'}`}>
-          {stat.isUp ? <TrendingUp size={12}/> : <TrendingDown size={12}/>}
+          {stat.isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
           {stat.change}
         </span>
       </div>
@@ -106,14 +80,73 @@ const StatCard = ({ stat }) => {
   );
 };
 
-// ============ MAIN COMPONENT ============
-
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('today');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/api/v1/dashboard?filter=${filter}`);
+        if (res.data && res.data.data) {
+          setData(res.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+    const interval = setInterval(fetchData, 30000); // refresh every 30s
+    return () => clearInterval(interval);
+  }, [filter]);
+
+  if (loading && !data) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+      </div>
+    );
+  }
+
+  // Calculate metrics based on real data
+  const METRICS = [
+    {
+      label: filter === 'month' ? 'Doanh thu Tháng' : filter === 'week' ? 'Doanh thu Tuần' : 'Doanh thu Hôm nay',
+      value: Number(data?.totalRevenue || 0).toLocaleString('vi-VN'),
+      unit: 'đ', baseline: 'Cập nhật realtime', change: 'Live', isUp: true,
+      icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10'
+    },
+    {
+      label: 'Xe trong sân',
+      value: data?.carsInShop || 0,
+      unit: 'xe', baseline: 'Đang phục vụ / Đã đến', change: 'Live', isUp: true,
+      icon: Car, color: 'text-amber-400', bg: 'bg-amber-500/10'
+    },
+    {
+      label: 'Tiến độ',
+      value: `${data?.completedBookings || 0}/${data?.totalBookingsToday || 0}`,
+      unit: 'đơn', baseline: 'Hoàn thành / Tổng lịch', change: 'Live', isUp: true,
+      icon: Activity, color: 'text-cyan-400', bg: 'bg-cyan-500/10'
+    },
+    {
+      label: 'Chờ thu tiền',
+      value: data?.pendingPayments || 0,
+      unit: 'xe', baseline: 'Xe đang làm / Hoàn thành', change: 'Live', isUp: false,
+      icon: CreditCard, color: 'text-red-400', bg: 'bg-red-500/10'
+    }
+  ];
+
+  const scheduleList = data?.todaySchedule || [];
+  const breakdownList = data?.revenueBreakdown || [];
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-[1400px] mx-auto font-body selection:bg-cyan-500/30">
-      
+
       {/* HEADER & CLOCK */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-6">
         <div>
@@ -123,24 +156,34 @@ export default function AdminDashboard() {
           </div>
           <p className="text-white/40 text-sm font-mono tracking-wide">SYSTEM.DASHBOARD // Trạng thái xưởng thời gian thực</p>
         </div>
-        <div className="bg-neutral-950 border border-white/10 px-5 py-3 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.05)]">
-          <LiveClock />
-          <p className="text-[10px] text-white/30 text-right mt-1.5 font-mono uppercase tracking-widest">Thời gian hệ thống</p>
-        </div>
-      </div>
 
-      {/* ALERTS BAR */}
-      <div className="space-y-3">
-        {ALERTS.map(alert => (
-          <div key={alert.id} className={`flex items-start gap-4 p-4 rounded-xl border relative overflow-hidden ${alert.type === 'danger' ? 'bg-red-500/5 border-red-500/30' : 'bg-amber-500/5 border-amber-500/30'}`}>
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${alert.type === 'danger' ? 'bg-red-500 animate-pulse' : 'bg-amber-500'}`} />
-            {alert.type === 'danger' ? <ShieldAlert className="text-red-400 mt-0.5 shrink-0" size={20}/> : <AlertTriangle className="text-amber-400 mt-0.5 shrink-0" size={20}/>}
-            <div className="flex-1">
-              <p className={`text-sm font-medium tracking-wide ${alert.type === 'danger' ? 'text-red-400' : 'text-amber-400'}`}>{alert.message}</p>
-              <p className="text-[11px] font-mono mt-1 opacity-60 text-white">Ghi nhận lúc: {alert.time}</p>
-            </div>
+        <div className="flex items-center gap-4">
+          <div className="bg-neutral-950 border border-white/10 p-1.5 rounded-xl flex items-center gap-1 shadow-[0_0_20px_rgba(6,182,212,0.05)]">
+            <button
+              onClick={() => setFilter('today')}
+              className={`px-4 py-2 rounded-lg text-xs font-mono tracking-widest transition-all ${filter === 'today' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-white/50 hover:text-white'}`}
+            >
+              HÔM NAY
+            </button>
+            <button
+              onClick={() => setFilter('week')}
+              className={`px-4 py-2 rounded-lg text-xs font-mono tracking-widest transition-all ${filter === 'week' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-white/50 hover:text-white'}`}
+            >
+              TUẦN NÀY
+            </button>
+            <button
+              onClick={() => setFilter('month')}
+              className={`px-4 py-2 rounded-lg text-xs font-mono tracking-widest transition-all ${filter === 'month' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-white/50 hover:text-white'}`}
+            >
+              THÁNG NÀY
+            </button>
           </div>
-        ))}
+
+          <div className="bg-neutral-950 border border-white/10 px-5 py-3 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.05)] hidden lg:block">
+            <LiveClock />
+            <p className="text-[10px] text-white/30 text-right mt-1.5 font-mono uppercase tracking-widest">Thời gian hệ thống</p>
+          </div>
+        </div>
       </div>
 
       {/* METRICS ROW */}
@@ -150,83 +193,56 @@ export default function AdminDashboard() {
 
       {/* MIDDLE SECTION: LIVE OPERATIONS & REVENUE */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
-        {/* LIVE STAFF */}
-        <div className="xl:col-span-2 bg-neutral-950 border border-white/5 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
-            <div>
-              <h3 className="font-hero text-xl text-white font-medium tracking-tight">Trạng thái Xưởng</h3>
-              <p className="text-xs text-white/40 font-mono mt-1">SLOT HIỆN TẠI: 14:00 - 15:00</p>
-            </div>
-            <span className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono tracking-widest text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"/> LIVE
-            </span>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {LIVE_STAFF.map(staff => (
-              <div key={staff.id} className="bg-black/40 border border-white/10 rounded-xl p-5 relative overflow-hidden group">
-                <div className={`absolute top-0 left-0 w-1 h-full ${staff.accent}`} />
-                
-                <div className="flex justify-between items-start mb-5">
-                  <div>
-                    <span className="text-[10px] text-white/40 font-mono tracking-widest">{staff.id}</span>
-                    <h4 className="text-white font-medium tracking-wide mt-0.5">{staff.name}</h4>
-                  </div>
-                  <span className="flex items-center gap-1.5 px-2 py-1 rounded bg-blue-500/10 border border-blue-500/20 text-[10px] font-mono tracking-widest text-blue-400">
-                    <Play size={10} className="fill-blue-400" /> WORKING
-                  </span>
-                </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 bg-white/5 rounded-lg p-3">
-                    <Car size={18} className="text-white/40" />
+        {/* REVENUE BREAKDOWN CHART */}
+        <div className="xl:col-span-2 bg-neutral-950 border border-white/5 rounded-2xl p-6 flex flex-col relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 group-hover:bg-cyan-500/10 transition-all duration-700 pointer-events-none" />
+
+          <div className="mb-8 pb-4 border-b border-white/5 relative">
+            <h3 className="font-hero text-xl text-white font-medium tracking-tight">Cơ cấu Doanh thu</h3>
+            <p className="text-xs text-white/40 font-mono mt-1">BIỂU ĐỒ THEO DỊCH VỤ TRONG {filter === 'month' ? 'THÁNG' : filter === 'week' ? 'TUẦN' : 'NGÀY'}</p>
+          </div>
+
+          <div className="flex-1 flex flex-col justify-center space-y-6 relative">
+            {breakdownList.length === 0 ? (
+              <div className="text-center text-white/40 font-mono text-sm py-12">Chưa có dữ liệu doanh thu.</div>
+            ) : (
+              breakdownList.map((item, i) => (
+                <div key={i} className="group/item">
+                  <div className="flex items-end justify-between mb-2">
                     <div>
-                      <span className="text-sm text-white font-mono block">{staff.car}</span>
-                      <span className="text-[11px] text-white/50">{staff.service}</span>
+                      <span className="text-sm font-medium text-white/90 block group-hover/item:text-white transition-colors">{item.name}</span>
+                      <span className="text-[10px] font-mono text-white/40">{item.count} xe thực hiện</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-mono text-white block">{item.revenue.toLocaleString('vi-VN')}đ</span>
+                      <span className={`text-[10px] font-mono ${item.text}`}>{item.percent.toFixed(1)}% tổng thu</span>
                     </div>
                   </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-[11px] font-mono text-white/50 mb-2">
-                      <span>Đã làm: {staff.timeElapsed}p</span>
-                      <span>Định mức: {staff.timeTotal}p</span>
+                  <div className="w-full h-3 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                    <div className={`h-full rounded-full ${item.color} group-hover/item:brightness-125 transition-all duration-1000 ease-out relative`} style={{ width: `${item.percent}%` }}>
+                      <div className="absolute top-0 right-0 bottom-0 left-0 bg-gradient-to-r from-transparent to-white/20" />
                     </div>
-                    <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all duration-1000 ${staff.accent}`} style={{width: `${staff.progress}%`}} />
-                    </div>
-                    <p className={`text-[10px] mt-2 text-right font-mono tracking-wide ${staff.accent.replace('bg-', 'text-')}`}>
-                      Dự kiến xong: {staff.timeTotal - staff.timeElapsed} phút nữa
-                    </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
-        {/* REVENUE BREAKDOWN */}
+        {/* ALERTS */}
         <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 flex flex-col">
           <div className="mb-6 pb-4 border-b border-white/5">
-            <h3 className="font-hero text-xl text-white font-medium tracking-tight">Cơ cấu Doanh thu</h3>
-            <p className="text-xs text-white/40 font-mono mt-1">THEO DỊCH VỤ TRONG NGÀY</p>
+            <h3 className="font-hero text-xl text-white font-medium tracking-tight">Thông báo Hệ thống</h3>
           </div>
-
-          <div className="flex-1 flex flex-col justify-center space-y-6">
-            {REVENUE_BREAKDOWN.map((item, i) => (
-              <div key={i}>
-                <div className="flex items-end justify-between mb-2">
-                  <div>
-                    <span className="text-sm text-white/80 block">{item.name}</span>
-                    <span className="text-[10px] font-mono text-white/40">{item.count} xe thực hiện</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm font-mono text-white block">{item.revenue.toLocaleString('vi-VN')}đ</span>
-                    <span className={`text-[10px] font-mono ${item.text}`}>{item.percent}% tổng thu</span>
-                  </div>
-                </div>
-                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${item.color}`} style={{ width: `${item.percent}%` }} />
+          <div className="flex-1 flex flex-col space-y-3">
+            {ALERTS.map(alert => (
+              <div key={alert.id} className={`flex items-start gap-4 p-4 rounded-xl border relative overflow-hidden ${alert.type === 'danger' ? 'bg-red-500/5 border-red-500/30' : 'bg-amber-500/5 border-amber-500/30'}`}>
+                <div className={`absolute left-0 top-0 bottom-0 w-1 ${alert.type === 'danger' ? 'bg-red-500 animate-pulse' : 'bg-amber-500'}`} />
+                {alert.type === 'danger' ? <ShieldAlert className="text-red-400 mt-0.5 shrink-0" size={20} /> : <AlertTriangle className="text-amber-400 mt-0.5 shrink-0" size={20} />}
+                <div className="flex-1">
+                  <p className={`text-sm font-medium tracking-wide ${alert.type === 'danger' ? 'text-red-400' : 'text-amber-400'}`}>{alert.message}</p>
+                  <p className="text-[11px] font-mono mt-1 opacity-60 text-white">Lúc: {alert.time}</p>
                 </div>
               </div>
             ))}
@@ -239,7 +255,9 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/[0.02]">
           <div className="flex items-center gap-3">
             <Clock className="text-white/40" size={20} />
-            <h3 className="font-hero text-lg font-medium text-white tracking-tight">Nhật ký Phục vụ</h3>
+            <h3 className="font-hero text-lg font-medium text-white tracking-tight">
+              Nhật ký Phục vụ {filter === 'month' ? 'Tháng Này' : filter === 'week' ? 'Tuần Này' : 'Hôm Nay'}
+            </h3>
           </div>
           <button
             onClick={() => navigate('/admin/booking-schedule')}
@@ -249,9 +267,9 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
           <table className="w-full text-left border-collapse">
-            <thead>
+            <thead className="sticky top-0 bg-neutral-950 z-10 shadow-md">
               <tr className="border-b border-white/5 bg-black/20">
                 <th className="px-6 py-4 text-[10px] font-mono tracking-widest text-white/30 uppercase">Khung giờ</th>
                 <th className="px-6 py-4 text-[10px] font-mono tracking-widest text-white/30 uppercase">Biển số</th>
@@ -262,30 +280,38 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="font-mono text-sm">
-              {TODAY_SCHEDULE.map((booking, idx) => (
-                <tr key={booking.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-4 text-white/60">{booking.time}</td>
-                  <td className="px-6 py-4">
-                    <div className="inline-block px-2 py-1 bg-white/5 border border-white/10 rounded text-white tracking-wider">
-                      {booking.plate}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-white/80 font-body">{booking.service}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-block px-2 py-1 rounded text-[10px] tracking-widest border ${STATUS_CONFIG[booking.status].style}`}>
-                      {STATUS_CONFIG[booking.status].label}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right text-white">
-                    {booking.price.toLocaleString('vi-VN')}đ
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className={`inline-block px-2 py-1 rounded text-[10px] tracking-widest border ${PAYMENT_CONFIG[booking.payment].style}`}>
-                      {PAYMENT_CONFIG[booking.payment].label}
-                    </span>
+              {scheduleList.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-white/40 font-mono text-sm">
+                    Chưa có đơn hàng nào.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                scheduleList.map((booking, idx) => (
+                  <tr key={idx} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                    <td className="px-6 py-4 text-white/60 whitespace-nowrap">{booking.time}</td>
+                    <td className="px-6 py-4">
+                      <div className="inline-block px-2 py-1 bg-white/5 border border-white/10 rounded text-white tracking-wider">
+                        {booking.plate}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-white/80 font-body">{booking.service}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-block px-2 py-1 rounded text-[10px] tracking-widest border ${STATUS_CONFIG[booking.status]?.style || STATUS_CONFIG['PENDING'].style}`}>
+                        {STATUS_CONFIG[booking.status]?.label || booking.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right text-white">
+                      {booking.price?.toLocaleString('vi-VN')}đ
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className={`inline-block px-2 py-1 rounded text-[10px] tracking-widest border ${PAYMENT_CONFIG[booking.payment]?.style || PAYMENT_CONFIG['UNPAID'].style}`}>
+                        {PAYMENT_CONFIG[booking.payment]?.label || booking.payment}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

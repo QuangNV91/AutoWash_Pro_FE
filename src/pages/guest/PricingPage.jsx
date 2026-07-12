@@ -216,7 +216,7 @@ export default function PricingPage() {
                 // Cập nhật giá trị hiển thị từ API nếu có
                 const displayPrice = apiData ? (apiData.basePrice ?? apiData.base_price ?? apiData.priceRaw).toLocaleString('vi-VN') : plan.price;
                 const displayTime = apiData ? `${apiData.durationMinutes ?? apiData.duration_minutes ?? parseInt(plan.duration)} phút` : plan.duration;
-                const displayPoints = apiData ? `+${apiData.basePoints ?? apiData.base_points ?? parseInt(plan.points.replace(/\\D/g, ''))} điểm` : plan.points;
+                const displayPoints = apiData ? `+${Math.floor((apiData.basePrice ?? apiData.base_price ?? apiData.price ?? parseInt(plan.price.replace(/\\D/g, ''))) / 1000)} điểm` : plan.points;
 
                 return (
                   <div
@@ -344,7 +344,7 @@ export default function PricingPage() {
                       <td className="px-5 py-4 text-white font-medium text-sm">Điểm tích lũy</td>
                       {PRICING_PLANS.map((p, i) => {
                         const apiData = apiServices[p.name];
-                        const displayPoints = apiData ? `+${apiData.basePoints ?? apiData.base_points ?? parseInt(p.points.replace(/\\D/g, ''))} điểm` : p.points;
+                        const displayPoints = apiData ? `+${Math.floor((apiData.basePrice ?? apiData.base_price ?? apiData.price ?? parseInt(p.price.replace(/\\D/g, ''))) / 1000)} điểm` : p.points;
                         return (
                           <td key={p.id} className={`px-4 py-4 text-sm text-center font-medium ${TIER_ACCENT_COL[i]} ${TIER_BG_COL[i]}`}>
                             {displayPoints}

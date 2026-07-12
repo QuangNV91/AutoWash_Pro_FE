@@ -186,7 +186,7 @@ export default function StaffDashboard() {
                 Xin chào, <span className="text-cyan-400">{staffName.split(' ').pop()}</span>!
               </h1>
               <p className="text-white/40 text-xs font-mono tracking-wide">
-                {MOCK_STAFF.id} · {MOCK_STAFF.shift}: {MOCK_STAFF.shiftTime}
+                {localStorage.getItem('username')} · {MOCK_STAFF.shift}: {MOCK_STAFF.shiftTime}
               </p>
             </div>
           </div>
@@ -409,7 +409,7 @@ export default function StaffDashboard() {
               </tr>
             </thead>
             <tbody>
-              {MOCK_BOOKINGS_TODAY.map(b => {
+              {bookings.map(b => {
                 const StatusIcon = STATUS_CONFIG[b.status]?.icon || Clock
                 return (
                   <tr key={b.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group cursor-pointer" onClick={() => navigate('/staff/checkin')}>
@@ -458,3 +458,4 @@ export default function StaffDashboard() {
     </div>
   )
 }
+

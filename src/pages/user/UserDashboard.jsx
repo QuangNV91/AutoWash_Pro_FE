@@ -377,7 +377,7 @@ export default function UserDashboard() {
                           <h3 className="font-medium text-lg text-white">{booking.serviceName}</h3>
                           <div className="flex items-center gap-2 mt-1 text-white/60">
                             <Car size={14} className="text-white/40" />
-                            <span className="text-sm">{booking.vehicleType}</span>
+                            <span className="text-sm">{booking.vehicleType || booking.licensePlate}</span>
                           </div>
                         </div>
                         <div className="text-left sm:text-right">
@@ -386,11 +386,11 @@ export default function UserDashboard() {
                             {TIER_DISCOUNTS[user.tier] > 0 && (
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
-                                <p className="text-sm text-white/40 line-through">{(booking.price || 0).toLocaleString('vi-VN')}đ</p>
+                                <p className="text-sm text-white/40 line-through">{(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ</p>
                               </div>
                             )}
                             <p className="font-medium text-lg text-cyan-400">
-                              {((booking.price || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                              {((booking.price || booking.totalAmount || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
                             </p>
                           </div>
                           <p className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded inline-block mt-1">
@@ -406,7 +406,7 @@ export default function UserDashboard() {
                           </div>
                           <div>
                             <p className="text-xs text-white/40">Ngày đặt</p>
-                            <p className="font-medium text-white">{booking.date}</p>
+                            <p className="font-medium text-white">{booking.date || booking.bookingDate}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -415,7 +415,7 @@ export default function UserDashboard() {
                           </div>
                           <div>
                             <p className="text-xs text-white/40">Thời gian</p>
-                            <p className="font-medium text-white">{booking.time}</p>
+                            <p className="font-medium text-white">{booking.time || (booking.startTime && booking.startTime.substring(0, 5))}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -470,11 +470,11 @@ export default function UserDashboard() {
                           <div className="flex items-center gap-4 mt-2 text-sm text-white/60">
                             <div className="flex items-center gap-1.5">
                               <Calendar size={14} className="text-white/40" />
-                              <span>{booking.date} {booking.time}</span>
+                              <span>{booking.date || booking.bookingDate} {booking.time || (booking.startTime && booking.startTime.substring(0, 5))}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <Car size={14} className="text-white/40" />
-                              <span>{booking.vehicleType}</span>
+                              <span>{booking.vehicleType || booking.licensePlate}</span>
                             </div>
                           </div>
                         </div>
@@ -483,11 +483,11 @@ export default function UserDashboard() {
                             {TIER_DISCOUNTS[user.tier] > 0 && (
                               <div className="flex items-center gap-2 mb-0.5">
                                 <span className="text-[10px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
-                                <p className="text-xs text-white/40 line-through">{(booking.price || 0).toLocaleString('vi-VN')}đ</p>
+                                <p className="text-xs text-white/40 line-through">{(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ</p>
                               </div>
                             )}
                             <p className="font-medium text-lg text-cyan-400">
-                              {((booking.price || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                              {((booking.price || booking.totalAmount || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
                             </p>
                           </div>
                           {booking.status === 'CANCELLED' && booking.penaltyPoints > 0 && (

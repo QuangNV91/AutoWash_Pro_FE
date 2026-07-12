@@ -200,7 +200,7 @@ export default function ServicesPage() {
               const apiData = apiServices[svc.name];
               const displayPrice = apiData ? (apiData.basePrice ?? apiData.base_price ?? apiData.price).toLocaleString('vi-VN') + 'đ' : svc.price;
               const displayTime = apiData ? (apiData.durationMinutes ?? apiData.duration_minutes ?? apiData.duration) + ' phút' : svc.duration;
-              const displayPoints = apiData ? '+' + (apiData.basePoints ?? apiData.base_points ?? apiData.points) + ' điểm tích lũy' : svc.points;
+              const displayPoints = apiData ? '+' + Math.floor((apiData.basePrice ?? apiData.base_price ?? apiData.price ?? parseInt(svc.price.replace(/\\D/g, ''))) / 1000) + ' điểm tích lũy' : svc.points;
 
               return (
                 <div

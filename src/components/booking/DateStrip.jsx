@@ -1,13 +1,16 @@
 
 export default function DateStrip({ selectedDate, onSelectDate, maxDays = 7 }) {
-  // Generate next 'maxDays' days
   const dates = Array.from({ length: maxDays }).map((_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    
     return {
       date: d,
       dayName: i === 0 ? 'Hôm nay' : i === 1 ? 'Ngày mai' : d.toLocaleDateString('vi-VN', { weekday: 'short' }),
-      dateString: d.toISOString().split('T')[0], // yyyy-mm-dd
+      dateString: `${year}-${month}-${day}`, // Local YYYY-MM-DD
       dayOfMonth: d.getDate(),
       month: d.getMonth() + 1
     };
