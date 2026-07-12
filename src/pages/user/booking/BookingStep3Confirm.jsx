@@ -32,7 +32,7 @@ export default function BookingStep3Confirm() {
     }
   }, [bookingItems, selectedDate, navigate]);
 
-  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Bạch kim' };
+  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Kim  Cương' };
   const discount = getDiscount();
 
   const handleBack = () => {
@@ -42,13 +42,13 @@ export default function BookingStep3Confirm() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setSubmitResults([]);
-    setSubmitProgress(1); // Mới bắt đầu
+    setSubmitProgress(1);
 
     try {
       const checkoutPayload = {
         bookingDate: selectedDate,
         paymentMethod: paymentMethod,
-        voucherCode: "", // Có thể thêm sau nếu có tính năng nhập voucher
+        voucherCode: "",
         items: bookingItems.map(item => ({
           serviceId: item.service.id,
           licensePlate: item.licensePlate,
@@ -59,36 +59,32 @@ export default function BookingStep3Confirm() {
       };
 
       const res = await checkoutBookings(checkoutPayload);
-      
-      // Thành công toàn bộ (Backend xử lý giao dịch nguyên tử)
+
       const results = bookingItems.map(item => ({
         itemId: item.id,
         success: true,
-        bookingId: res.transactionRef || 'N/A', // Tạm lưu transactionRef
+        bookingId: res.transactionRef || 'N/A',
         error: null
       }));
       setSubmitResults(results);
 
-      // Nếu ONLINE có link VNPay -> redirect
       if (paymentMethod === 'ONLINE' && res.paymentRedirectUrl) {
         window.location.href = res.paymentRedirectUrl;
         return;
       }
 
-      // Xử lý CASH -> Chuyển hướng Success
       navigate('/booking/success');
 
     } catch (err) {
       console.error('Lỗi checkout:', err);
       const status = err.response?.status;
       let errorMsg = err.response?.data?.message || 'Hệ thống đang bận, vui lòng thử lại';
-      
+
       if (status === 401) {
         navigate('/auth/login');
         return;
       }
 
-      // Đánh dấu thất bại cho tất cả (Vì giao dịch nguyên tử)
       const results = bookingItems.map(item => ({
         itemId: item.id,
         success: false,
@@ -107,7 +103,7 @@ export default function BookingStep3Confirm() {
     <PageWrapper title="Xác nhận">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="mb-8 relative">
-          <button 
+          <button
             onClick={handleBack}
             disabled={isSubmitting}
             className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors disabled:opacity-50"
@@ -123,7 +119,7 @@ export default function BookingStep3Confirm() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
-            
+
             {/* Tóm tắt tất cả xe */}
             <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-6">
@@ -146,11 +142,10 @@ export default function BookingStep3Confirm() {
                   const result = submitResults.find(r => r.itemId === item.id);
 
                   return (
-                    <div 
-                      key={item.id} 
-                      className={`bg-white/5 border rounded-xl p-5 ${
-                        result ? (result.success ? 'border-green-500/30' : 'border-red-500/30') : 'border-white/10'
-                      }`}
+                    <div
+                      key={item.id}
+                      className={`bg-white/5 border rounded-xl p-5 ${result ? (result.success ? 'border-green-500/30' : 'border-red-500/30') : 'border-white/10'
+                        }`}
                     >
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div className="flex-1">
@@ -210,17 +205,17 @@ export default function BookingStep3Confirm() {
                   </div>
                   <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Phương thức thanh toán</h2>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* CASH */}
                   <label className={`relative cursor-pointer rounded-xl border p-5 flex flex-col gap-3 transition-all duration-300
-                    ${paymentMethod === 'CASH' 
-                      ? 'border-white bg-white/5' 
+                    ${paymentMethod === 'CASH'
+                      ? 'border-white bg-white/5'
                       : 'border-white/10 bg-white/5 hover:border-white/30'}`}
                   >
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
+                    <input
+                      type="radio"
+                      name="paymentMethod"
                       value="CASH"
                       checked={paymentMethod === 'CASH'}
                       onChange={() => setPaymentMethod('CASH')}
@@ -241,13 +236,13 @@ export default function BookingStep3Confirm() {
 
                   {/* ONLINE */}
                   <label className={`relative cursor-pointer rounded-xl border p-5 flex flex-col gap-3 transition-all duration-300
-                    ${paymentMethod === 'ONLINE' 
-                      ? 'border-white bg-white/5' 
+                    ${paymentMethod === 'ONLINE'
+                      ? 'border-white bg-white/5'
                       : 'border-white/10 bg-white/5 hover:border-white/30'}`}
                   >
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
+                    <input
+                      type="radio"
+                      name="paymentMethod"
                       value="ONLINE"
                       checked={paymentMethod === 'ONLINE'}
                       onChange={() => setPaymentMethod('ONLINE')}

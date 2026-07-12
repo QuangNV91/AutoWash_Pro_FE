@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import api from '../../services/api'
 import {
   ScanLine, LogIn, Play, CheckCircle2, ChevronLeft, Check, X
@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 
 const MOCK_BOOKINGS = [
   { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',   phone: '0912345678', service: 'Detailing & Shine', duration: 60,  status: 'WORKING',   payment: 'UNPAID', price: 350000, startedAt: Date.now() - 22 * 60 * 1000 },
-  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   phone: '0933444555', service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 40000,  startedAt: null },
+  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   phone: '0933444555', service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 50000,  startedAt: null },
   { id: 'BKG-10314', time: '10:30', plate: '—',          customer: 'Võ Thị Em',       phone: '0977123456', service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'UNPAID', price: 150000, startedAt: null },
   { id: 'BKG-10315', time: '11:00', plate: '—',          customer: 'Đỗ Văn Phúc',     phone: '0908876543', service: 'Ceramic Shield',     duration: 120, status: 'PENDING',   payment: 'PAID',   price: 800000, startedAt: null },
 ]
@@ -57,6 +57,7 @@ function WorkingTimer({ startedAt, duration }) {
 
 export default function StaffCheckin() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [bookings, setBookings] = useState([])
   const [loadingBookings, setLoadingBookings] = useState(true)
   const [selected, setSelected] = useState(null)
@@ -65,7 +66,7 @@ export default function StaffCheckin() {
   const [selectedService, setSelectedService] = useState('')
   
   const [servicesMap, setServicesMap] = useState({
-    'Eco Wash': { price: 40000, duration: 15 },
+    'Eco Wash': { price: 50000, duration: 15 },
     'Premium Care': { price: 150000, duration: 30 },
     'Detailing & Shine': { price: 350000, duration: 60 },
     'Ceramic Shield': { price: 800000, duration: 120 }
@@ -74,14 +75,14 @@ export default function StaffCheckin() {
   useEffect(() => {
     const fetchData = async () => {
       let currentServicesMap = {
-        'Eco Wash': { price: 40000, duration: 15 },
+        'Eco Wash': { price: 50000, duration: 15 },
         'Premium Care': { price: 150000, duration: 30 },
         'Detailing & Shine': { price: 350000, duration: 60 },
         'Ceramic Shield': { price: 800000, duration: 120 }
       };
 
       try {
-        const res = await api.get('/api/services/active');
+        const res = await api.get('/api/v1/services');
         if (res.data?.success && res.data.data && res.data.data.length > 0) {
           const newMap = {};
           res.data.data.forEach(s => {
@@ -96,11 +97,24 @@ export default function StaffCheckin() {
 
       try {
         setLoadingBookings(true);
-        const today = new Date().toISOString().split('T')[0];
-        const res = await api.get(`/api/bookings/date?date=${today}`);
+        const offset = new Date().getTimezoneOffset();
+        const localDate = new Date(new Date().getTime() - (offset * 60 * 1000));
+        let today = localDate.toISOString().split('T')[0];
         
-        if (res.data?.success && res.data.data && res.data.data.length > 0) {
-          const formattedBookings = res.data.data.map(b => ({
+        const savedDate = sessionStorage.getItem('staffCheckinDate');
+        if (location.state?.date) {
+          today = location.state.date;
+          sessionStorage.setItem('staffCheckinDate', today);
+        } else if (savedDate) {
+          today = savedDate;
+        }
+
+        const res = await api.get('/api/bookings');
+        
+        if (res.data?.success && res.data.data) {
+          const dayBookings = res.data.data.filter(b => b.bookingDate === today);
+          
+          const formattedBookings = dayBookings.map(b => ({
             id: `BKG-${b.id}`,
             realId: b.id,
             time: b.startTime ? b.startTime.substring(0, 5) : '00:00',
@@ -163,7 +177,11 @@ export default function StaffCheckin() {
       }));
       toast.success('Cập nhật trạng thái thành công');
       setConfirmOpen(false);
-      if (next === 'DONE') navigate('/staff/payment');
+      if (next === 'DONE' || next === 'COMPLETED') {
+        setTimeout(() => {
+          navigate('/staff/payment');
+        }, 100);
+      }
     } catch (err) {
       toast.error('Lỗi khi cập nhật trạng thái');
     }

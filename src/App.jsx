@@ -29,7 +29,6 @@ import StaffManagement from './pages/admin/StaffManagement.jsx'
 import AdminProfile from './pages/admin/AdminProfile.jsx'
 import CustomerManagement from './pages/admin/CustomerManagement.jsx'
 import PaymentManagement from './pages/admin/PaymentManagement.jsx'
-import PromotionManagement from './pages/admin/PromotionManagement.jsx'
 import ReportDashboard from './pages/admin/ReportDashboard.jsx'
 import ServiceManagement from './pages/admin/ServiceManagement.jsx'
 import SystemSettings from './pages/admin/SystemSettings.jsx'
@@ -81,7 +80,6 @@ export default function App() {
           <Route path="services" element={<ServiceManagement />} />
           <Route path="customers" element={<CustomerManagement />} />
           <Route path="payments" element={<PaymentManagement />} />
-          <Route path="promotions" element={<PromotionManagement />} />
           <Route path="reports" element={<ReportDashboard />} />
           <Route path="settings" element={<SystemSettings />} />
         </Route>
@@ -91,3 +89,4 @@ export default function App() {
     </>
   )
 }
+

@@ -64,7 +64,11 @@ const useBookingStore = create((set, get) => ({
 
   getTotalPoints: () => {
     const items = get().bookingItems;
-    const basePoints = items.reduce((sum, item) => sum + (item.service?.basePoints ?? item.service?.base_points ?? item.service?.points ?? 0), 0);
+    const basePoints = items.reduce((sum, item) => {
+      const price = item.service?.basePrice ?? item.service?.base_price ?? item.service?.price ?? 0;
+      // Đồng bộ tính điểm: 1000đ = 1 điểm cho toàn bộ hệ thống
+      return sum + Math.floor(price / 1000);
+    }, 0);
     const onlineBonus = get().paymentMethod === 'ONLINE' ? 10 * items.filter(i => i.service).length : 0;
     return basePoints + onlineBonus;
   },

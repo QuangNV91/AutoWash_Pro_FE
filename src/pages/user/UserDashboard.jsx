@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/layout/PageWrapper';
 import { User, Calendar, History, Star, Settings, LogOut, Car, Clock, MapPin, ChevronRight, CheckCircle2, Clock3, Loader2 } from 'lucide-react';
 import { getBookingHistory, cancelBooking } from '../../services/bookingService';
+import api from '../../services/api';
+import { TIER_DISCOUNTS } from '../../store/bookingStore';
 import toast from 'react-hot-toast';
 
 // MOCK DATA
@@ -35,7 +37,7 @@ const MOCK_BOOKINGS = [
     date: '2026-06-01',
     time: '14:30',
     status: 'COMPLETED',
-    price: 40000,
+    price: 50000,
     paymentMethod: 'CASH',
     paymentStatus: 'PAID',
     createdAt: '2026-05-30T16:20:00Z'
@@ -44,26 +46,52 @@ const MOCK_BOOKINGS = [
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('bookings'); // bookings, history, profile
+  const [activeTab, setActiveTab] = useState('bookings'); // bookings, history, profile, loyalty
   const [user, setUser] = useState(MOCK_USER);
   const [bookings, setBookings] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cancelModal, setCancelModal] = useState({ isOpen: false, booking: null, policy: null });
 
   useEffect(() => {
-    const fetchHistory = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
         const data = await getBookingHistory();
         setBookings(data);
+
+        // Fetch User Loyalty Info
+        try {
+          const myRes = await api.get('/api/loyalty/my');
+          if (myRes.data?.success) {
+            setUser(prev => ({ 
+              ...prev, 
+              points: myRes.data.data.points, 
+              tier: myRes.data.data.tier,
+              fullName: myRes.data.data.fullName || prev.fullName,
+              phone: myRes.data.data.phone || prev.phone
+            }));
+          }
+          const transRes = await api.get('/api/loyalty/transactions');
+          if (transRes.data?.success) {
+            setTransactions(transRes.data.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch loyalty info", err);
+        }
       } catch (error) {
         console.error("Failed to fetch bookings", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchHistory();
+    fetchData();
   }, []);
+
+  // DEBUG
+  useEffect(() => {
+    console.log("Bookings fetched:", bookings);
+  }, [bookings]);
 
   // Status Badge Component
   const StatusBadge = ({ status }) => {
@@ -278,6 +306,18 @@ export default function UserDashboard() {
                 <ChevronRight size={16} />
               </button>
 
+              <button
+                onClick={() => setActiveTab('loyalty')}
+                className={`w-full flex items-center justify-between px-6 py-4 text-left transition-colors border-l-2
+                  ${activeTab === 'loyalty' ? 'bg-white/5 border-white text-white' : 'border-transparent text-white/60 hover:bg-white/5 hover:text-white'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <Star size={18} />
+                  <span className="font-medium">Lịch sử điểm thưởng</span>
+                </div>
+                <ChevronRight size={16} />
+              </button>
+
               <div className="h-px bg-white/5 w-full my-2"></div>
 
               <button
@@ -295,6 +335,8 @@ export default function UserDashboard() {
 
             {activeTab === 'bookings' && (
               <div className="space-y-6">
+                {/* Debug Dump */}
+                {bookings.length > 0 && <div style={{ display: 'none' }} id="debug-bookings">{JSON.stringify(bookings)}</div>}
                 <div className="flex justify-between items-end mb-2">
                   <div>
                     <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Lịch hẹn sắp tới</h2>
@@ -324,8 +366,8 @@ export default function UserDashboard() {
                         Đặt lịch ngay
                       </button>
                     </div>
-                  ) : bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').map(booking => (
-                    <div key={booking.bookingId || booking.id} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
+                  ) : bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').map((booking, index) => (
+                    <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
@@ -335,12 +377,22 @@ export default function UserDashboard() {
                           <h3 className="font-medium text-lg text-white">{booking.serviceName}</h3>
                           <div className="flex items-center gap-2 mt-1 text-white/60">
                             <Car size={14} className="text-white/40" />
-                            <span className="text-sm">{booking.vehicleType}</span>
+                            <span className="text-sm">{booking.vehicleType || booking.licensePlate}</span>
                           </div>
                         </div>
                         <div className="text-left sm:text-right">
                           <p className="text-sm text-white/40 mb-1">Tổng thanh toán</p>
-                          <p className="font-medium text-lg text-white">{booking.price.toLocaleString('vi-VN')}đ</p>
+                          <div className="flex flex-col sm:items-end">
+                            {TIER_DISCOUNTS[user.tier] > 0 && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
+                                <p className="text-sm text-white/40 line-through">{(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ</p>
+                              </div>
+                            )}
+                            <p className="font-medium text-lg text-cyan-400">
+                              {((booking.price || booking.totalAmount || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                            </p>
+                          </div>
                           <p className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded inline-block mt-1">
                             {booking.paymentMethod === 'ONLINE' ? 'Đã thanh toán Online' : 'Thanh toán tại cửa hàng'}
                           </p>
@@ -354,7 +406,7 @@ export default function UserDashboard() {
                           </div>
                           <div>
                             <p className="text-xs text-white/40">Ngày đặt</p>
-                            <p className="font-medium text-white">{booking.date}</p>
+                            <p className="font-medium text-white">{booking.date || booking.bookingDate}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -363,7 +415,7 @@ export default function UserDashboard() {
                           </div>
                           <div>
                             <p className="text-xs text-white/40">Thời gian</p>
-                            <p className="font-medium text-white">{booking.time}</p>
+                            <p className="font-medium text-white">{booking.time || (booking.startTime && booking.startTime.substring(0, 5))}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -406,8 +458,8 @@ export default function UserDashboard() {
                       <Loader2 size={32} className="animate-spin mb-4" />
                       <p>Đang tải dữ liệu...</p>
                     </div>
-                  ) : bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED').map(booking => (
-                    <div key={booking.bookingId || booking.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
+                  ) : bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED').map((booking, index) => (
+                    <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
@@ -418,16 +470,26 @@ export default function UserDashboard() {
                           <div className="flex items-center gap-4 mt-2 text-sm text-white/60">
                             <div className="flex items-center gap-1.5">
                               <Calendar size={14} className="text-white/40" />
-                              <span>{booking.date} {booking.time}</span>
+                              <span>{booking.date || booking.bookingDate} {booking.time || (booking.startTime && booking.startTime.substring(0, 5))}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <Car size={14} className="text-white/40" />
-                              <span>{booking.vehicleType}</span>
+                              <span>{booking.vehicleType || booking.licensePlate}</span>
                             </div>
                           </div>
                         </div>
                         <div className="text-left sm:text-right">
-                          <p className="font-medium text-lg text-white">{booking.price.toLocaleString('vi-VN')}đ</p>
+                          <div className="flex flex-col sm:items-end">
+                            {TIER_DISCOUNTS[user.tier] > 0 && (
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="text-[10px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
+                                <p className="text-xs text-white/40 line-through">{(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ</p>
+                              </div>
+                            )}
+                            <p className="font-medium text-lg text-cyan-400">
+                              {((booking.price || booking.totalAmount || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                            </p>
+                          </div>
                           {booking.status === 'CANCELLED' && booking.penaltyPoints > 0 && (
                             <p className="text-xs text-red-400 mt-1">Đã trừ {booking.penaltyPoints} điểm</p>
                           )}
@@ -514,6 +576,52 @@ export default function UserDashboard() {
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'loyalty' && (
+              <div className="space-y-6">
+                <div className="mb-6">
+                  <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Lịch sử điểm thưởng</h2>
+                  <p className="text-white/60 mt-1">Theo dõi quá trình tích lũy và sử dụng điểm của bạn.</p>
+                </div>
+
+                <div className="space-y-4">
+                  {isLoading ? (
+                    <div className="flex flex-col items-center justify-center p-12 text-white/60">
+                      <Loader2 size={32} className="animate-spin mb-4" />
+                      <p>Đang tải dữ liệu...</p>
+                    </div>
+                  ) : transactions.length === 0 ? (
+                    <div className="bg-neutral-950 border border-white/5 rounded-2xl p-12 text-center">
+                      <p className="text-white/60">Bạn chưa có giao dịch điểm nào.</p>
+                    </div>
+                  ) : (
+                    transactions.map((txn, index) => (
+                      <div key={txn.id || index} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 flex justify-between items-center hover:border-white/10 transition-colors">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${txn.transactionType === 'EARN' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                            <Star size={24} />
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">
+                              {txn.transactionType === 'EARN' ? 'Tích điểm dịch vụ' : 'Đổi điểm / Trừ điểm'}
+                            </p>
+                            <p className="text-sm text-white/40 mt-1">
+                              {new Date(txn.createdAt).toLocaleDateString('vi-VN')} {new Date(txn.createdAt).toLocaleTimeString('vi-VN')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`text-xl font-mono font-medium ${txn.transactionType === 'EARN' ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {txn.transactionType === 'EARN' ? '+' : ''}{txn.pointChange}
+                          </p>
+                          <p className="text-xs text-white/40 mt-1">Số dư: {txn.balanceAfter}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}

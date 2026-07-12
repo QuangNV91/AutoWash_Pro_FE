@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../components/layout/Navbar';
 import Footer from '../../components/layout/Footer';
 import { Clock, Star, Percent, Crown, Award, Sparkles } from 'lucide-react';
+import { getServices } from '../../services/bookingService';
 
 // Dữ liệu gói dịch vụ — đồng bộ với MOCK_SERVICES trong bookingService.js
 const PRICING_PLANS = [
@@ -12,10 +13,10 @@ const PRICING_PLANS = [
     subtitle: 'Gói Cơ Bản',
     label: 'GÓI CƠ BẢN',
     badge: null,
-    price: '40.000',
-    priceRaw: 40000,
+    price: '50.000',
+    priceRaw: 50000,
     duration: '15 phút',
-    points: '+40 điểm',
+    points: '+50 điểm',
     themeColor: 'cyan',
     featured: false,
     features: [
@@ -127,18 +128,18 @@ const THEME = {
 };
 
 const COMPARISON_ROWS = [
-  { name: 'Rửa bụi bẩn & phun bọt tuyết',          v: [true,  true,  true,  true]  },
-  { name: 'Rửa áp lực cao & lau khô microfiber',    v: [true,  true,  true,  true]  },
-  { name: 'Rửa kỹ gầm xe & nội thất bánh xe',       v: [false, true,  true,  true]  },
-  { name: 'Vệ sinh sên xích & lốc máy động cơ',     v: [false, true,  true,  true]  },
-  { name: 'Hút bụi & lau dọn nội thất xe',           v: [false, true,  true,  true]  },
-  { name: 'Chăm sóc chuyên sâu bề mặt sơn',         v: [false, false, true,  true]  },
-  { name: 'Tẩy ố kính & phủ Nano kính lái',         v: [false, false, true,  true]  },
-  { name: 'Đánh bóng & xóa xước nhẹ bề mặt sơn',   v: [false, false, true,  true]  },
-  { name: 'Dưỡng & bảo vệ nội thất da/nhựa',        v: [false, false, true,  true]  },
-  { name: 'Hiệu chỉnh sơn (Paint Correction)',       v: [false, false, false, true]  },
-  { name: 'Phủ 2 lớp Ceramic — kháng nước/bụi/UV',  v: [false, false, false, true]  },
-  { name: 'Bảo hành lớp phủ Ceramic 6 tháng',       v: [false, false, false, true]  },
+  { name: 'Rửa bụi bẩn & phun bọt tuyết', v: [true, true, true, true] },
+  { name: 'Rửa áp lực cao & lau khô microfiber', v: [true, true, true, true] },
+  { name: 'Rửa kỹ gầm xe & nội thất bánh xe', v: [false, true, true, true] },
+  { name: 'Vệ sinh sên xích & lốc máy động cơ', v: [false, true, true, true] },
+  { name: 'Hút bụi & lau dọn nội thất xe', v: [false, true, true, true] },
+  { name: 'Chăm sóc chuyên sâu bề mặt sơn', v: [false, false, true, true] },
+  { name: 'Tẩy ố kính & phủ Nano kính lái', v: [false, false, true, true] },
+  { name: 'Đánh bóng & xóa xước nhẹ bề mặt sơn', v: [false, false, true, true] },
+  { name: 'Dưỡng & bảo vệ nội thất da/nhựa', v: [false, false, true, true] },
+  { name: 'Hiệu chỉnh sơn (Paint Correction)', v: [false, false, false, true] },
+  { name: 'Phủ 2 lớp Ceramic — kháng nước/bụi/UV', v: [false, false, false, true] },
+  { name: 'Bảo hành lớp phủ Ceramic 6 tháng', v: [false, false, false, true] },
 ];
 
 const TIER_ACCENT_COL = [
@@ -152,6 +153,17 @@ export default function PricingPage() {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('token');
   const location = useLocation();
+  const [apiServices, setApiServices] = useState({});
+
+  useEffect(() => {
+    getServices().then(data => {
+      const map = {};
+      if (Array.isArray(data)) {
+        data.forEach(s => map[s.name || s.serviceName] = s);
+      }
+      setApiServices(map);
+    }).catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (location.hash) {
@@ -199,6 +211,13 @@ export default function PricingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
               {PRICING_PLANS.map((plan) => {
                 const t = THEME[plan.themeColor];
+                const apiData = apiServices[plan.name];
+                
+                // Cập nhật giá trị hiển thị từ API nếu có
+                const displayPrice = apiData ? (apiData.basePrice ?? apiData.base_price ?? apiData.priceRaw).toLocaleString('vi-VN') : plan.price;
+                const displayTime = apiData ? `${apiData.durationMinutes ?? apiData.duration_minutes ?? parseInt(plan.duration)} phút` : plan.duration;
+                const displayPoints = apiData ? `+${Math.floor((apiData.basePrice ?? apiData.base_price ?? apiData.price ?? parseInt(plan.price.replace(/\\D/g, ''))) / 1000)} điểm` : plan.points;
+
                 return (
                   <div
                     key={plan.id}
@@ -230,13 +249,13 @@ export default function PricingPage() {
                       <p className={`text-xs mb-3 ${t.accent}`}>{plan.subtitle}</p>
 
                       <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-white text-3xl font-medium">{plan.price}</span>
+                        <span className="text-white text-3xl font-medium">{displayPrice}</span>
                         <span className="text-white/40">đ</span>
                       </div>
 
                       <div className={`flex items-center gap-4 text-white/60 text-sm mb-6`}>
-                        <span className="flex items-center gap-1"><Clock size={13} /> {plan.duration}</span>
-                        <span className={`flex items-center gap-1 ${t.accent}`}><Star size={13} /> {plan.points}</span>
+                        <span className="flex items-center gap-1"><Clock size={13} /> {displayTime}</span>
+                        <span className={`flex items-center gap-1 ${t.accent}`}><Star size={13} /> {displayPoints}</span>
                       </div>
 
                       <div className="border-t border-white/10 mb-5" />
@@ -309,31 +328,43 @@ export default function PricingPage() {
                     {/* Thời gian */}
                     <tr className="bg-white/5">
                       <td className="px-5 py-4 text-white font-medium text-sm">Thời gian</td>
-                      {PRICING_PLANS.map((p, i) => (
-                        <td key={p.id} className={`px-4 py-4 text-sm text-center font-medium ${TIER_ACCENT_COL[i]} ${TIER_BG_COL[i]}`}>
-                          {p.duration}
-                        </td>
-                      ))}
+                      {PRICING_PLANS.map((p, i) => {
+                        const apiData = apiServices[p.name];
+                        const displayTime = apiData ? `${apiData.durationMinutes ?? apiData.duration_minutes ?? parseInt(p.duration)} phút` : p.duration;
+                        return (
+                          <td key={p.id} className={`px-4 py-4 text-sm text-center font-medium ${TIER_ACCENT_COL[i]} ${TIER_BG_COL[i]}`}>
+                            {displayTime}
+                          </td>
+                        );
+                      })}
                     </tr>
 
                     {/* Điểm tích lũy */}
                     <tr className="bg-white/5">
                       <td className="px-5 py-4 text-white font-medium text-sm">Điểm tích lũy</td>
-                      {PRICING_PLANS.map((p, i) => (
-                        <td key={p.id} className={`px-4 py-4 text-sm text-center font-medium ${TIER_ACCENT_COL[i]} ${TIER_BG_COL[i]}`}>
-                          {p.points}
-                        </td>
-                      ))}
+                      {PRICING_PLANS.map((p, i) => {
+                        const apiData = apiServices[p.name];
+                        const displayPoints = apiData ? `+${Math.floor((apiData.basePrice ?? apiData.base_price ?? apiData.price ?? parseInt(p.price.replace(/\\D/g, ''))) / 1000)} điểm` : p.points;
+                        return (
+                          <td key={p.id} className={`px-4 py-4 text-sm text-center font-medium ${TIER_ACCENT_COL[i]} ${TIER_BG_COL[i]}`}>
+                            {displayPoints}
+                          </td>
+                        );
+                      })}
                     </tr>
 
                     {/* Giá */}
                     <tr className="border-t border-white/10">
                       <td className="px-5 py-5 text-white font-medium">Giá</td>
-                      {PRICING_PLANS.map((p, i) => (
-                        <td key={p.id} className={`px-4 py-5 text-center ${TIER_BG_COL[i]}`}>
-                          <span className={`text-lg font-medium ${TIER_ACCENT_COL[i]}`}>{p.price}đ</span>
-                        </td>
-                      ))}
+                      {PRICING_PLANS.map((p, i) => {
+                        const apiData = apiServices[p.name];
+                        const displayPrice = apiData ? (apiData.basePrice ?? apiData.base_price ?? p.priceRaw).toLocaleString('vi-VN') : p.price;
+                        return (
+                          <td key={p.id} className={`px-4 py-5 text-center ${TIER_BG_COL[i]}`}>
+                            <span className={`text-lg font-medium ${TIER_ACCENT_COL[i]}`}>{displayPrice}đ</span>
+                          </td>
+                        );
+                      })}
                     </tr>
                   </tbody>
                 </table>
@@ -356,10 +387,10 @@ export default function PricingPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {[
-                { tier: 'Member',   label: 'Thành viên', points: '0 điểm',     discount: '0%',  color: 'border-white/10', icon: <Star size={24} />,     iconColor: 'text-white/40' },
-                { tier: 'Silver',   label: 'Bạc',        points: '500 điểm',   discount: '5%',  color: 'border-white/20', icon: <Award size={24} />,    iconColor: 'text-white/60' },
-                { tier: 'Gold',     label: 'Vàng',       points: '1.500 điểm', discount: '10%', color: 'border-white/30', icon: <Crown size={24} />,    iconColor: 'text-white/80' },
-                { tier: 'Platinum', label: 'Bạch Kim',   points: '3.000 điểm', discount: '15%', color: 'border-white/40', icon: <Sparkles size={24} />, iconColor: 'text-white'    },
+                { tier: 'Member', label: 'Thành viên', points: '0 điểm', discount: '0%', color: 'border-white/10', icon: <Star size={24} />, iconColor: 'text-white/40' },
+                { tier: 'Silver', label: 'Bạc', points: '500 điểm', discount: '5%', color: 'border-white/20', icon: <Award size={24} />, iconColor: 'text-white/60' },
+                { tier: 'Gold', label: 'Vàng', points: '1.500 điểm', discount: '10%', color: 'border-white/30', icon: <Crown size={24} />, iconColor: 'text-white/80' },
+                { tier: 'Platinum', label: 'Kim Cương', points: '3.000 điểm', discount: '15%', color: 'border-white/40', icon: <Sparkles size={24} />, iconColor: 'text-white' },
               ].map((item, idx) => (
                 <div key={idx} className={`bg-neutral-900/50 border ${item.color} rounded-2xl p-6 text-center hover:scale-105 transition-all duration-300`}>
                   <div className={`w-12 h-12 mx-auto mb-4 rounded-xl bg-white/5 flex items-center justify-center ${item.iconColor}`}>
@@ -388,9 +419,9 @@ export default function PricingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {[
-                { step: '01', title: 'Đặt lịch online',      desc: 'Chọn gói dịch vụ, ngày giờ phù hợp trên hệ thống đặt lịch thông minh.' },
-                { step: '02', title: 'Đến cửa hàng',         desc: 'Mang xe đến đúng giờ hẹn. Nhân viên sẽ check-in và tiếp nhận xe.' },
-                { step: '03', title: 'Thực hiện dịch vụ',    desc: 'Kỹ thuật viên thực hiện theo đúng quy trình chuẩn với thiết bị hiện đại.' },
+                { step: '01', title: 'Đặt lịch online', desc: 'Chọn gói dịch vụ, ngày giờ phù hợp trên hệ thống đặt lịch thông minh.' },
+                { step: '02', title: 'Đến cửa hàng', desc: 'Mang xe đến đúng giờ hẹn. Nhân viên sẽ check-in và tiếp nhận xe.' },
+                { step: '03', title: 'Thực hiện dịch vụ', desc: 'Kỹ thuật viên thực hiện theo đúng quy trình chuẩn với thiết bị hiện đại.' },
                 { step: '04', title: 'Nhận xe & Thanh toán', desc: 'Kiểm tra kết quả, thanh toán tiện lợi và tích điểm thành viên.' },
               ].map((item, idx) => (
                 <div key={idx} className="relative text-center group">

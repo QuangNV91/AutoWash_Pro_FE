@@ -39,7 +39,8 @@ const THEME_STYLES = {
 export default function ServiceCard({ service, isSelected, onSelect, compact = false }) {
   const price = service.basePrice ?? service.base_price ?? service.price;
   const duration = service.durationMinutes ?? service.duration_minutes ?? service.duration;
-  const points = service.basePoints ?? service.base_points ?? service.points;
+  // Đồng bộ hoàn toàn logic tính điểm = Giá / 1000 cho tất cả mọi nơi
+  const points = Math.floor(price / 1000);
   const theme = THEME_STYLES[service.themeColor] ?? THEME_STYLES.cyan;
 
   return (

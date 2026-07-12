@@ -2,19 +2,19 @@ import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import {
-  CalendarDays, Clock, LogIn, RefreshCw, CheckCircle2, Search, Coffee
+  CalendarDays, Clock, LogIn, RefreshCw, CheckCircle2, Search, Coffee, ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { updateBookingStatus } from '../../services/bookingService'
 import toast from 'react-hot-toast'
 
 const TODAY_BOOKINGS = [
-  { id: 'BKG-10310', time: '08:00', plate: '30A-123.45', customer: 'Nguyễn Văn An',   service: 'Eco Wash',          duration: 15,  status: 'COMPLETED', payment: 'PAID',   price: 40000  },
+  { id: 'BKG-10310', time: '08:00', plate: '30A-123.45', customer: 'Nguyễn Văn An',   service: 'Eco Wash',          duration: 15,  status: 'COMPLETED', payment: 'PAID',   price: 50000  },
   { id: 'BKG-10311', time: '08:15', plate: '51F-111.11', customer: 'Lê Hoàng Cường',  service: 'Premium Care',       duration: 30,  status: 'COMPLETED', payment: 'PAID',   price: 150000 },
   { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',   service: 'Detailing & Shine',  duration: 60,  status: 'WORKING',   payment: 'UNPAID', price: 350000 },
-  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 40000  },
+  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 50000  },
   { id: 'BKG-10314', time: '10:30', plate: '—',          customer: 'Võ Thị Em',       service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'UNPAID', price: 150000 },
   { id: 'BKG-10315', time: '11:00', plate: '—',          customer: 'Đỗ Văn Phúc',     service: 'Ceramic Shield',     duration: 120, status: 'PENDING',   payment: 'PAID',   price: 800000 },
-  { id: 'BKG-10316', time: '13:30', plate: '—',          customer: 'Hoàng Thị Lan',   service: 'Eco Wash',          duration: 15,  status: 'PENDING',   payment: 'UNPAID', price: 40000  },
+  { id: 'BKG-10316', time: '13:30', plate: '—',          customer: 'Hoàng Thị Lan',   service: 'Eco Wash',          duration: 15,  status: 'PENDING',   payment: 'UNPAID', price: 50000  },
   { id: 'BKG-10317', time: '14:00', plate: '—',          customer: 'Bùi Văn Khánh',   service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'PAID',   price: 150000 },
   { id: 'BKG-10318', time: '15:00', plate: '—',          customer: 'Ngô Minh Tuấn',   service: 'Detailing & Shine',  duration: 60,  status: 'PENDING',   payment: 'UNPAID', price: 350000 },
 ]
@@ -43,6 +43,7 @@ function bookingHour(b)  { return parseInt(b.time.split(':')[0]) }
 
 export default function StaffBookings() {
   const navigate = useNavigate()
+  const [selectedDate, setSelectedDate] = useState(new Date())
   const [bookings, setBookings] = useState([])
   const [loadingBookings, setLoadingBookings] = useState(true)
   const [filter, setFilter]   = useState('ALL')
@@ -51,23 +52,50 @@ export default function StaffBookings() {
   const [editService, setEditService] = useState('')
 
   const [servicesMap, setServicesMap] = useState({
-    'Eco Wash': { price: 40000, duration: 15 },
+    'Eco Wash': { price: 50000, duration: 15 },
     'Premium Care': { price: 150000, duration: 30 },
     'Detailing & Shine': { price: 350000, duration: 60 },
     'Ceramic Shield': { price: 800000, duration: 120 }
   })
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const handlePrevDay = () => {
+    setSelectedDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setDate(newDate.getDate() - 1);
+      // Prevent going too far back if needed, but currently allowing looking back
+      return newDate;
+    });
+  };
+
+  const handleNextDay = () => {
+    setSelectedDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setDate(newDate.getDate() + 1);
+      
+      const maxDate = new Date(today);
+      maxDate.setDate(maxDate.getDate() + 7);
+      if (newDate > maxDate) {
+          toast('Chỉ được xem trước tối đa 7 ngày', { icon: 'ℹ️' });
+          return prev;
+      }
+      return newDate;
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       let currentServicesMap = {
-        'Eco Wash': { price: 40000, duration: 15 },
+        'Eco Wash': { price: 50000, duration: 15 },
         'Premium Care': { price: 150000, duration: 30 },
         'Detailing & Shine': { price: 350000, duration: 60 },
         'Ceramic Shield': { price: 800000, duration: 120 }
       };
 
       try {
-        const res = await api.get('/api/services/active');
+        const res = await api.get('/api/v1/services');
         if (res.data?.success && res.data.data && res.data.data.length > 0) {
           const newMap = {};
           res.data.data.forEach(s => {
@@ -82,11 +110,18 @@ export default function StaffBookings() {
 
       try {
         setLoadingBookings(true);
-        const today = new Date().toISOString().split('T')[0];
-        const res = await api.get(`/api/bookings/date?date=${today}`);
+        const offset = selectedDate.getTimezoneOffset();
+        const localDate = new Date(selectedDate.getTime() - (offset*60*1000));
+        const dateStr = localDate.toISOString().split('T')[0];
         
-        if (res.data?.success && res.data.data && res.data.data.length > 0) {
-          const formattedBookings = res.data.data.map(b => ({
+        // Use the existing all bookings API since the date specific one might not exist
+        const res = await api.get('/api/bookings');
+        
+        if (res.data?.success && res.data.data) {
+          // Filter by selected date on the frontend
+          const dayBookings = res.data.data.filter(b => b.bookingDate === dateStr);
+          
+          const formattedBookings = dayBookings.map(b => ({
             id: `BKG-${b.id}`,
             realId: b.id,
             time: b.startTime ? b.startTime.substring(0, 5) : '00:00',
@@ -98,7 +133,9 @@ export default function StaffBookings() {
             status: b.status || 'PENDING',
             payment: b.paymentMethod ? 'PAID' : 'UNPAID',
           }));
-          setBookings(formattedBookings);
+          // Filter out CANCELED or NO_SHOW statuses to prevent UI crashes
+          const validStatuses = ['PENDING', 'ARRIVED', 'WORKING', 'COMPLETED'];
+          setBookings(formattedBookings.filter(b => validStatuses.includes(b.status)));
         } else {
           setBookings([]);
         }
@@ -110,7 +147,7 @@ export default function StaffBookings() {
       }
     };
     fetchData();
-  }, []);
+  }, [selectedDate]);
 
   const filtered = useMemo(() =>
     bookings.filter(b => {
@@ -167,9 +204,27 @@ export default function StaffBookings() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <CalendarDays className="text-cyan-400" size={26} />
-            <h1 className="font-hero text-2xl font-medium tracking-tight">Lịch hẹn hôm nay</h1>
+            <h1 className="font-hero text-2xl font-medium tracking-tight">
+              {selectedDate.toDateString() === new Date().toDateString() ? 'Lịch hẹn hôm nay' : 'Lịch hẹn sắp tới'}
+            </h1>
           </div>
-          <p className="text-white/40 text-sm font-mono">{new Date().toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}</p>
+          <div className="flex items-center gap-3 mt-2">
+            <button 
+              onClick={handlePrevDay}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <p className="text-white/80 text-sm font-mono min-w-[160px] text-center">
+              {selectedDate.toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}
+            </p>
+            <button 
+              onClick={handleNextDay}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={15} />
@@ -236,7 +291,10 @@ export default function StaffBookings() {
                           className="bg-neutral-950 border border-white/5 hover:border-white/15 rounded-xl p-4 cursor-pointer transition-all group"
                         >
                           <div className="flex items-start justify-between mb-2">
-                            <span className="font-mono text-xs bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white tracking-widest">{b.plate}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-xs bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white tracking-widest">{b.plate}</span>
+                              <span className="text-xs text-white/50 font-mono">{b.time}</span>
+                            </div>
                             <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${STATUS_CONFIG[b.status].color} flex items-center gap-1`}>
                               <Icon size={10} />{STATUS_CONFIG[b.status].label}
                             </span>
@@ -325,7 +383,12 @@ export default function StaffBookings() {
                 )}
                 {selectedBooking.status !== 'COMPLETED' && editService === selectedBooking.service && (
                   <button
-                    onClick={() => navigate('/staff/checkin')}
+                    onClick={() => {
+                      const offset = selectedDate.getTimezoneOffset();
+                      const localDate = new Date(selectedDate.getTime() - (offset * 60 * 1000));
+                      const dateStr = localDate.toISOString().split('T')[0];
+                      navigate('/staff/checkin', { state: { date: dateStr } });
+                    }}
                     className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white/10 hover:bg-white/20 text-white transition-colors"
                   >
                     Đến Check-in

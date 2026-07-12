@@ -105,7 +105,7 @@ export default function BookingSlotDashboard() {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/api/v1/bookings/admin/all');
+      const res = await api.get('/api/bookings');
       if (res.data?.success && res.data.data) {
         const mapped = res.data.data.map(b => ({
           id: `BKG-${b.id}`,
@@ -257,7 +257,7 @@ export default function BookingSlotDashboard() {
       const booking = bookings.find(b => b.id === editingBookingId);
       if (booking?.realId && booking?.customerId) {
         try {
-          await api.patch(`/api/v1/bookings/${booking.realId}/cancel?customerId=${booking.customerId}`);
+          await api.patch(`/api/bookings/${booking.realId}/cancel?customerId=${booking.customerId}`);
         } catch (err) {
           console.error('Cancel error:', err);
           toast.error(err.response?.data?.message || 'Lỗi khi hủy lịch');

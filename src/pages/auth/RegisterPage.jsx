@@ -42,16 +42,21 @@ export default function RegisterPage() {
       
       try {
         const payload = {
-          username: values.fullName,
+          fullName: values.fullName,
           phone: values.phone,
           email: values.email,
           password: values.password
         };
-        await api.post('/auth/register', payload);
-        setSuccess('Đăng ký thành công! Đang chuyển hướng...');
+        const response = await api.post('/auth/register', payload);
+        
+        // Retrieve the verificationCode from the backend response
+        const responseData = response.data?.data || response.data;
+        const code = responseData?.verificationCode || response.data?.verificationCode || response?.verificationCode;
+        
+        setSuccess('Đăng ký thành công! Đang chuyển hướng đến trang xác thực...');
         
         setTimeout(() => {
-          navigate('/auth/login');
+          navigate('/auth/verify', { state: { phone: values.phone, code } });
         }, 1500);
         
       } catch (err) {
