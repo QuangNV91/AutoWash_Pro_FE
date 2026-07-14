@@ -125,7 +125,7 @@ export default function StaffCheckin() {
             duration: currentServicesMap[b.serviceName]?.duration || 30,
             price: currentServicesMap[b.serviceName]?.price || 0,
             status: b.status || 'PENDING',
-            payment: b.paymentMethod ? 'PAID' : 'UNPAID',
+            payment: b.paymentStatus === 'SUCCESS' ? 'PAID' : 'UNPAID',
             startedAt: b.status === 'WORKING' ? Date.now() - 5 * 60 * 1000 : null,
           }));
           // Only show active ones in check-in page
@@ -148,6 +148,16 @@ export default function StaffCheckin() {
     if (!b) return;
 
     const next = STATUS_NEXT[b.status];
+    // Bắt buộc thu tiền trước khi hoàn thành đơn (nếu chưa thanh toán)
+    if (next === 'DONE' && b.payment !== 'PAID') {
+      toast('Chuyển sang trang thu tiền để hoàn thành đơn', { icon: '💳' });
+      setConfirmOpen(false);
+      setTimeout(() => {
+        navigate('/staff/payment', { state: { selectedBookingId: b.id } });
+      }, 500);
+      return;
+    }
+
     const updateData = {
       status: next === 'DONE' ? 'COMPLETED' : next,
       licensePlate: selected?.status === 'PENDING' ? plateInput : undefined,
@@ -175,13 +185,8 @@ export default function StaffCheckin() {
         }
         return updatedBooking;
       }));
-      toast.success('Cập nhật trạng thái thành công');
+      toast.success(next === 'DONE' ? 'Đã hoàn thành đơn hàng' : 'Cập nhật trạng thái thành công');
       setConfirmOpen(false);
-      if (next === 'DONE' || next === 'COMPLETED') {
-        setTimeout(() => {
-          navigate('/staff/payment');
-        }, 100);
-      }
     } catch (err) {
       toast.error('Lỗi khi cập nhật trạng thái');
     }

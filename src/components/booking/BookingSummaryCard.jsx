@@ -9,18 +9,13 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
     userTier,
     getTotalPrice,
     getTotalPoints,
-    getDiscount,
-    getDiscountedTotal,
   } = useBookingStore();
 
   const hasAnyService = bookingItems.some(item => item.service);
   const totalPrice = getTotalPrice();
   const totalPoints = getTotalPoints();
-  const discount = getDiscount();
-  const discountedTotal = getDiscountedTotal();
-  const discountAmount = totalPrice - discountedTotal;
 
-  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Kim Cương' };
+
 
   // Empty state
   if (!hasAnyService && !selectedDate) {
@@ -107,12 +102,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
               </span>
             </div>
 
-            <div className={`flex justify-between items-center text-sm ${discount > 0 ? 'text-green-400' : 'text-white/60'}`}>
-              <span>Chiết khấu hạng {tierLabels[userTier]} ({discount * 100}%):</span>
-              <span className="font-medium">
-                -{discountAmount.toLocaleString('vi-VN')}đ
-              </span>
-            </div>
+
 
             {/* Điểm */}
             <div className="flex justify-between items-center text-sm">
@@ -126,7 +116,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
             <div className="flex justify-between items-center pt-3 border-t border-white/10">
               <span className="font-medium text-white">Tổng cộng:</span>
               <span className="text-2xl font-medium text-white">
-                {discountedTotal.toLocaleString('vi-VN')}đ
+                {totalPrice.toLocaleString('vi-VN')}đ
               </span>
             </div>
           </div>

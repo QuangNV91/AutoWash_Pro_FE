@@ -24,13 +24,59 @@ export default function BookingStep1Service() {
   const [services, setServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(true);
   const [servicesError, setServicesError] = useState(null);
+  const [licensePlateErrors, setLicensePlateErrors] = useState({});
+
+  // Biển số ô tô VN: 2 chữ số tỉnh + 1-2 chữ cái + gạch ngang + 4-5 chữ số
+  // VD hợp lệ: 51A-12345, 30AB-12345, 43H-1234
+  // VD không hợp lệ (xe máy): 51B1-123, 29-B12345
+  const CAR_PLATE_REGEX = /^[0-9]{2}[A-Z]{1,2}-[0-9]{4,5}$/;
+
+  // Kiểm tra tàton bộ biển số trong booking (format + trùng lập)
+  const validateAllPlates = (items) => {
+    const newErrors = {};
+    const plateCount = {};
+
+    // Đếm số lần xuất hiện mỗi biển số
+    items.forEach(item => {
+      const plate = item.licensePlate.trim().toUpperCase();
+      if (plate) plateCount[plate] = (plateCount[plate] || 0) + 1;
+    });
+
+    items.forEach(item => {
+      const plate = item.licensePlate.trim().toUpperCase();
+      if (!plate) {
+        newErrors[item.id] = 'Vui lòng nhập biển số xe';
+      } else if (!CAR_PLATE_REGEX.test(plate)) {
+        newErrors[item.id] = 'Biển số ô tô không hợp lệ. Ví dụ đúng: 51A-12345, 30AB-12345';
+      } else if (plateCount[plate] > 1) {
+        // Business rule: không được đặt 2 xe cùng biển số trong 1 booking
+        newErrors[item.id] = 'Biển số này đã được sử dụng cho xe khác trong lịch đặt này';
+      } else {
+        newErrors[item.id] = '';
+      }
+    });
+
+    setLicensePlateErrors(newErrors);
+    return newErrors;
+  };
+
+  const validateLicensePlate = (id, value) => {
+    // Khi blur một ô, validate lại toàn bộ để phát hiện trùng lập
+    const updatedItems = bookingItems.map(item =>
+      item.id === id ? { ...item, licensePlate: value } : item
+    );
+    validateAllPlates(updatedItems);
+  };
 
   const maxVehicles = getMaxVehicles();
   const canAddMore = bookingItems.length < maxVehicles;
 
   // Tính validity inline (không dùng isStep1Valid vì Zustand get() không trigger re-render)
   const step1Valid = bookingItems.length > 0 && bookingItems.every(
-    item => !!item.service && item.licensePlate.trim().length > 0
+    item => !!item.service &&
+            item.licensePlate.trim().length > 0 &&
+            CAR_PLATE_REGEX.test(item.licensePlate.trim().toUpperCase()) &&
+            !licensePlateErrors[item.id]
   );
 
   // Fetch user tier context
@@ -119,7 +165,12 @@ export default function BookingStep1Service() {
                   {/* Nút xóa xe (không cho xóa xe cuối cùng) */}
                   {bookingItems.length > 1 && (
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => {
+                        removeItem(item.id);
+                        // Re-validate sau khi xóa để clear lỗi trùng biển ở các xe còn lại
+                        const remaining = bookingItems.filter(i => i.id !== item.id);
+                        validateAllPlates(remaining);
+                      }}
                       className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
                       title="Xóa xe này"
                     >
@@ -137,9 +188,29 @@ export default function BookingStep1Service() {
                         type="text"
                         placeholder="Biển số xe *"
                         value={item.licensePlate}
-                        onChange={(e) => updateItem(item.id, { licensePlate: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white/40 transition-colors placeholder-white/30 text-sm"
+                        onChange={(e) => {
+                          const val = e.target.value.toUpperCase();
+                          updateItem(item.id, { licensePlate: val });
+                          // Validate toàn bộ để phát hiện trùng biển số realtime
+                          const updatedItems = bookingItems.map(i =>
+                            i.id === item.id ? { ...i, licensePlate: val } : i
+                          );
+                          validateAllPlates(updatedItems);
+                        }}
+                        onBlur={(e) => validateLicensePlate(item.id, e.target.value)}
+                        maxLength={10}
+                        className={`w-full bg-white/5 border ${
+                          licensePlateErrors[item.id]
+                            ? 'border-red-500/60 focus:border-red-500'
+                            : 'border-white/10 focus:border-white/40'
+                        } rounded-xl px-4 py-3 text-white focus:outline-none transition-colors placeholder-white/30 text-sm font-mono tracking-wider uppercase`}
                       />
+                      {licensePlateErrors[item.id] && (
+                        <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                          <AlertCircle size={12} />
+                          {licensePlateErrors[item.id]}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <input

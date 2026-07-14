@@ -131,7 +131,7 @@ export default function StaffBookings() {
             duration: currentServicesMap[b.serviceName]?.duration || 30,
             price: currentServicesMap[b.serviceName]?.price || 0,
             status: b.status || 'PENDING',
-            payment: b.paymentMethod ? 'PAID' : 'UNPAID',
+            payment: b.paymentStatus === 'SUCCESS' ? 'PAID' : 'UNPAID',
           }));
           // Filter out CANCELED or NO_SHOW statuses to prevent UI crashes
           const validStatuses = ['PENDING', 'ARRIVED', 'WORKING', 'COMPLETED'];

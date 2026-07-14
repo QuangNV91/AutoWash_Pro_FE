@@ -18,9 +18,7 @@ export default function BookingStep3Confirm() {
     setIsSubmitting,
     submitResults,
     setSubmitResults,
-    getDiscountedTotal,
     getTotalPoints,
-    getDiscount,
     userTier,
   } = useBookingStore();
 
@@ -32,8 +30,7 @@ export default function BookingStep3Confirm() {
     }
   }, [bookingItems, selectedDate, navigate]);
 
-  const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Kim  Cương' };
-  const discount = getDiscount();
+
 
   const handleBack = () => {
     navigate('/booking/datetime');
@@ -60,6 +57,13 @@ export default function BookingStep3Confirm() {
 
       const res = await checkoutBookings(checkoutPayload);
 
+      // Nếu thanh toán online → redirect thẳng sang VNPay, không setSubmitResults
+      // để tránh re-render trang gây nhấp nháy trước khi chuyển trang
+      if (paymentMethod === 'ONLINE' && res.paymentRedirectUrl) {
+        window.location.href = res.paymentRedirectUrl;
+        return;
+      }
+
       const results = bookingItems.map(item => ({
         itemId: item.id,
         success: true,
@@ -67,11 +71,6 @@ export default function BookingStep3Confirm() {
         error: null
       }));
       setSubmitResults(results);
-
-      if (paymentMethod === 'ONLINE' && res.paymentRedirectUrl) {
-        window.location.href = res.paymentRedirectUrl;
-        return;
-      }
 
       navigate('/booking/success');
 

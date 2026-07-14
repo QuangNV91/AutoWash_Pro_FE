@@ -2,10 +2,10 @@ import { create } from 'zustand';
 
 // Giới hạn xe theo Tier
 const TIER_VEHICLE_LIMITS = {
-  MEMBER: 2,
-  SILVER: 3,
-  GOLD: 4,
-  PLATINUM: 5,
+  MEMBER: 1,
+  SILVER: 2,
+  GOLD: 3,
+  PLATINUM: 4,
 };
 
 // Giới hạn ngày đặt trước theo Tier
@@ -16,13 +16,7 @@ const TIER_MAX_DAYS = {
   PLATINUM: 14,
 };
 
-// Chiết khấu theo Tier
-const TIER_DISCOUNTS = {
-  MEMBER: 0,
-  SILVER: 0.05,
-  GOLD: 0.10,
-  PLATINUM: 0.15,
-};
+
 
 const generateId = () => crypto.randomUUID ? crypto.randomUUID() : `item-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
@@ -55,7 +49,6 @@ const useBookingStore = create((set, get) => ({
   // === Getters ===
   getMaxVehicles: () => TIER_VEHICLE_LIMITS[get().userTier] || 2,
   getMaxDays: () => TIER_MAX_DAYS[get().userTier] || 7,
-  getDiscount: () => TIER_DISCOUNTS[get().userTier] || 0,
 
   getTotalPrice: () => {
     const items = get().bookingItems;
@@ -73,11 +66,7 @@ const useBookingStore = create((set, get) => ({
     return basePoints + onlineBonus;
   },
 
-  getDiscountedTotal: () => {
-    const total = get().getTotalPrice();
-    const discount = get().getDiscount();
-    return Math.round(total * (1 - discount));
-  },
+
 
   // Tính slot xung đột client-side cho 1 item
   getConflictingSlots: (itemId) => {
@@ -218,5 +207,5 @@ function minutesToTime(minutes) {
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
-export { TIER_VEHICLE_LIMITS, TIER_MAX_DAYS, TIER_DISCOUNTS };
+export { TIER_VEHICLE_LIMITS, TIER_MAX_DAYS };
 export default useBookingStore;

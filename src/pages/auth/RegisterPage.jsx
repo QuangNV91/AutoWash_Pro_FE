@@ -47,18 +47,14 @@ export default function RegisterPage() {
           email: values.email,
           password: values.password
         };
-        const response = await api.post('/auth/register', payload);
+        await api.post('/auth/register', payload);
         
-        // Retrieve the verificationCode from the backend response
-        const responseData = response.data?.data || response.data;
-        const code = responseData?.verificationCode || response.data?.verificationCode || response?.verificationCode;
-        
-        setSuccess('Đăng ký thành công! Đang chuyển hướng đến trang xác thực...');
-        
+        setSuccess('Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...');
+
         setTimeout(() => {
-          navigate('/auth/verify', { state: { phone: values.phone, code } });
-        }, 1500);
-        
+          navigate('/auth/login');
+        }, 1200);
+
       } catch (err) {
         setApiError(
           err.response?.data?.message || 

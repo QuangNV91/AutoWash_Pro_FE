@@ -194,7 +194,7 @@ export default function HomePage() {
               <h2 className="font-hero text-4xl md:text-5xl font-medium text-white tracking-tight">Chăm sóc toàn diện</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {
                   title: 'Eco Wash',
@@ -217,7 +217,14 @@ export default function HomePage() {
                   time: '60 phút',
                   desc: 'Chăm sóc toàn diện sơn xe, kính & nội thất',
                   img: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=2070&auto=format&fit=crop'
-                }
+                },
+                  {
+                    title: 'Ceramic Shield',
+                    price: '800.000đ',
+                    time: '120 phút',
+                    desc: 'Phủ Ceramic cao cấp bảo vệ lớp sơn tới 2 năm',
+                    img: 'https://images.unsplash.com/photo-1600492193502-3c24d852089b?q=80&w=2070&auto=format&fit=crop'
+                  }
               ].map((service, idx) => {
                 const apiData = apiServices[service.title];
                 const displayPrice = apiData ? (apiData.basePrice ?? apiData.base_price ?? apiData.price).toLocaleString('vi-VN') + 'đ' : service.price;

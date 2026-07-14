@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ChevronLeft, CheckCircle2, Banknote,
   Smartphone, Building2, Check, AlertTriangle, Receipt, Gift
 } from 'lucide-react'
@@ -22,6 +22,7 @@ const TIER_COLOR = { MEMBER: 'text-gray-400', SILVER: 'text-slate-300', GOLD: 't
 
 export default function StaffPayment() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [bookings, setBookings] = useState([])
   const [selected, setSelected] = useState(null)
   const [method, setMethod]   = useState(null)
@@ -53,16 +54,12 @@ export default function StaffPayment() {
       try {
         const res = await api.get('/api/bookings');
         if (res.data?.success && res.data.data) {
-          const paidStr = localStorage.getItem('paidBookings');
-          const paidList = paidStr ? JSON.parse(paidStr) : [];
-          
           const offset = new Date().getTimezoneOffset();
           const localDate = new Date(new Date().getTime() - (offset * 60 * 1000));
           const today = localDate.toISOString().split('T')[0];
 
-          // Filter for COMPLETED and not paid, and only show today's bookings
-          // We check if paymentMethod is absent and the booking ID is not in our local paidList
-          const unpaid = res.data.data.filter(b => b.status === 'COMPLETED' && !b.paymentMethod && !paidList.includes(b.id) && b.bookingDate === today);
+          // Filter for COMPLETED or WORKING and not paid
+          const unpaid = res.data.data.filter(b => (b.status === 'COMPLETED' || b.status === 'WORKING') && b.paymentStatus !== 'SUCCESS');
           
           const formatted = unpaid.map(b => ({
             id: `BKG-${b.id}`,
@@ -78,7 +75,14 @@ export default function StaffPayment() {
           }));
           
           setBookings(formatted);
-          if (formatted.length > 0) setSelected(formatted[0]);
+          if (formatted.length > 0) {
+            if (location.state?.selectedBookingId) {
+              const found = formatted.find(x => x.id === location.state.selectedBookingId);
+              setSelected(found || formatted[0]);
+            } else {
+              setSelected(formatted[0]);
+            }
+          }
         }
       } catch (err) {
         console.error('Error fetching bookings:', err);
@@ -106,9 +110,8 @@ export default function StaffPayment() {
     </div>
   )
 
-  const discount   = Math.round(selected.price * selected.tierDiscount)
   const bonusPts   = method === 'BANK_TRANSFER' || method === 'MOMO' ? 10 : 0
-  const finalPrice = selected.price - discount
+  const finalPrice = selected.price
   const totalPts   = selected.loyaltyPoints + bonusPts
 
   const handleConfirmPayment = async () => {
@@ -125,14 +128,6 @@ export default function StaffPayment() {
         paymentStatus: 'PAID' 
       });
 
-      // Save to local storage since backend doesn't persist paymentMethod
-      const paidStr = localStorage.getItem('paidBookings');
-      let paidList = paidStr ? JSON.parse(paidStr) : [];
-      if (!paidList.includes(selected.realId)) {
-        paidList.push(selected.realId);
-        localStorage.setItem('paidBookings', JSON.stringify(paidList));
-      }
-      
       setPaid(true)
       setBookings(prev => prev.filter(b => b.id !== selected.id))
       setTimeout(() => {
@@ -215,12 +210,7 @@ export default function StaffPayment() {
                 <span className="text-white/50">Đơn giá</span>
                 <span className="text-white font-mono">{selected.price.toLocaleString('vi-VN')}đ</span>
               </div>
-              {selected.tierDiscount > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/50">Chiết khấu Tier ({(selected.tierDiscount * 100).toFixed(0)}%)</span>
-                  <span className="text-emerald-400 font-mono">-{discount.toLocaleString('vi-VN')}đ</span>
-                </div>
-              )}
+
               {bonusPts > 0 && (
                 <div className="flex justify-between text-sm text-amber-400/80">
                   <span className="flex items-center gap-1"><Gift size={13} /> Điểm thưởng TT online</span>

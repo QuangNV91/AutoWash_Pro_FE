@@ -20,4 +20,16 @@ api.interceptors.request.use(
   }
 );
 
+api.interceptors.response.use(
+  (response) => {
+    // Tự động log toàn bộ API data ra console cho tất cả các trang
+    console.log(`[API SUCCESS] ${response.config.method.toUpperCase()} ${response.config.url}:`, response.data);
+    return response;
+  },
+  (error) => {
+    console.error(`[API ERROR] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`, error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
 export default api;

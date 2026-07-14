@@ -15,7 +15,7 @@ export default function BookingSuccessPage() {
     submitResults,
     paymentMethod,
     getTotalPoints,
-    getDiscountedTotal,
+    getTotalPrice,
     resetCart,
     resetKeepDate,
   } = useBookingStore();
@@ -57,7 +57,7 @@ export default function BookingSuccessPage() {
   // Cấu hình giao diện thành công (có thể là VNPAY success nhưng mất state, hoặc success từ CASH còn state)
   const successCount = submitResults.filter(r => r.success).length;
   const totalPoints = getTotalPoints();
-  const totalPrice = getDiscountedTotal();
+  const totalPrice = getTotalPrice();
   const hasStoreData = bookingItems.length > 0 && bookingItems[0].service;
 
   return (

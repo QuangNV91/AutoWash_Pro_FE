@@ -13,7 +13,6 @@ export default function BookingVnpayReturn() {
   const vnp_ResponseCode = searchParams.get('vnp_ResponseCode');
 
   useEffect(() => {
-    // If we have explicit paymentStatus from our backend redirect
     if (paymentStatus === 'SUCCESS') {
       setStatus('success');
     } else if (paymentStatus === 'FAILED' || vnp_ResponseCode && vnp_ResponseCode !== '00') {
