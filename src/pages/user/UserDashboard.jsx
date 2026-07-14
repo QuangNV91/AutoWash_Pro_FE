@@ -4,17 +4,17 @@ import PageWrapper from '../../components/layout/PageWrapper';
 import { User, Calendar, History, Star, Settings, LogOut, Car, Clock, MapPin, ChevronRight, CheckCircle2, Clock3, Loader2 } from 'lucide-react';
 import { getBookingHistory, cancelBooking } from '../../services/bookingService';
 import api from '../../services/api';
-import { TIER_DISCOUNTS } from '../../store/bookingStore';
+
 import toast from 'react-hot-toast';
 
 // MOCK DATA
-const MOCK_USER = {
-  fullName: 'Khách hàng VIP',
-  phone: '0905388789',
-  tier: 'SILVER',
-  points: 1250,
-  nextTierPoints: 2000,
-  nextTier: 'GOLD',
+const DEFAULT_USER = {
+  fullName: 'Khách hàng',
+  phone: '',
+  tier: 'MEMBER',
+  points: 0,
+  nextTierPoints: 500,
+  nextTier: 'SILVER',
 };
 
 const MOCK_BOOKINGS = [
@@ -47,7 +47,7 @@ const MOCK_BOOKINGS = [
 export default function UserDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('bookings'); // bookings, history, profile, loyalty
-  const [user, setUser] = useState(MOCK_USER);
+  const [user, setUser] = useState(DEFAULT_USER);
   const [bookings, setBookings] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,7 +58,13 @@ export default function UserDashboard() {
       try {
         setIsLoading(true);
         const data = await getBookingHistory();
-        setBookings(data);
+        // Sort mới nhất lên trên: bookingId lớn hơn = đặt sau
+        const sorted = [...data].sort((a, b) => {
+          const idA = a.bookingId ?? a.id ?? 0;
+          const idB = b.bookingId ?? b.id ?? 0;
+          return Number(idB) - Number(idA);
+        });
+        setBookings(sorted);
 
         // Fetch User Loyalty Info
         try {
@@ -366,7 +372,10 @@ export default function UserDashboard() {
                         Đặt lịch ngay
                       </button>
                     </div>
-                  ) : bookings.filter(b => b.status === 'PENDING' || b.status === 'WORKING').map((booking, index) => (
+                  ) : bookings
+                      .filter(b => b.status === 'PENDING' || b.status === 'WORKING')
+                      .sort((a, b) => Number(b.bookingId ?? b.id ?? 0) - Number(a.bookingId ?? a.id ?? 0))
+                      .map((booking, index) => (
                     <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                         <div>
@@ -383,14 +392,9 @@ export default function UserDashboard() {
                         <div className="text-left sm:text-right">
                           <p className="text-sm text-white/40 mb-1">Tổng thanh toán</p>
                           <div className="flex flex-col sm:items-end">
-                            {TIER_DISCOUNTS[user.tier] > 0 && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
-                                <p className="text-sm text-white/40 line-through">{(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ</p>
-                              </div>
-                            )}
+
                             <p className="font-medium text-lg text-cyan-400">
-                              {((booking.price || booking.totalAmount || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                              {(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ
                             </p>
                           </div>
                           <p className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded inline-block mt-1">
@@ -458,7 +462,10 @@ export default function UserDashboard() {
                       <Loader2 size={32} className="animate-spin mb-4" />
                       <p>Đang tải dữ liệu...</p>
                     </div>
-                  ) : bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED').map((booking, index) => (
+                  ) : bookings
+                      .filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED')
+                      .sort((a, b) => Number(b.bookingId ?? b.id ?? 0) - Number(a.bookingId ?? a.id ?? 0))
+                      .map((booking, index) => (
                     <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
                         <div>
@@ -480,14 +487,9 @@ export default function UserDashboard() {
                         </div>
                         <div className="text-left sm:text-right">
                           <div className="flex flex-col sm:items-end">
-                            {TIER_DISCOUNTS[user.tier] > 0 && (
-                              <div className="flex items-center gap-2 mb-0.5">
-                                <span className="text-[10px] text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">Giảm {TIER_DISCOUNTS[user.tier] * 100}% hạng {user.tier}</span>
-                                <p className="text-xs text-white/40 line-through">{(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ</p>
-                              </div>
-                            )}
+
                             <p className="font-medium text-lg text-cyan-400">
-                              {((booking.price || booking.totalAmount || 0) * (1 - (TIER_DISCOUNTS[user.tier] || 0))).toLocaleString('vi-VN')}đ
+                              {(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ
                             </p>
                           </div>
                           {booking.status === 'CANCELLED' && booking.penaltyPoints > 0 && (

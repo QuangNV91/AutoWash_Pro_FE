@@ -82,10 +82,8 @@ export default function BookingStep2DateTime() {
     navigate('/booking');
   };
 
-  // Tier labels
   const tierLabels = { MEMBER: 'Thành viên', SILVER: 'Bạc', GOLD: 'Vàng', PLATINUM: 'Kim Cương' };
 
-  // Check nếu không có service nào
   if (bookingItems.length === 0 || !bookingItems[0].service) return null;
 
   return (
