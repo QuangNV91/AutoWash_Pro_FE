@@ -22,7 +22,6 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-    // Tự động log toàn bộ API data ra console cho tất cả các trang
     console.log(`[API SUCCESS] ${response.config.method.toUpperCase()} ${response.config.url}:`, response.data);
     return response;
   },

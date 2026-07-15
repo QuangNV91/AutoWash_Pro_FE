@@ -57,8 +57,6 @@ export default function BookingStep3Confirm() {
 
       const res = await checkoutBookings(checkoutPayload);
 
-      // Nếu thanh toán online → redirect thẳng sang VNPay, không setSubmitResults
-      // để tránh re-render trang gây nhấp nháy trước khi chuyển trang
       if (paymentMethod === 'ONLINE' && res.paymentRedirectUrl) {
         window.location.href = res.paymentRedirectUrl;
         return;

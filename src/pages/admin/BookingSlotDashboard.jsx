@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { TEN_SLOTS, mapTimeToSlot as mapTimeToSlotUtil } from '../../utils/scheduleUtils';
 import api from '../../services/api';
 import { Clock, CheckCircle2, ChevronLeft, ChevronRight,
   Plus, Edit2, Car, CreditCard, LogIn, RefreshCw, X, Trash2, CalendarDays, Loader2, Shield
@@ -25,19 +26,7 @@ const PAYMENT_STATUS = {
   PAID: { label: 'Đã thanh toán', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' }
 };
 
-const TEN_SLOTS = [
-  { key: 'slot-1', time: '08:00 - 09:00', label: 'Slot 01' },
-  { key: 'slot-2', time: '09:00 - 10:00', label: 'Slot 02' },
-  { key: 'slot-3', time: '10:00 - 11:00', label: 'Slot 03' },
-  { key: 'slot-4', time: '11:00 - 12:00', label: 'Slot 04' },
-  { key: 'slot-break', time: '12:00 - 13:00', label: 'Nghỉ trưa', isBreak: true },
-  { key: 'slot-5', time: '13:00 - 14:00', label: 'Slot 05' },
-  { key: 'slot-6', time: '14:00 - 15:00', label: 'Slot 06' },
-  { key: 'slot-7', time: '15:00 - 16:00', label: 'Slot 07' },
-  { key: 'slot-8', time: '16:00 - 17:00', label: 'Slot 08' },
-  { key: 'slot-9', time: '17:00 - 18:00', label: 'Slot 09' },
-  { key: 'slot-10', time: '18:00 - 19:00', label: 'Slot 10' },
-];
+// TEN_SLOTS imported from scheduleUtils (07:00 - 18:00, matching customer booking)
 
 // Helper functions for date
 const formatDate = (date) => {
@@ -79,21 +68,7 @@ const generateWeekDays = (startDate) => {
 const today = new Date();
 const todayStr = formatDate(today);
 
-const mapTimeToSlot = (timeStr) => {
-  if (!timeStr) return 'slot-1';
-  const hour = parseInt(timeStr.split(':')[0], 10);
-  if (hour === 8) return 'slot-1';
-  if (hour === 9) return 'slot-2';
-  if (hour === 10) return 'slot-3';
-  if (hour === 11) return 'slot-4';
-  if (hour === 13) return 'slot-5';
-  if (hour === 14) return 'slot-6';
-  if (hour === 15) return 'slot-7';
-  if (hour === 16) return 'slot-8';
-  if (hour === 17) return 'slot-9';
-  if (hour === 18) return 'slot-10';
-  return 'slot-1'; // fallback
-};
+// mapTimeToSlot imported from scheduleUtils
 
 export default function BookingSlotDashboard() {
   const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
@@ -112,7 +87,7 @@ export default function BookingSlotDashboard() {
           realId: b.id,
           customerId: b.customerId,
           date: b.bookingDate,
-          slotKey: mapTimeToSlot(b.startTime),
+          slotKey: mapTimeToSlotUtil(b.startTime),
           customer: b.customerName || 'Vãng lai',
           plate: b.licensePlate || 'N/A',
           service: b.serviceName || 'Eco Wash',
