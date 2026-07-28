@@ -13,11 +13,15 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
 
   const hasAnyService = bookingItems.some(item => item.service);
   const totalPrice = getTotalPrice();
-  const totalPoints = getTotalPoints();
+
+  const basePoints = bookingItems.reduce((sum, item) => {
+    const priceVal = item.service?.basePrice ?? item.service?.base_price ?? item.service?.price ?? 0;
+    return sum + Math.floor(Number(priceVal) / 1000);
+  }, 0);
+  const totalPoints = basePoints;
 
 
 
-  // Empty state
   if (!hasAnyService && !selectedDate) {
     return (
       <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center">
@@ -39,7 +43,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
       </div>
 
       <div className="p-6 space-y-4 max-h-[400px] overflow-y-auto scrollbar-hide">
-        {/* Danh sách xe */}
+        {/*  */}
         {bookingItems.map((item, index) => (
           <div key={item.id} className={`${index > 0 ? 'border-t border-white/5 pt-4' : ''}`}>
             <div className="flex items-start justify-between gap-2">
@@ -65,7 +69,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
               )}
             </div>
 
-            {/* Giờ đã chọn */}
+            {/*  */}
             {item.selectedTime && (
               <div className="flex items-center gap-2 mt-2 text-xs text-white/60">
                 <Clock size={12} className="text-white/40" />
@@ -76,7 +80,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
         ))}
       </div>
 
-      {/* Date — nếu đã chọn */}
+      {/*  */}
       {selectedDate && (
         <div className="px-6 pb-4 border-t border-white/5 pt-4">
           <div className="flex items-center gap-3 text-white/60">
@@ -91,7 +95,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
         </div>
       )}
 
-      {/* Total */}
+      {/*  */}
       {hasAnyService && (
         <div className="bg-white/5 px-6 py-5 border-t border-white/5">
           <div className="space-y-2.5 mb-5">
@@ -104,7 +108,7 @@ export default function BookingSummaryCard({ onNext, canProceed = true }) {
 
 
 
-            {/* Điểm */}
+            {/*  */}
             <div className="flex justify-between items-center text-sm">
               <span className="text-white/60 flex items-center gap-1">
                 <Star size={14} className="text-white/40" />

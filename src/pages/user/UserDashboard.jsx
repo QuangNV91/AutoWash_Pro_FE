@@ -7,7 +7,6 @@ import api from '../../services/api';
 
 import toast from 'react-hot-toast';
 
-// MOCK DATA
 const DEFAULT_USER = {
   fullName: 'Khách hàng',
   phone: '',
@@ -46,7 +45,7 @@ const MOCK_BOOKINGS = [
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('bookings'); // bookings, history, profile, loyalty
+  const [activeTab, setActiveTab] = useState('bookings');
   const [user, setUser] = useState(DEFAULT_USER);
   const [bookings, setBookings] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -58,7 +57,6 @@ export default function UserDashboard() {
       try {
         setIsLoading(true);
         const data = await getBookingHistory();
-        // Sort mới nhất lên trên: bookingId lớn hơn = đặt sau
         const sorted = [...data].sort((a, b) => {
           const idA = a.bookingId ?? a.id ?? 0;
           const idB = b.bookingId ?? b.id ?? 0;
@@ -66,13 +64,12 @@ export default function UserDashboard() {
         });
         setBookings(sorted);
 
-        // Fetch User Loyalty Info
         try {
           const myRes = await api.get('/api/loyalty/my');
           if (myRes.data?.success) {
-            setUser(prev => ({ 
-              ...prev, 
-              points: myRes.data.data.points, 
+            setUser(prev => ({
+              ...prev,
+              points: myRes.data.data.points,
               tier: myRes.data.data.tier,
               fullName: myRes.data.data.fullName || prev.fullName,
               phone: myRes.data.data.phone || prev.phone
@@ -94,12 +91,10 @@ export default function UserDashboard() {
     fetchData();
   }, []);
 
-  // DEBUG
   useEffect(() => {
     console.log("Bookings fetched:", bookings);
   }, [bookings]);
 
-  // Status Badge Component
   const StatusBadge = ({ status }) => {
     const statusConfig = {
       'PENDING': { color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20', text: 'Chờ xác nhận', icon: <Clock3 size={14} /> },
@@ -124,7 +119,6 @@ export default function UserDashboard() {
   };
 
   const calculateCancelPolicy = (date, time) => {
-    // Giả lập thời gian hiện tại (có thể thay đổi để test)
     const now = new Date();
     const bookingDateTime = new Date(`${date}T${time}:00`);
     const diffHours = (bookingDateTime - now) / (1000 * 60 * 60);
@@ -148,8 +142,7 @@ export default function UserDashboard() {
       if (booking.bookingId) {
         await cancelBooking(booking.bookingId);
       }
-      
-      // Cập nhật state bookings
+
       setBookings(prev => prev.map(b => {
         const isMatch = (b.bookingId && b.bookingId === booking.bookingId) || (!b.bookingId && b.id === booking.id);
         return isMatch ? { ...b, status: 'CANCELLED' } : b;
@@ -243,8 +236,8 @@ export default function UserDashboard() {
                             style={{ left: `${positionPercent}%`, transform: 'translateX(-50%)' }}
                           >
                             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors z-10 relative ${isAchieved
-                                ? 'bg-white border-white'
-                                : 'bg-black border-white/20'
+                              ? 'bg-white border-white'
+                              : 'bg-black border-white/20'
                               }`}>
                               {isAchieved && <div className="w-1.5 h-1.5 rounded-full bg-black"></div>}
                             </div>
@@ -371,78 +364,78 @@ export default function UserDashboard() {
                       </button>
                     </div>
                   ) : bookings
-                      .filter(b => b.status === 'PENDING' || b.status === 'WORKING')
-                      .sort((a, b) => Number(b.bookingId ?? b.id ?? 0) - Number(a.bookingId ?? a.id ?? 0))
-                      .map((booking, index) => (
-                    <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
-                      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
-                        <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="font-mono text-xs text-white/40">{booking.id}</span>
-                            <StatusBadge status={booking.status} />
+                    .filter(b => b.status === 'PENDING' || b.status === 'WORKING')
+                    .sort((a, b) => Number(b.bookingId ?? b.id ?? 0) - Number(a.bookingId ?? a.id ?? 0))
+                    .map((booking, index) => (
+                      <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 hover:border-white/10 rounded-2xl p-6 transition-all">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                          <div>
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="font-mono text-xs text-white/40">{booking.id}</span>
+                              <StatusBadge status={booking.status} />
+                            </div>
+                            <h3 className="font-medium text-lg text-white">{booking.serviceName}</h3>
+                            <div className="flex items-center gap-2 mt-1 text-white/60">
+                              <Car size={14} className="text-white/40" />
+                              <span className="text-sm">{booking.vehicleType || booking.licensePlate}</span>
+                            </div>
                           </div>
-                          <h3 className="font-medium text-lg text-white">{booking.serviceName}</h3>
-                          <div className="flex items-center gap-2 mt-1 text-white/60">
-                            <Car size={14} className="text-white/40" />
-                            <span className="text-sm">{booking.vehicleType || booking.licensePlate}</span>
-                          </div>
-                        </div>
-                        <div className="text-left sm:text-right">
-                          <p className="text-sm text-white/40 mb-1">Tổng thanh toán</p>
-                          <div className="flex flex-col sm:items-end">
+                          <div className="text-left sm:text-right">
+                            <p className="text-sm text-white/40 mb-1">Tổng thanh toán</p>
+                            <div className="flex flex-col sm:items-end">
 
-                            <p className="font-medium text-lg text-cyan-400">
-                              {(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ
+                              <p className="font-medium text-lg text-cyan-400">
+                                {(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ
+                              </p>
+                            </div>
+                            <p className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded inline-block mt-1">
+                              {booking.paymentMethod === 'ONLINE' ? 'Đã thanh toán Online' : 'Thanh toán tại cửa hàng'}
                             </p>
                           </div>
-                          <p className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded inline-block mt-1">
-                            {booking.paymentMethod === 'ONLINE' ? 'Đã thanh toán Online' : 'Thanh toán tại cửa hàng'}
-                          </p>
                         </div>
-                      </div>
 
-                      <div className="bg-black rounded-xl p-4 flex flex-col sm:flex-row gap-4 sm:gap-8 border border-white/5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60">
-                            <Calendar size={18} />
+                        <div className="bg-black rounded-xl p-4 flex flex-col sm:flex-row gap-4 sm:gap-8 border border-white/5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60">
+                              <Calendar size={18} />
+                            </div>
+                            <div>
+                              <p className="text-xs text-white/40">Ngày đặt</p>
+                              <p className="font-medium text-white">{booking.date || booking.bookingDate}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-xs text-white/40">Ngày đặt</p>
-                            <p className="font-medium text-white">{booking.date || booking.bookingDate}</p>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60">
+                              <Clock size={18} />
+                            </div>
+                            <div>
+                              <p className="text-xs text-white/40">Thời gian</p>
+                              <p className="font-medium text-white">{booking.time || (booking.startTime && booking.startTime.substring(0, 5))}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60">
+                              <MapPin size={18} />
+                            </div>
+                            <div>
+                              <p className="text-xs text-white/40">Chi nhánh</p>
+                              <p className="font-medium text-white">AutoWash Pro Center</p>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60">
-                            <Clock size={18} />
-                          </div>
-                          <div>
-                            <p className="text-xs text-white/40">Thời gian</p>
-                            <p className="font-medium text-white">{booking.time || (booking.startTime && booking.startTime.substring(0, 5))}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60">
-                            <MapPin size={18} />
-                          </div>
-                          <div>
-                            <p className="text-xs text-white/40">Chi nhánh</p>
-                            <p className="font-medium text-white">AutoWash Pro Center</p>
-                          </div>
-                        </div>
-                      </div>
 
-                      {booking.status === 'PENDING' && (
-                        <div className="mt-4 flex justify-end gap-3">
-                          <button
-                            onClick={() => openCancelModal(booking)}
-                            className="px-5 py-2 text-sm font-medium rounded-lg border border-white/10 text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-                          >
-                            Hủy lịch
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        {booking.status === 'PENDING' && (
+                          <div className="mt-4 flex justify-end gap-3">
+                            <button
+                              onClick={() => openCancelModal(booking)}
+                              className="px-5 py-2 text-sm font-medium rounded-lg border border-white/10 text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                            >
+                              Hủy lịch
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </div>
             )}
@@ -461,46 +454,46 @@ export default function UserDashboard() {
                       <p>Đang tải dữ liệu...</p>
                     </div>
                   ) : bookings
-                      .filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED')
-                      .sort((a, b) => Number(b.bookingId ?? b.id ?? 0) - Number(a.bookingId ?? a.id ?? 0))
-                      .map((booking, index) => (
-                    <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
-                      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                        <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="font-mono text-xs text-white/40">{booking.id}</span>
-                            <StatusBadge status={booking.status} />
-                          </div>
-                          <h3 className="font-medium text-lg text-white">{booking.serviceName}</h3>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-white/60">
-                            <div className="flex items-center gap-1.5">
-                              <Calendar size={14} className="text-white/40" />
-                              <span>{booking.date || booking.bookingDate} {booking.time || (booking.startTime && booking.startTime.substring(0, 5))}</span>
+                    .filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'PAYMENT_FAILED')
+                    .sort((a, b) => Number(b.bookingId ?? b.id ?? 0) - Number(a.bookingId ?? a.id ?? 0))
+                    .map((booking, index) => (
+                      <div key={(booking.bookingId || booking.id) + '-' + index} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 opacity-75 hover:opacity-100 transition-opacity">
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                          <div>
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="font-mono text-xs text-white/40">{booking.id}</span>
+                              <StatusBadge status={booking.status} />
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              <Car size={14} className="text-white/40" />
-                              <span>{booking.vehicleType || booking.licensePlate}</span>
+                            <h3 className="font-medium text-lg text-white">{booking.serviceName}</h3>
+                            <div className="flex items-center gap-4 mt-2 text-sm text-white/60">
+                              <div className="flex items-center gap-1.5">
+                                <Calendar size={14} className="text-white/40" />
+                                <span>{booking.date || booking.bookingDate} {booking.time || (booking.startTime && booking.startTime.substring(0, 5))}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <Car size={14} className="text-white/40" />
+                                <span>{booking.vehicleType || booking.licensePlate}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="text-left sm:text-right">
-                          <div className="flex flex-col sm:items-end">
+                          <div className="text-left sm:text-right">
+                            <div className="flex flex-col sm:items-end">
 
-                            <p className="font-medium text-lg text-cyan-400">
-                              {(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ
-                            </p>
+                              <p className="font-medium text-lg text-cyan-400">
+                                {(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ
+                              </p>
+                            </div>
+
+                            <button
+                              onClick={() => navigate('/booking')}
+                              className="mt-2 text-sm text-white hover:text-white/80 font-medium transition-colors underline"
+                            >
+                              Đặt lại dịch vụ này
+                            </button>
                           </div>
-
-                          <button
-                            onClick={() => navigate('/booking')}
-                            className="mt-2 text-sm text-white hover:text-white/80 font-medium transition-colors underline"
-                          >
-                            Đặt lại dịch vụ này
-                          </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             )}
@@ -641,8 +634,8 @@ export default function UserDashboard() {
             </div>
 
             <div className={`p-4 rounded-xl border mb-6 ${cancelModal.policy.type === 'REFUND'
-                ? 'bg-green-900/10 border-green-500/20 text-green-400'
-                : 'bg-red-900/10 border-red-500/20 text-red-400'
+              ? 'bg-green-900/10 border-green-500/20 text-green-400'
+              : 'bg-red-900/10 border-red-500/20 text-red-400'
               }`}>
               <p className="text-sm font-medium">{cancelModal.policy.message}</p>
             </div>

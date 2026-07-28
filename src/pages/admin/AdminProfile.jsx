@@ -29,7 +29,6 @@ export default function AdminProfile() {
 
   const handleSaveProfile = (e) => {
     e.preventDefault();
-    // Simulate API call
     toast.success('Profile updated successfully!');
   };
 
@@ -39,7 +38,6 @@ export default function AdminProfile() {
       toast.error('New passwords do not match!');
       return;
     }
-    // Simulate API call
     toast.success('Password updated successfully!');
     setPasswords({ current: '', new: '', confirm: '' });
   };

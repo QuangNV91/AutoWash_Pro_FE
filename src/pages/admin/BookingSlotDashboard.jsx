@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { TEN_SLOTS, mapTimeToSlot as mapTimeToSlotUtil } from '../../utils/scheduleUtils';
 import api from '../../services/api';
-import { Clock, CheckCircle2, ChevronLeft, ChevronRight,
+import {
+  Clock, CheckCircle2, ChevronLeft, ChevronRight,
   Plus, Edit2, Car, CreditCard, LogIn, RefreshCw, X, Trash2, CalendarDays, Loader2, Shield
 } from 'lucide-react';
 import BookingSlotModal from '../../components/admin/modals/BookingSlotModal';
@@ -27,9 +28,7 @@ const PAYMENT_STATUS = {
   PAID: { label: 'Đã thanh toán', color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20' }
 };
 
-// TEN_SLOTS imported from scheduleUtils (07:00 - 18:00, matching customer booking)
 
-// Helper functions for date
 const formatDate = (date) => {
   const d = new Date(date);
   const year = d.getFullYear();
@@ -41,7 +40,7 @@ const formatDate = (date) => {
 const getStartOfWeek = (date) => {
   const d = new Date(date);
   const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   return new Date(d.setDate(diff));
 };
 
@@ -50,7 +49,7 @@ const generateWeekDays = (startDate) => {
   const start = new Date(startDate);
   const dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
   const shortNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-  
+
   for (let i = 0; i < 7; i++) {
     const current = new Date(start);
     current.setDate(start.getDate() + i);
@@ -65,11 +64,9 @@ const generateWeekDays = (startDate) => {
   return days;
 };
 
-// Initial state data
 const today = new Date();
 const todayStr = formatDate(today);
 
-// mapTimeToSlot imported from scheduleUtils
 
 export default function BookingSlotDashboard() {
   const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
@@ -77,7 +74,6 @@ export default function BookingSlotDashboard() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch all bookings
   const fetchBookings = async () => {
     try {
       setLoading(true);
@@ -95,7 +91,6 @@ export default function BookingSlotDashboard() {
           status: b.status || 'PENDING',
           payment: b.paymentMethod ? 'PAID' : 'UNPAID'
         }));
-        // Strictly filter to valid statuses for the dashboard
         setBookings(mapped.filter(b => ['PENDING', 'ARRIVED', 'WORKING', 'COMPLETED'].includes(b.status)));
       }
     } catch (err) {
@@ -109,13 +104,12 @@ export default function BookingSlotDashboard() {
     fetchBookings();
   }, []);
 
-  // Week navigation
   const handlePrevWeek = () => {
     const newDate = new Date(currentWeekStart);
     newDate.setDate(newDate.getDate() - 7);
     setCurrentWeekStart(newDate);
   };
-  
+
   const handleNextWeek = () => {
     const newDate = new Date(currentWeekStart);
     newDate.setDate(newDate.getDate() + 7);
@@ -131,23 +125,20 @@ export default function BookingSlotDashboard() {
   const weekDays = useMemo(() => generateWeekDays(currentWeekStart), [currentWeekStart]);
   const selectedDayObj = weekDays.find(d => d.fullDate === selectedDate) || weekDays[0];
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('add');
   const [editingBookingId, setEditingBookingId] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     date: '', slotKey: '', service: 'Eco Wash', customer: '', plate: '', status: 'PENDING', payment: 'UNPAID'
   });
 
   const { maxBookingsPerSlot } = useSystemConfigStore();
 
-  // Calculate Capacity Logic
   const calculateAllocation = (slotBookings) => {
     let staff1 = 0;
     let staff2 = 0;
-    
-    // Process each booking
+
     for (const b of slotBookings) {
       const duration = SERVICE_CONFIG[b.service]?.duration || 0;
       if (duration === 120) {
@@ -159,17 +150,17 @@ export default function BookingSlotDashboard() {
         } else if (staff2 + duration <= 60) {
           staff2 += duration;
         } else {
-          return { staff1, staff2, isValid: false, isFull: true }; // Cannot fit time
+          return { staff1, staff2, isValid: false, isFull: true };
         }
       }
     }
-    
+
     const isDurationFull = staff1 === 60 && staff2 === 60;
     const isCountFull = slotBookings.length >= maxBookingsPerSlot;
 
-    return { 
-      staff1, 
-      staff2, 
+    return {
+      staff1,
+      staff2,
       isValid: staff1 <= 60 && staff2 <= 60 && slotBookings.length <= maxBookingsPerSlot,
       isFull: isDurationFull || isCountFull,
       hasCeramic: slotBookings.some(b => b.service === 'Ceramic Shield')
@@ -190,19 +181,18 @@ export default function BookingSlotDashboard() {
   const computedDayData = useMemo(() => {
     return TEN_SLOTS.map((slot) => {
       if (slot.isBreak) return { ...slot, isBreak: true };
-      
+
       const slotBookings = currentDayBookings.filter((b) => b.slotKey === slot.key);
       const allocation = calculateAllocation(slotBookings);
-      
-      return { 
-        ...slot, 
-        bookingsList: slotBookings, 
+
+      return {
+        ...slot,
+        bookingsList: slotBookings,
         allocation
       };
     });
   }, [currentDayBookings]);
 
-  // Form Validation (Instant check on capacity)
   const isFormValid = useMemo(() => {
     if (!formData.service) return true;
     const existingBookings = bookings.filter(b => b.date === formData.date && b.slotKey === formData.slotKey && b.id !== editingBookingId);
@@ -270,14 +260,14 @@ export default function BookingSlotDashboard() {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!isFormValid) {
       toast.error(`Không thể xếp thêm xe. Slot đã đầy hoặc vượt quá giới hạn ${maxBookingsPerSlot} xe/slot.`);
       return;
     }
 
     if (modalMode === 'add') {
-      setBookings((prev) => [...prev, { id: `BKG-${Math.floor(Math.random()*10000)}`, ...formData }]);
+      setBookings((prev) => [...prev, { id: `BKG-${Math.floor(Math.random() * 10000)}`, ...formData }]);
     } else {
       setBookings((prev) => prev.map((b) => (b.id === editingBookingId ? { ...b, ...formData } : b)));
     }
@@ -291,11 +281,11 @@ export default function BookingSlotDashboard() {
         <div>
           <h1 className="font-hero text-3xl font-medium text-white tracking-tight">Lịch hẹn & Điều phối</h1>
           <p className="text-white/40 mt-1 text-sm flex items-center gap-2">
-            <CalendarDays size={14}/> Ngày {selectedDayObj.dateStr}/{selectedDayObj.fullDate.split('-')[1]} - {selectedDayObj.name}
+            <CalendarDays size={14} /> Ngày {selectedDayObj.dateStr}/{selectedDayObj.fullDate.split('-')[1]} - {selectedDayObj.name}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={handleToday}
             className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium text-white transition-colors"
           >
@@ -326,18 +316,17 @@ export default function BookingSlotDashboard() {
         {weekDays.map((day) => {
           const hasBookings = bookings.some(b => b.date === day.fullDate);
           const isSelected = selectedDate === day.fullDate;
-          
+
           return (
             <button
               key={day.fullDate}
               onClick={() => setSelectedDate(day.fullDate)}
-              className={`relative flex flex-col items-center min-w-[80px] p-3 rounded-2xl border transition-all duration-300 ${
-                isSelected
+              className={`relative flex flex-col items-center min-w-[80px] p-3 rounded-2xl border transition-all duration-300 ${isSelected
                   ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
-                  : day.isToday 
+                  : day.isToday
                     ? 'bg-white/5 border-white/20 text-white hover:bg-white/10'
                     : 'bg-neutral-950 border-white/5 text-white/50 hover:bg-white/5 hover:text-white'
-              }`}
+                }`}
             >
               <span className="text-xs font-medium mb-1">{day.name}</span>
               <span className={`text-xl font-hero ${isSelected || day.isToday ? 'text-white' : ''}`}>{day.dateStr}</span>
@@ -395,136 +384,136 @@ export default function BookingSlotDashboard() {
           <span className="ml-3 text-white/40 font-mono text-sm">Đang đồng bộ dữ liệu...</span>
         </div>
       ) : (
-      <div className="space-y-6">
-        {/* Slots List */}
-        {computedDayData.map((slot) => {
-          if (slot.isBreak) {
-            return (
-              <div key={slot.key} className="flex flex-col lg:flex-row gap-6 opacity-60">
-                <div className="w-full lg:w-48 shrink-0">
-                  <div className="bg-white/5 border border-white/5 rounded-2xl p-5 h-full flex flex-col justify-center">
-                    <span className="text-xs text-white/40 font-mono">BREAK</span>
-                    <h3 className="text-xl font-hero text-white/60 tracking-tight mt-1">{slot.time}</h3>
+        <div className="space-y-6">
+          {/* Slots List */}
+          {computedDayData.map((slot) => {
+            if (slot.isBreak) {
+              return (
+                <div key={slot.key} className="flex flex-col lg:flex-row gap-6 opacity-60">
+                  <div className="w-full lg:w-48 shrink-0">
+                    <div className="bg-white/5 border border-white/5 rounded-2xl p-5 h-full flex flex-col justify-center">
+                      <span className="text-xs text-white/40 font-mono">BREAK</span>
+                      <h3 className="text-xl font-hero text-white/60 tracking-tight mt-1">{slot.time}</h3>
+                    </div>
+                  </div>
+                  <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-5 flex items-center justify-center border-dashed">
+                    <p className="text-white/40 text-sm font-medium tracking-widest uppercase">Giờ nghỉ trưa toàn ca</p>
                   </div>
                 </div>
-                <div className="flex-1 bg-white/5 border border-white/5 rounded-2xl p-5 flex items-center justify-center border-dashed">
-                  <p className="text-white/40 text-sm font-medium tracking-widest uppercase">Giờ nghỉ trưa toàn ca</p>
+              );
+            }
+
+            return (
+              <div key={slot.key} className="flex flex-col lg:flex-row gap-6">
+                {/* Slot Time & Capacity Bar */}
+                <div className="w-full lg:w-48 shrink-0">
+                  <div className={`bg-neutral-950 border border-white/5 rounded-2xl p-5 h-full relative overflow-hidden group ${slot.allocation.hasCeramic ? 'border-amber-500/30' : ''}`}>
+                    {/* Glow */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    <div className="flex justify-between items-start">
+                      <span className="text-xs text-white/40 font-mono">{slot.label}</span>
+                      {slot.allocation.hasCeramic && <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" title="Ceramic Shield Locked" />}
+                    </div>
+                    <h3 className="text-xl font-hero text-white tracking-tight mt-1">{slot.time}</h3>
+
+                    <div className="mt-4 space-y-2">
+                      {/* NV1 Progress */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-medium text-white/60 w-6">NV1</span>
+                        <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${slot.allocation.staff1 === 60 ? 'bg-red-500' : slot.allocation.staff1 > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                            style={{ width: `${(slot.allocation.staff1 / 60) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-white/40 w-8 text-right">{slot.allocation.staff1}p</span>
+                      </div>
+                      {/* NV2 Progress */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-medium text-white/60 w-6">NV2</span>
+                        <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${slot.allocation.staff2 === 60 ? 'bg-red-500' : slot.allocation.staff2 > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                            style={{ width: `${(slot.allocation.staff2 / 60) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-white/40 w-8 text-right">{slot.allocation.staff2}p</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slot Bookings Grid */}
+                <div className="flex-1 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
+                  {slot.bookingsList.map((item) => {
+                    const statusConfig = WORK_STATUS[item.status] || WORK_STATUS['PENDING'];
+                    const StatusIcon = statusConfig.icon;
+                    const isCeramic = item.service === 'Ceramic Shield';
+                    return (
+                      <div key={item.id} className={`bg-neutral-950 border rounded-2xl p-5 relative group hover:border-white/10 transition-colors ${isCeramic ? 'border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.05)]' : 'border-white/5'}`}>
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="inline-flex items-center px-2 py-1 rounded bg-white/5 border border-white/10 font-mono text-xs text-white font-medium">
+                            {item.plate ? item.plate.toUpperCase() : "CHƯA CÓ BKS"}
+                          </div>
+                          <span className={`text-xs font-medium px-2 py-1 rounded border ${SERVICE_CONFIG[item.service]?.badge}`}>
+                            {item.service} ({SERVICE_CONFIG[item.service]?.duration}p)
+                          </span>
+                        </div>
+
+                        <div className="mb-4">
+                          <p className="text-sm text-white font-medium">{item.customer}</p>
+                          <p className="text-xs text-white/40 mt-0.5">Mã đơn: {item.id}</p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 mb-4">
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${statusConfig.color}`}>
+                            <StatusIcon size={12} />
+                            {statusConfig.label}
+                          </span>
+                          <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${PAYMENT_STATUS[item.payment].color}`}>
+                            {PAYMENT_STATUS[item.payment].label}
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() => handleOpenEditModal(item)}
+                          className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                      </div>
+                    );
+                  })}
+
+                  {!slot.allocation.isFull && (
+                    <button
+                      onClick={() => handleOpenAddModal(slot.key)}
+                      className="bg-neutral-950/50 border-2 border-dashed border-white/5 rounded-2xl p-5 flex flex-col items-center justify-center text-white/40 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all min-h-[160px] cursor-pointer"
+                    >
+                      <Plus size={24} className="mb-2" />
+                      <span className="text-sm font-medium">Thêm xe vào khung giờ</span>
+                      <span className="text-xs mt-1">
+                        Còn trống {60 - slot.allocation.staff1}p (NV1) / {60 - slot.allocation.staff2}p (NV2)
+                      </span>
+                      <span className="text-[10px] text-white/30 mt-1">
+                        (Đã đặt {slot.bookingsList.length}/{maxBookingsPerSlot} xe)
+                      </span>
+                    </button>
+                  )}
+
+                  {slot.allocation.hasCeramic && slot.bookingsList.length === 1 && (
+                    <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-5 flex flex-col items-center justify-center text-amber-500/60 min-h-[160px]">
+                      <Shield size={24} className="mb-2 opacity-50" />
+                      <span className="text-sm font-medium text-center">Khung giờ bị khóa</span>
+                      <span className="text-xs mt-1 text-center px-4">Gói Ceramic Shield chiếm dụng 100% nhân lực hiện tại</span>
+                    </div>
+                  )}
                 </div>
               </div>
             );
-          }
-
-          return (
-            <div key={slot.key} className="flex flex-col lg:flex-row gap-6">
-              {/* Slot Time & Capacity Bar */}
-              <div className="w-full lg:w-48 shrink-0">
-                <div className={`bg-neutral-950 border border-white/5 rounded-2xl p-5 h-full relative overflow-hidden group ${slot.allocation.hasCeramic ? 'border-amber-500/30' : ''}`}>
-                  {/* Glow */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs text-white/40 font-mono">{slot.label}</span>
-                    {slot.allocation.hasCeramic && <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" title="Ceramic Shield Locked" />}
-                  </div>
-                  <h3 className="text-xl font-hero text-white tracking-tight mt-1">{slot.time}</h3>
-                  
-                  <div className="mt-4 space-y-2">
-                    {/* NV1 Progress */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-medium text-white/60 w-6">NV1</span>
-                      <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-500 ${slot.allocation.staff1 === 60 ? 'bg-red-500' : slot.allocation.staff1 > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                          style={{ width: `${(slot.allocation.staff1 / 60) * 100}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-white/40 w-8 text-right">{slot.allocation.staff1}p</span>
-                    </div>
-                    {/* NV2 Progress */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-medium text-white/60 w-6">NV2</span>
-                      <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-500 ${slot.allocation.staff2 === 60 ? 'bg-red-500' : slot.allocation.staff2 > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                          style={{ width: `${(slot.allocation.staff2 / 60) * 100}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-white/40 w-8 text-right">{slot.allocation.staff2}p</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Slot Bookings Grid */}
-              <div className="flex-1 grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
-                {slot.bookingsList.map((item) => {
-                  const statusConfig = WORK_STATUS[item.status] || WORK_STATUS['PENDING'];
-                  const StatusIcon = statusConfig.icon;
-                  const isCeramic = item.service === 'Ceramic Shield';
-                  return (
-                    <div key={item.id} className={`bg-neutral-950 border rounded-2xl p-5 relative group hover:border-white/10 transition-colors ${isCeramic ? 'border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.05)]' : 'border-white/5'}`}>
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="inline-flex items-center px-2 py-1 rounded bg-white/5 border border-white/10 font-mono text-xs text-white font-medium">
-                          {item.plate ? item.plate.toUpperCase() : "CHƯA CÓ BKS"}
-                        </div>
-                        <span className={`text-xs font-medium px-2 py-1 rounded border ${SERVICE_CONFIG[item.service]?.badge}`}>
-                          {item.service} ({SERVICE_CONFIG[item.service]?.duration}p)
-                        </span>
-                      </div>
-
-                      <div className="mb-4">
-                        <p className="text-sm text-white font-medium">{item.customer}</p>
-                        <p className="text-xs text-white/40 mt-0.5">Mã đơn: {item.id}</p>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2 mb-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${statusConfig.color}`}>
-                          <StatusIcon size={12} />
-                          {statusConfig.label}
-                        </span>
-                        <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${PAYMENT_STATUS[item.payment].color}`}>
-                          {PAYMENT_STATUS[item.payment].label}
-                        </span>
-                      </div>
-
-                      <button 
-                        onClick={() => handleOpenEditModal(item)}
-                        className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <Edit2 size={14} />
-                      </button>
-                    </div>
-                  );
-                })}
-
-                {!slot.allocation.isFull && (
-                  <button
-                    onClick={() => handleOpenAddModal(slot.key)}
-                    className="bg-neutral-950/50 border-2 border-dashed border-white/5 rounded-2xl p-5 flex flex-col items-center justify-center text-white/40 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all min-h-[160px] cursor-pointer"
-                  >
-                    <Plus size={24} className="mb-2" />
-                    <span className="text-sm font-medium">Thêm xe vào khung giờ</span>
-                    <span className="text-xs mt-1">
-                      Còn trống {60 - slot.allocation.staff1}p (NV1) / {60 - slot.allocation.staff2}p (NV2)
-                    </span>
-                    <span className="text-[10px] text-white/30 mt-1">
-                      (Đã đặt {slot.bookingsList.length}/{maxBookingsPerSlot} xe)
-                    </span>
-                  </button>
-                )}
-                
-                {slot.allocation.hasCeramic && slot.bookingsList.length === 1 && (
-                  <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-5 flex flex-col items-center justify-center text-amber-500/60 min-h-[160px]">
-                    <Shield size={24} className="mb-2 opacity-50" />
-                    <span className="text-sm font-medium text-center">Khung giờ bị khóa</span>
-                    <span className="text-xs mt-1 text-center px-4">Gói Ceramic Shield chiếm dụng 100% nhân lực hiện tại</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+          })}
+        </div>
       )}
 
       {/* Modal Overlay via Component */}

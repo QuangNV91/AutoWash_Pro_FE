@@ -26,15 +26,12 @@ export default function BookingStep1Service() {
   const [servicesError, setServicesError] = useState(null);
   const [licensePlateErrors, setLicensePlateErrors] = useState({});
 
-  // Biển số ô tô VN: 2 chữ số tỉnh + 1-2 chữ cái + gạch ngang + 4-5 chữ số
   const CAR_PLATE_REGEX = /^[0-9]{2}[A-Z]{1,2}-[0-9]{4,5}$/;
 
-  // Kiểm tra tàton bộ biển số trong booking (format + trùng lập)
   const validateAllPlates = (items) => {
     const newErrors = {};
     const plateCount = {};
 
-    // Đếm số lần xuất hiện mỗi biển số
     items.forEach(item => {
       const plate = item.licensePlate.trim().toUpperCase();
       if (plate) plateCount[plate] = (plateCount[plate] || 0) + 1;
@@ -47,7 +44,6 @@ export default function BookingStep1Service() {
       } else if (!CAR_PLATE_REGEX.test(plate)) {
         newErrors[item.id] = 'Biển số ô tô không hợp lệ. Ví dụ đúng: 51A-12345, 30AB-12345';
       } else if (plateCount[plate] > 1) {
-        // Business rule: không được đặt 2 xe cùng biển số trong 1 booking
         newErrors[item.id] = 'Biển số này đã được sử dụng cho xe khác trong lịch đặt này';
       } else {
         newErrors[item.id] = '';
@@ -59,7 +55,6 @@ export default function BookingStep1Service() {
   };
 
   const validateLicensePlate = (id, value) => {
-    // Khi blur một ô, validate lại toàn bộ để phát hiện trùng lập
     const updatedItems = bookingItems.map(item =>
       item.id === id ? { ...item, licensePlate: value } : item
     );
@@ -69,15 +64,13 @@ export default function BookingStep1Service() {
   const maxVehicles = getMaxVehicles();
   const canAddMore = bookingItems.length < maxVehicles;
 
-  // Tính validity inline (không dùng isStep1Valid vì Zustand get() không trigger re-render)
   const step1Valid = bookingItems.length > 0 && bookingItems.every(
     item => !!item.service &&
-            item.licensePlate.trim().length > 0 &&
-            CAR_PLATE_REGEX.test(item.licensePlate.trim().toUpperCase()) &&
-            !licensePlateErrors[item.id]
+      item.licensePlate.trim().length > 0 &&
+      CAR_PLATE_REGEX.test(item.licensePlate.trim().toUpperCase()) &&
+      !licensePlateErrors[item.id]
   );
 
-  // Fetch user tier context
   useEffect(() => {
     api.get('/api/v1/bookings/context')
       .then(res => {
@@ -119,7 +112,6 @@ export default function BookingStep1Service() {
     }
   };
 
-  // Tìm tên tier tiếp theo
   const getNextTierName = () => {
     const tiers = ['MEMBER', 'SILVER', 'GOLD', 'PLATINUM'];
     const currentIdx = tiers.indexOf(userTier);
@@ -139,12 +131,12 @@ export default function BookingStep1Service() {
         <StepIndicator currentStep={1} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
-          {/* Left Column: Danh sách xe & Chọn dịch vụ */}
+          {/* */}
           <div className="lg:col-span-2 space-y-8">
 
             {bookingItems.map((item, index) => (
               <div key={item.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6 relative">
-                {/* Header xe */}
+                {/*  */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80">
@@ -160,12 +152,11 @@ export default function BookingStep1Service() {
                     </div>
                   </div>
 
-                  {/* Nút xóa xe (không cho xóa xe cuối cùng) */}
+                  {/* */}
                   {bookingItems.length > 1 && (
                     <button
                       onClick={() => {
                         removeItem(item.id);
-                        // Re-validate sau khi xóa để clear lỗi trùng biển ở các xe còn lại
                         const remaining = bookingItems.filter(i => i.id !== item.id);
                         validateAllPlates(remaining);
                       }}
@@ -177,7 +168,7 @@ export default function BookingStep1Service() {
                   )}
                 </div>
 
-                {/* Nhập thông tin xe */}
+                {/*  */}
                 <div className="mb-6 space-y-4">
                   <span className="text-white/60 font-medium text-sm block">Thông tin xe *</span>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -189,7 +180,6 @@ export default function BookingStep1Service() {
                         onChange={(e) => {
                           const val = e.target.value.toUpperCase();
                           updateItem(item.id, { licensePlate: val });
-                          // Validate toàn bộ để phát hiện trùng biển số realtime
                           const updatedItems = bookingItems.map(i =>
                             i.id === item.id ? { ...i, licensePlate: val } : i
                           );
@@ -197,11 +187,10 @@ export default function BookingStep1Service() {
                         }}
                         onBlur={(e) => validateLicensePlate(item.id, e.target.value)}
                         maxLength={10}
-                        className={`w-full bg-white/5 border ${
-                          licensePlateErrors[item.id]
+                        className={`w-full bg-white/5 border ${licensePlateErrors[item.id]
                             ? 'border-red-500/60 focus:border-red-500'
                             : 'border-white/10 focus:border-white/40'
-                        } rounded-xl px-4 py-3 text-white focus:outline-none transition-colors placeholder-white/30 text-sm font-mono tracking-wider uppercase`}
+                          } rounded-xl px-4 py-3 text-white focus:outline-none transition-colors placeholder-white/30 text-sm font-mono tracking-wider uppercase`}
                       />
                       {licensePlateErrors[item.id] && (
                         <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
@@ -263,7 +252,7 @@ export default function BookingStep1Service() {
               </div>
             ))}
 
-            {/* Nút thêm xe */}
+            {/**/}
             {canAddMore ? (
               <button
                 onClick={addItem}
@@ -288,7 +277,7 @@ export default function BookingStep1Service() {
             )}
           </div>
 
-          {/* Right Column: Booking Summary */}
+          {/*  */}
           <div className="lg:col-span-1 lg:mt-0 lg:sticky lg:top-28 lg:self-start z-10">
             <BookingSummaryCard
               onNext={handleNext}

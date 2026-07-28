@@ -80,14 +80,7 @@ export default function ReportDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* CHART MOCK 1 */}
-        <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 h-[400px] flex flex-col justify-center items-center text-center">
-          <BarChart3 className="text-white/10 mb-4" size={48} />
-          <h3 className="font-hero text-lg font-medium tracking-tight text-white/50 mb-2">Biểu đồ Doanh thu</h3>
-          <p className="text-sm font-mono text-white/30">Chưa có dữ liệu API theo thời gian thực.</p>
-        </div>
-
+      <div className="grid grid-cols-1 gap-6">
         {/* TOP SERVICES */}
         <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 flex flex-col">
           <h3 className="font-hero text-lg font-medium tracking-tight mb-6">Dịch vụ thịnh hành</h3>

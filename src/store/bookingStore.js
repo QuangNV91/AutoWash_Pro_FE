@@ -59,14 +59,15 @@ const useBookingStore = create((set, get) => ({
   getTotalPoints: () => {
     const items = get().bookingItems;
     const basePoints = items.reduce((sum, item) => {
-      const price = item.service?.basePrice ?? item.service?.base_price ?? item.service?.price ?? 0;
-      // Đồng bộ tính điểm: 1000đ = 1 điểm cho toàn bộ hệ thống
+      const priceVal = item.service?.basePrice ?? item.service?.base_price ?? item.service?.price ?? 0;
+      const price = Number(priceVal) || 0;
       return sum + Math.floor(price / 1000);
     }, 0);
     
     // Lấy cấu hình điểm thưởng thanh toán online từ store
-    const rewardPointsOnline = useSystemConfigStore.getState().rewardPointsOnlinePayment;
-    const onlineBonus = get().paymentMethod === 'ONLINE' ? rewardPointsOnline * items.filter(i => i.service).length : 0;
+    const rewardPointsOnline = useSystemConfigStore.getState().rewardPointsOnlinePayment || 0;
+    const onlineBonus = get().paymentMethod === 'ONLINE' ? (rewardPointsOnline * items.filter(i => i.service).length) : 0;
+    
     return basePoints + onlineBonus;
   },
 

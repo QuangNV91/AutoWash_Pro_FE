@@ -7,23 +7,11 @@ import {
 import { updateBookingStatus } from '../../services/bookingService'
 import toast from 'react-hot-toast'
 
-const TODAY_BOOKINGS = [
-  { id: 'BKG-10310', time: '08:00', plate: '30A-123.45', customer: 'Nguyễn Văn An',   service: 'Eco Wash',          duration: 15,  status: 'COMPLETED', payment: 'PAID',   price: 50000  },
-  { id: 'BKG-10311', time: '08:15', plate: '51F-111.11', customer: 'Lê Hoàng Cường',  service: 'Premium Care',       duration: 30,  status: 'COMPLETED', payment: 'PAID',   price: 150000 },
-  { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',   service: 'Detailing & Shine',  duration: 60,  status: 'WORKING',   payment: 'UNPAID', price: 350000 },
-  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 50000  },
-  { id: 'BKG-10314', time: '10:30', plate: '—',          customer: 'Võ Thị Em',       service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'UNPAID', price: 150000 },
-  { id: 'BKG-10315', time: '11:00', plate: '—',          customer: 'Đỗ Văn Phúc',     service: 'Ceramic Shield',     duration: 120, status: 'PENDING',   payment: 'PAID',   price: 800000 },
-  { id: 'BKG-10316', time: '13:30', plate: '—',          customer: 'Hoàng Thị Lan',   service: 'Eco Wash',          duration: 15,  status: 'PENDING',   payment: 'UNPAID', price: 50000  },
-  { id: 'BKG-10317', time: '14:00', plate: '—',          customer: 'Bùi Văn Khánh',   service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'PAID',   price: 150000 },
-  { id: 'BKG-10318', time: '15:00', plate: '—',          customer: 'Ngô Minh Tuấn',   service: 'Detailing & Shine',  duration: 60,  status: 'PENDING',   payment: 'UNPAID', price: 350000 },
-]
-
 const STATUS_CONFIG = {
-  PENDING:   { label: 'Chờ đến',  color: 'text-yellow-400  bg-yellow-500/10  border-yellow-500/20',  icon: Clock        },
-  ARRIVED:   { label: 'Đã đến',   color: 'text-orange-400  bg-orange-500/10  border-orange-500/20',  icon: LogIn        },
-  WORKING:   { label: 'Đang rửa', color: 'text-blue-400    bg-blue-500/10    border-blue-500/20',    icon: RefreshCw    },
-  COMPLETED: { label: 'Xong',     color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2 },
+  PENDING: { label: 'Chờ đến', color: 'text-yellow-400  bg-yellow-500/10  border-yellow-500/20', icon: Clock },
+  ARRIVED: { label: 'Đã đến', color: 'text-orange-400  bg-orange-500/10  border-orange-500/20', icon: LogIn },
+  WORKING: { label: 'Đang rửa', color: 'text-blue-400    bg-blue-500/10    border-blue-500/20', icon: RefreshCw },
+  COMPLETED: { label: 'Xong', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2 },
 }
 const SERVICE_COLOR = {
   'Eco Wash': 'text-cyan-400', 'Premium Care': 'text-purple-400',
@@ -40,15 +28,15 @@ const SLOTS = [
 ]
 
 function slotHour(slot) { return parseInt(slot.time.split(':')[0]) }
-function bookingHour(b)  { return parseInt(b.time.split(':')[0]) }
+function bookingHour(b) { return parseInt(b.time.split(':')[0]) }
 
 export default function StaffBookings() {
   const navigate = useNavigate()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [bookings, setBookings] = useState([])
   const [loadingBookings, setLoadingBookings] = useState(true)
-  const [filter, setFilter]   = useState('ALL')
-  const [search, setSearch]   = useState('')
+  const [filter, setFilter] = useState('ALL')
+  const [search, setSearch] = useState('')
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [editService, setEditService] = useState('')
 
@@ -61,12 +49,11 @@ export default function StaffBookings() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const handlePrevDay = () => {
     setSelectedDate(prev => {
       const newDate = new Date(prev);
       newDate.setDate(newDate.getDate() - 1);
-      // Prevent going too far back if needed, but currently allowing looking back
       return newDate;
     });
   };
@@ -75,12 +62,12 @@ export default function StaffBookings() {
     setSelectedDate(prev => {
       const newDate = new Date(prev);
       newDate.setDate(newDate.getDate() + 1);
-      
+
       const maxDate = new Date(today);
       maxDate.setDate(maxDate.getDate() + 7);
       if (newDate > maxDate) {
-          toast('Chỉ được xem trước tối đa 7 ngày', { icon: 'ℹ️' });
-          return prev;
+        toast('Chỉ được xem trước tối đa 7 ngày', { icon: 'ℹ️' });
+        return prev;
       }
       return newDate;
     });
@@ -112,16 +99,14 @@ export default function StaffBookings() {
       try {
         setLoadingBookings(true);
         const offset = selectedDate.getTimezoneOffset();
-        const localDate = new Date(selectedDate.getTime() - (offset*60*1000));
+        const localDate = new Date(selectedDate.getTime() - (offset * 60 * 1000));
         const dateStr = localDate.toISOString().split('T')[0];
-        
-        // Use the existing all bookings API since the date specific one might not exist
+
         const res = await api.get('/api/bookings');
-        
+
         if (res.data?.success && res.data.data) {
-          // Filter by selected date on the frontend
           const dayBookings = res.data.data.filter(b => b.bookingDate === dateStr);
-          
+
           const formattedBookings = dayBookings.map(b => ({
             id: `BKG-${b.id}`,
             realId: b.id,
@@ -134,7 +119,6 @@ export default function StaffBookings() {
             status: b.status || 'PENDING',
             payment: b.paymentStatus === 'SUCCESS' ? 'PAID' : 'UNPAID',
           }));
-          // Filter out CANCELED or NO_SHOW statuses to prevent UI crashes
           const validStatuses = ['PENDING', 'ARRIVED', 'WORKING', 'COMPLETED'];
           setBookings(formattedBookings.filter(b => validStatuses.includes(b.status)));
         } else {
@@ -142,7 +126,7 @@ export default function StaffBookings() {
         }
       } catch (err) {
         console.error('Error fetching bookings:', err);
-        setBookings(TODAY_BOOKINGS);
+        setBookings([]);
       } finally {
         setLoadingBookings(false);
       }
@@ -154,15 +138,15 @@ export default function StaffBookings() {
     bookings.filter(b => {
       if (filter !== 'ALL' && b.status !== filter) return false
       if (search && !b.customer.toLowerCase().includes(search.toLowerCase()) &&
-          !b.plate.includes(search) && !b.id.includes(search)) return false
+        !b.plate.includes(search) && !b.id.includes(search)) return false
       return true
     }), [filter, search, bookings])
 
   const counts = {
     total: bookings.length,
-    pending:   bookings.filter(b => b.status === 'PENDING').length,
-    arrived:   bookings.filter(b => b.status === 'ARRIVED').length,
-    working:   bookings.filter(b => b.status === 'WORKING').length,
+    pending: bookings.filter(b => b.status === 'PENDING').length,
+    arrived: bookings.filter(b => b.status === 'ARRIVED').length,
+    working: bookings.filter(b => b.status === 'WORKING').length,
     completed: bookings.filter(b => b.status === 'COMPLETED').length,
   }
 
@@ -173,13 +157,13 @@ export default function StaffBookings() {
 
   const handleSaveEdit = async () => {
     if (!selectedBooking) return;
-    
+
     if (editService && editService !== selectedBooking.service && servicesMap[editService]) {
       try {
         if (selectedBooking.realId) {
           await updateBookingStatus(selectedBooking.realId, { serviceName: editService });
         }
-        
+
         setBookings(prev => prev.map(b => {
           if (b.id !== selectedBooking.id) return b;
           return {
@@ -210,16 +194,16 @@ export default function StaffBookings() {
             </h1>
           </div>
           <div className="flex items-center gap-3 mt-2">
-            <button 
+            <button
               onClick={handlePrevDay}
               className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
             >
               <ChevronLeft size={16} />
             </button>
             <p className="text-white/80 text-sm font-mono min-w-[160px] text-center">
-              {selectedDate.toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}
+              {selectedDate.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
             </p>
-            <button 
+            <button
               onClick={handleNextDay}
               className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
             >
@@ -240,11 +224,11 @@ export default function StaffBookings() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { label: 'Tổng', val: counts.total,     f: 'ALL',       color: 'text-white',        border: 'border-white/10'        },
-          { label: 'Chờ đến', val: counts.pending, f: 'PENDING',  color: 'text-yellow-400',   border: 'border-yellow-500/20'   },
-          { label: 'Đã đến',  val: counts.arrived, f: 'ARRIVED',  color: 'text-orange-400',   border: 'border-orange-500/20'   },
-          { label: 'Đang rửa',val: counts.working, f: 'WORKING',  color: 'text-blue-400',     border: 'border-blue-500/20'     },
-          { label: 'Xong',   val: counts.completed,f: 'COMPLETED', color: 'text-emerald-400', border: 'border-emerald-500/20'  },
+          { label: 'Tổng', val: counts.total, f: 'ALL', color: 'text-white', border: 'border-white/10' },
+          { label: 'Chờ đến', val: counts.pending, f: 'PENDING', color: 'text-yellow-400', border: 'border-yellow-500/20' },
+          { label: 'Đã đến', val: counts.arrived, f: 'ARRIVED', color: 'text-orange-400', border: 'border-orange-500/20' },
+          { label: 'Đang rửa', val: counts.working, f: 'WORKING', color: 'text-blue-400', border: 'border-blue-500/20' },
+          { label: 'Xong', val: counts.completed, f: 'COMPLETED', color: 'text-emerald-400', border: 'border-emerald-500/20' },
         ].map(s => (
           <button key={s.f} onClick={() => setFilter(s.f)}
             className={`bg-neutral-950 border rounded-xl p-3 text-left transition-all ${filter === s.f ? s.border + ' bg-white/5' : 'border-white/5 hover:border-white/10'}`}>
@@ -351,7 +335,7 @@ export default function StaffBookings() {
               {selectedBooking.status !== 'COMPLETED' && (
                 <div>
                   <label className="text-sm text-white/70 font-medium mb-2 block">Cập nhật gói dịch vụ</label>
-                  <select 
+                  <select
                     value={editService}
                     onChange={(e) => setEditService(e.target.value)}
                     className="w-full bg-black/50 border border-white/10 focus:border-cyan-500 focus:outline-none rounded-xl px-4 py-2.5 text-white text-sm"
@@ -364,7 +348,7 @@ export default function StaffBookings() {
                     <div className="mt-3 text-sm bg-cyan-500/10 border border-cyan-500/20 p-3 rounded-xl">
                       <p className="text-cyan-400 mb-1 text-xs">Dịch vụ sẽ thay đổi, giá mới cập nhật:</p>
                       <p className="text-white font-mono">
-                        {servicesMap[editService].price.toLocaleString('vi-VN')}đ 
+                        {servicesMap[editService].price.toLocaleString('vi-VN')}đ
                         <span className="text-white/50 ml-2">({servicesMap[editService].duration} phút)</span>
                       </p>
                     </div>

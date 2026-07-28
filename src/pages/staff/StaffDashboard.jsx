@@ -7,35 +7,19 @@ import {
   Timer, Gauge, TrendingUp, Coffee
 } from 'lucide-react'
 
-// ============ MOCK DATA ============
-const MOCK_STAFF = {
-  id: 'NV-01',
-  name: 'Nguyễn Văn Tèo',
-  shift: 'CA 1',
-  shiftTime: '07:00 - 12:00',
-}
-
-const MOCK_BOOKINGS_TODAY = [
-  { id: 'BKG-10310', time: '08:00', plate: '30A-123.45', customer: 'Nguyễn Văn An', service: 'Eco Wash', duration: 15, status: 'COMPLETED', payment: 'PAID' },
-  { id: 'BKG-10311', time: '08:15', plate: '51F-111.11', customer: 'Lê Hoàng Cường', service: 'Premium Care', duration: 30, status: 'COMPLETED', payment: 'PAID' },
-  { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình', service: 'Detailing & Shine', duration: 60, status: 'WORKING', payment: 'UNPAID', startedAt: Date.now() - 22 * 60 * 1000 },
-  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức', service: 'Eco Wash', duration: 15, status: 'ARRIVED', payment: 'PAID' },
-  { id: 'BKG-10314', time: '10:30', plate: '—', customer: 'Võ Thị Em', service: 'Premium Care', duration: 30, status: 'PENDING', payment: 'UNPAID' },
-  { id: 'BKG-10315', time: '11:00', plate: '—', customer: 'Đỗ Văn Phúc', service: 'Ceramic Shield', duration: 120, status: 'PENDING', payment: 'PAID' },
-]
 
 const STATUS_CONFIG = {
-  PENDING:   { label: 'Chờ đến',    color: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20', icon: Clock },
-  ARRIVED:   { label: 'Đã đến',     color: 'text-orange-400 bg-orange-500/10 border-orange-500/20', icon: LogIn },
-  WORKING:   { label: 'Đang rửa',   color: 'text-blue-400  bg-blue-500/10   border-blue-500/20',   icon: RefreshCw },
-  COMPLETED: { label: 'Xong',       color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2 },
+  PENDING: { label: 'Chờ đến', color: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20', icon: Clock },
+  ARRIVED: { label: 'Đã đến', color: 'text-orange-400 bg-orange-500/10 border-orange-500/20', icon: LogIn },
+  WORKING: { label: 'Đang rửa', color: 'text-blue-400  bg-blue-500/10   border-blue-500/20', icon: RefreshCw },
+  COMPLETED: { label: 'Xong', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2 },
 }
 
 const SERVICE_COLOR = {
-  'Eco Wash':         'text-cyan-400',
-  'Premium Care':     'text-purple-400',
-  'Detailing & Shine':'text-emerald-400',
-  'Ceramic Shield':   'text-amber-400',
+  'Eco Wash': 'text-cyan-400',
+  'Premium Care': 'text-purple-400',
+  'Detailing & Shine': 'text-emerald-400',
+  'Ceramic Shield': 'text-amber-400',
 }
 
 // ============ SUB-COMPONENTS ============
@@ -46,11 +30,11 @@ const LiveClock = () => {
     const t = setInterval(() => setTime(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
-  const hours   = time.getHours().toString().padStart(2, '0')
+  const hours = time.getHours().toString().padStart(2, '0')
   const minutes = time.getMinutes().toString().padStart(2, '0')
   const seconds = time.getSeconds().toString().padStart(2, '0')
-  const days    = ['Chủ Nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy']
-  const dateStr = `${days[time.getDay()]}, ${time.getDate().toString().padStart(2,'0')}/${(time.getMonth()+1).toString().padStart(2,'0')}/${time.getFullYear()}`
+  const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
+  const dateStr = `${days[time.getDay()]}, ${time.getDate().toString().padStart(2, '0')}/${(time.getMonth() + 1).toString().padStart(2, '0')}/${time.getFullYear()}`
   return (
     <div className="text-right">
       <div className="font-mono text-4xl font-light tracking-tight text-white flex items-end justify-end gap-1">
@@ -71,15 +55,15 @@ const WorkingTimer = ({ startedAt, duration }) => {
     const t = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 1000)
     return () => clearInterval(t)
   }, [startedAt])
-  const elapsedMin  = Math.floor(elapsed / 60)
-  const elapsedSec  = elapsed % 60
-  const progress    = Math.min((elapsedMin / duration) * 100, 100)
-  const isOvertime  = elapsedMin >= duration
+  const elapsedMin = Math.floor(elapsed / 60)
+  const elapsedSec = elapsed % 60
+  const progress = Math.min((elapsedMin / duration) * 100, 100)
+  const isOvertime = elapsedMin >= duration
   return (
     <div className="mt-3">
       <div className="flex justify-between text-[11px] font-mono mb-1.5">
         <span className={isOvertime ? 'text-red-400 font-bold' : 'text-white/60'}>
-          Đã làm: {elapsedMin}p {elapsedSec.toString().padStart(2,'0')}s
+          Đã làm: {elapsedMin}p {elapsedSec.toString().padStart(2, '0')}s
         </span>
         <span className="text-white/40">Định mức: {duration}p</span>
       </div>
@@ -100,14 +84,14 @@ const WorkingTimer = ({ startedAt, duration }) => {
 
 export default function StaffDashboard() {
   const navigate = useNavigate()
-  
+
   const [bookings, setBookings] = useState([])
   const [staffName, setStaffName] = useState('Nhân viên')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setStaffName(localStorage.getItem('username') || MOCK_STAFF.name);
-    
+    setStaffName(localStorage.getItem('username') || 'Nhân viên');
+
     const fetchBookings = async () => {
       try {
         setLoading(true);
@@ -119,11 +103,11 @@ export default function StaffDashboard() {
             servMap[s.serviceName] = s.duration;
           });
         }
-        
+
         // Fetch today's bookings
         const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
         const res = await api.get(`/api/bookings/date?date=${today}`);
-        
+
         if (res.data?.success && res.data.data && res.data.data.length > 0) {
           const formattedBookings = res.data.data.map(b => ({
             id: `BKG-${b.id}`,
@@ -147,8 +131,8 @@ export default function StaffDashboard() {
           setBookings([]);
         }
       } catch (err) {
-        console.error('Failed to load bookings, using mock:', err);
-        setBookings(MOCK_BOOKINGS_TODAY);
+        console.error('Failed to load bookings:', err);
+        setBookings([]);
       } finally {
         setLoading(false);
       }
@@ -157,12 +141,12 @@ export default function StaffDashboard() {
   }, []);
 
   const summary = useMemo(() => ({
-    total:     bookings.length,
-    pending:   bookings.filter(b => b.status === 'PENDING').length,
-    arrived:   bookings.filter(b => b.status === 'ARRIVED').length,
-    working:   bookings.filter(b => b.status === 'WORKING').length,
+    total: bookings.length,
+    pending: bookings.filter(b => b.status === 'PENDING').length,
+    arrived: bookings.filter(b => b.status === 'ARRIVED').length,
+    working: bookings.filter(b => b.status === 'WORKING').length,
     completed: bookings.filter(b => b.status === 'COMPLETED').length,
-    unpaid:    bookings.filter(b => b.payment === 'UNPAID' && b.status === 'COMPLETED').length,
+    unpaid: bookings.filter(b => b.payment === 'UNPAID' && b.status === 'COMPLETED').length,
   }), [bookings])
 
   const activeBookings = bookings.filter(b =>
@@ -186,7 +170,7 @@ export default function StaffDashboard() {
                 Xin chào, <span className="text-cyan-400">{staffName.split(' ').pop()}</span>!
               </h1>
               <p className="text-white/40 text-xs font-mono tracking-wide">
-                {localStorage.getItem('username')} · {MOCK_STAFF.shift}: {MOCK_STAFF.shiftTime}
+                {localStorage.getItem('username')} · Ca trực: 07:00 - 15:00
               </p>
             </div>
           </div>
@@ -202,7 +186,7 @@ export default function StaffDashboard() {
           <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
           <div>
             <p className="text-sm font-medium text-cyan-300">Ca trực đang hoạt động</p>
-            <p className="text-xs text-white/40 font-mono">{MOCK_STAFF.shift} · {MOCK_STAFF.shiftTime} · Còn {summary.total - summary.completed} xe cần xử lý</p>
+            <p className="text-xs text-white/40 font-mono">Ca trực · 07:00 - 15:00 · Còn {summary.total - summary.completed} xe cần xử lý</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -226,11 +210,11 @@ export default function StaffDashboard() {
       {/* ── SUMMARY STATS ── */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Tổng hôm nay', value: summary.total,     color: 'text-white',        icon: Car,          bg: 'bg-white/5' },
-          { label: 'Chờ đến',      value: summary.pending,   color: 'text-yellow-400',   icon: Clock,        bg: 'bg-yellow-500/10' },
-          { label: 'Đã đến',       value: summary.arrived,   color: 'text-orange-400',   icon: LogIn,        bg: 'bg-orange-500/10' },
-          { label: 'Đang rửa',     value: summary.working,   color: 'text-blue-400',     icon: RefreshCw,    bg: 'bg-blue-500/10' },
-          { label: 'Hoàn thành',   value: summary.completed, color: 'text-emerald-400',  icon: CheckCircle2, bg: 'bg-emerald-500/10' },
+          { label: 'Tổng hôm nay', value: summary.total, color: 'text-white', icon: Car, bg: 'bg-white/5' },
+          { label: 'Chờ đến', value: summary.pending, color: 'text-yellow-400', icon: Clock, bg: 'bg-yellow-500/10' },
+          { label: 'Đã đến', value: summary.arrived, color: 'text-orange-400', icon: LogIn, bg: 'bg-orange-500/10' },
+          { label: 'Đang rửa', value: summary.working, color: 'text-blue-400', icon: RefreshCw, bg: 'bg-blue-500/10' },
+          { label: 'Hoàn thành', value: summary.completed, color: 'text-emerald-400', icon: CheckCircle2, bg: 'bg-emerald-500/10' },
         ].map((s, i) => {
           const Icon = s.icon
           return (
@@ -279,9 +263,8 @@ export default function StaffDashboard() {
                 return (
                   <div
                     key={booking.id}
-                    className={`relative border rounded-2xl p-5 overflow-hidden group hover:border-white/10 transition-all ${
-                      isWorking ? 'bg-blue-500/5 border-blue-500/20' : 'bg-orange-500/5 border-orange-500/20'
-                    }`}
+                    className={`relative border rounded-2xl p-5 overflow-hidden group hover:border-white/10 transition-all ${isWorking ? 'bg-blue-500/5 border-blue-500/20' : 'bg-orange-500/5 border-orange-500/20'
+                      }`}
                   >
                     {/* Side accent */}
                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl ${isWorking ? 'bg-blue-500' : 'bg-orange-500'}`} />
@@ -428,11 +411,10 @@ export default function StaffDashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-3">
-                      <span className={`inline-flex items-center text-[11px] font-mono px-2 py-1 rounded border ${
-                        b.payment === 'PAID'
+                      <span className={`inline-flex items-center text-[11px] font-mono px-2 py-1 rounded border ${b.payment === 'PAID'
                           ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
                           : 'text-red-400 bg-red-500/10 border-red-500/20'
-                      }`}>
+                        }`}>
                         {b.payment === 'PAID' ? 'Đã TT' : 'Chưa TT'}
                       </span>
                     </td>

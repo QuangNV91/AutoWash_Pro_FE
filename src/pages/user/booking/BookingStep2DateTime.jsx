@@ -26,10 +26,8 @@ export default function BookingStep2DateTime() {
 
   const maxDays = getMaxDays();
 
-  // Tính validity inline
   const step2Valid = !!selectedDate && bookingItems.every(item => !!item.selectedTime);
 
-  // Redirect nếu chưa có dữ liệu bước 1
   useEffect(() => {
     const hasValidItems = bookingItems.length > 0 && bookingItems.every(item => item.service);
     if (!hasValidItems) {
@@ -55,15 +53,14 @@ export default function BookingStep2DateTime() {
     }
   }, [bookingItems, setItemSlots, setItemSlotsLoading]);
 
-  // Fetch slots khi ngày thay đổi
   useEffect(() => {
     if (selectedDate) {
       fetchSlotsForAllItems(selectedDate);
     }
-  }, [selectedDate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedDate]);
 
   const handleDateSelect = (date) => {
-    setDate(date); // Sẽ reset tất cả slots và selectedTime
+    setDate(date);
   };
 
   const handleTimeSelect = (itemId, time) => {
@@ -103,9 +100,9 @@ export default function BookingStep2DateTime() {
         <StepIndicator currentStep={2} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
-          {/* Left Column: Date & Time Selection */}
+          {/*  */}
           <div className="lg:col-span-2 space-y-10">
-            {/* Date Selection — chung cho tất cả xe */}
+            {/* */}
             <div>
               <div className="flex justify-between items-end mb-6">
                 <h2 className="font-hero text-2xl font-medium text-white tracking-tight">Chọn ngày</h2>
@@ -120,13 +117,13 @@ export default function BookingStep2DateTime() {
               />
             </div>
 
-            {/* Time Selection — riêng cho từng xe */}
+            {/* */}
             {bookingItems.map((item, index) => {
               const conflictSlots = getConflictingSlots(item.id);
 
               return (
                 <div key={item.id} className="bg-neutral-950 border border-white/5 rounded-2xl p-6">
-                  {/* Header xe */}
+                  {/* */}
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80">
                       <Car size={20} />
@@ -146,7 +143,7 @@ export default function BookingStep2DateTime() {
                     )}
                   </div>
 
-                  {/* Slot Grid */}
+                  {/* */}
                   <TimeSlotGrid
                     slots={item.availableSlots}
                     selectedTime={item.selectedTime}
@@ -161,7 +158,7 @@ export default function BookingStep2DateTime() {
               );
             })}
 
-            {/* Legend */}
+            {/* */}
             {selectedDate && (
               <div className="flex flex-wrap items-center gap-6 justify-center text-sm text-white/40">
                 <div className="flex items-center gap-2">
@@ -186,7 +183,7 @@ export default function BookingStep2DateTime() {
             )}
           </div>
 
-          {/* Right Column: Booking Summary */}
+          {/* */}
           <div className="lg:col-span-1 lg:mt-[56px] lg:sticky lg:top-28 lg:self-start z-10">
             <BookingSummaryCard
               onNext={handleNext}
