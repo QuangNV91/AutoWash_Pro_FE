@@ -30,12 +30,13 @@ const SERVICE_COLOR = {
   'Detailing & Shine': 'text-emerald-400', 'Ceramic Shield': 'text-amber-400',
 }
 const SLOTS = [
-  { label: 'Slot 1', time: '08:00 – 09:00' }, { label: 'Slot 2', time: '09:00 – 10:00' },
-  { label: 'Slot 3', time: '10:00 – 11:00' }, { label: 'Slot 4', time: '11:00 – 12:00' },
+  { label: 'Slot 1', time: '07:00 – 08:00' }, { label: 'Slot 2', time: '08:00 – 09:00' },
+  { label: 'Slot 3', time: '09:00 – 10:00' }, { label: 'Slot 4', time: '10:00 – 11:00' },
+  { label: 'Slot 5', time: '11:00 – 12:00' },
   { label: 'Nghỉ trưa', time: '12:00 – 13:00', isBreak: true },
-  { label: 'Slot 5', time: '13:00 – 14:00' }, { label: 'Slot 6', time: '14:00 – 15:00' },
-  { label: 'Slot 7', time: '15:00 – 16:00' }, { label: 'Slot 8', time: '16:00 – 17:00' },
-  { label: 'Slot 9', time: '17:00 – 18:00' },
+  { label: 'Slot 6', time: '13:00 – 14:00' }, { label: 'Slot 7', time: '14:00 – 15:00' },
+  { label: 'Slot 8', time: '15:00 – 16:00' }, { label: 'Slot 9', time: '16:00 – 17:00' },
+  { label: 'Slot 10', time: '17:00 – 18:00' },
 ]
 
 function slotHour(slot) { return parseInt(slot.time.split(':')[0]) }

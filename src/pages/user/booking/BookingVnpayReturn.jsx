@@ -9,7 +9,7 @@ export default function BookingVnpayReturn() {
   const [status, setStatus] = useState('loading');
 
   const txnRef = searchParams.get('txnRef');
-  const paymentStatus = searchParams.get('paymentStatus'); // SUCCESS, FAILED
+  const paymentStatus = searchParams.get('paymentStatus');
   const vnp_ResponseCode = searchParams.get('vnp_ResponseCode');
 
   useEffect(() => {
@@ -36,11 +36,11 @@ export default function BookingVnpayReturn() {
           {status === 'success' && (
             <div className="relative z-10 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500/10 blur-[100px] rounded-full"></div>
-              
+
               <div className="w-24 h-24 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center mb-6">
                 <CheckCircle2 size={48} className="text-green-400" />
               </div>
-              
+
               <h1 className="font-hero text-3xl md:text-4xl font-medium text-white mb-4 tracking-tight">Thanh toán thành công!</h1>
               <p className="text-white/60 mb-8 max-w-md mx-auto">
                 Giao dịch của bạn đã được xác nhận. Cảm ơn bạn đã sử dụng dịch vụ tại AutoWash Pro.
@@ -54,13 +54,13 @@ export default function BookingVnpayReturn() {
               )}
 
               <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-                <button 
+                <button
                   onClick={() => navigate('/dashboard')}
                   className="px-8 py-3.5 font-medium rounded-full bg-white text-black hover:bg-neutral-200 transition-colors"
                 >
                   Quản lý lịch hẹn
                 </button>
-                <Link 
+                <Link
                   to="/"
                   className="px-8 py-3.5 font-medium rounded-full border border-white/10 text-white hover:bg-white/5 transition-colors"
                 >
@@ -73,11 +73,11 @@ export default function BookingVnpayReturn() {
           {status === 'error' && (
             <div className="relative z-10 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-red-500/10 blur-[100px] rounded-full"></div>
-              
+
               <div className="w-24 h-24 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mb-6">
                 <XCircle size={48} className="text-red-400" />
               </div>
-              
+
               <h1 className="font-hero text-3xl md:text-4xl font-medium text-white mb-4 tracking-tight">Thanh toán thất bại</h1>
               <p className="text-white/60 mb-8 max-w-md mx-auto">
                 Giao dịch chưa được hoàn tất hoặc đã bị hủy bỏ. Lịch đặt của bạn vẫn được lưu giữ, vui lòng thanh toán lại hoặc thanh toán tại cửa hàng.
@@ -91,13 +91,13 @@ export default function BookingVnpayReturn() {
               )}
 
               <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-                <button 
+                <button
                   onClick={() => navigate('/dashboard')}
                   className="px-8 py-3.5 font-medium rounded-full border border-white/10 text-white hover:bg-white/5 transition-colors"
                 >
                   Xem lịch đã đặt
                 </button>
-                <Link 
+                <Link
                   to="/booking"
                   className="px-8 py-3.5 font-medium rounded-full bg-white text-black hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2"
                 >

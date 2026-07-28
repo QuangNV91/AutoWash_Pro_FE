@@ -1,5 +1,5 @@
 import api from './api';
-
+import { mapTimeToSlot } from '../utils/scheduleUtils';
 
 
 // ============ API FUNCTIONS ============
@@ -27,7 +27,9 @@ export async function getAvailableSlots(bookingDate, serviceId) {
     const res = await api.get('/api/v1/bookings/available-slots', {
       params: { booking_date: bookingDate, service_id: serviceId },
     });
-    return res.data.data || res.data;
+    const slots = res.data.data || res.data;
+
+    return slots;
   } catch (err) {
     console.error('getAvailableSlots API error:', err);
     throw err;

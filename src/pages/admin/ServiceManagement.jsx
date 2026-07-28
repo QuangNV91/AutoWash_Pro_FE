@@ -84,8 +84,6 @@ export default function ServiceManagement() {
 
     try {
       if (service.isActive) {
-        // Deactivate: BE doesn't have a deactivate for services, use delete then re-add
-        // Actually BE has DELETE and PATCH activate. Let's use DELETE to deactivate and PATCH to activate.
         await api.delete(`/api/services/${id}`);
         showToast(`Đã tắt dịch vụ "${service.name}"`);
       } else {

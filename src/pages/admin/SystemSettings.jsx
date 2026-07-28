@@ -1,6 +1,29 @@
 import { Settings, Save, Bell, Shield, Server, Globe } from 'lucide-react';
+import useSystemConfigStore from '../../store/systemConfigStore';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 export default function SystemSettings() {
+  const { maxBookingsPerSlot, rewardPointsOnlinePayment, updateConfig } = useSystemConfigStore();
+  
+  const [localMaxBookings, setLocalMaxBookings] = useState(maxBookingsPerSlot);
+  const [localRewardPoints, setLocalRewardPoints] = useState(rewardPointsOnlinePayment);
+
+  // Sync state if fetched late
+  useEffect(() => {
+    setLocalMaxBookings(maxBookingsPerSlot);
+    setLocalRewardPoints(rewardPointsOnlinePayment);
+  }, [maxBookingsPerSlot, rewardPointsOnlinePayment]);
+
+  const handleSave = async () => {
+    const success = await updateConfig(Number(localMaxBookings), Number(localRewardPoints));
+    if (success) {
+      toast.success('Đã lưu cấu hình hệ thống thành công!');
+    } else {
+      toast.error('Có lỗi xảy ra khi lưu cấu hình.');
+    }
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-8 w-full max-w-[1400px] mx-auto font-body text-white selection:bg-cyan-500/30">
       {/* HEADER */}
@@ -12,7 +35,9 @@ export default function SystemSettings() {
           </div>
           <p className="text-white/40 text-sm font-mono tracking-wide">SYSTEM.PREFERENCES // Quản lý thông số vận hành lõi</p>
         </div>
-        <button className="px-6 py-2.5 bg-cyan-500/10 text-cyan-400 font-medium text-sm rounded-xl border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all shadow-[0_0_15px_rgba(6,182,212,0.15)] font-mono uppercase tracking-widest flex items-center gap-2">
+        <button 
+          onClick={handleSave}
+          className="px-6 py-2.5 bg-cyan-500/10 text-cyan-400 font-medium text-sm rounded-xl border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all shadow-[0_0_15px_rgba(6,182,212,0.15)] font-mono uppercase tracking-widest flex items-center gap-2">
           <Save size={16} /> LƯU THAY ĐỔI
         </button>
       </div>
@@ -53,6 +78,41 @@ export default function SystemSettings() {
             <div className="space-y-2">
               <label className="text-[10px] text-white/40 tracking-widest uppercase">Địa chỉ</label>
               <input type="text" defaultValue="123 Nguyễn Văn Linh, Quận 7, TP.HCM" className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none" />
+            </div>
+          </div>
+
+          <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 space-y-6">
+            <h3 className="font-hero text-lg font-medium tracking-tight border-b border-white/5 pb-4">Cấu hình Đặt lịch & Điểm thưởng</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] text-white/40 tracking-widest uppercase">Giới hạn số xe / khung giờ</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    value={localMaxBookings}
+                    onChange={(e) => setLocalMaxBookings(e.target.value)}
+                    min="1"
+                    className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none" 
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-white/40">xe</span>
+                </div>
+                <p className="text-[10px] text-white/30">Số lượng đơn tối đa có thể tiếp nhận trong cùng một time slot.</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] text-white/40 tracking-widest uppercase">Điểm thưởng TT Online</label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    value={localRewardPoints}
+                    onChange={(e) => setLocalRewardPoints(e.target.value)}
+                    min="0"
+                    className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none" 
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-white/40">điểm</span>
+                </div>
+                <p className="text-[10px] text-white/30">Số điểm cộng thêm (mỗi xe) khi thanh toán trực tuyến qua VNPay.</p>
+              </div>
             </div>
           </div>
 
