@@ -47,12 +47,17 @@ export default function RegisterPage() {
           email: values.email,
           password: values.password
         };
-        await api.post('/auth/register', payload);
+        const response = await api.post('/auth/register', payload);
         
-        setSuccess('Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...');
+        setSuccess('Đăng ký thành công! Đang chuyển hướng đến trang xác thực...');
 
         setTimeout(() => {
-          navigate('/auth/login');
+          navigate('/auth/verify', { 
+            state: { 
+              phone: values.phone, 
+              code: response.data.verificationCode 
+            } 
+          });
         }, 1200);
 
       } catch (err) {

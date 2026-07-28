@@ -4,6 +4,7 @@ import PageWrapper from '../../../components/layout/PageWrapper';
 import StepIndicator from '../../../components/ui/StepIndicator';
 import BookingSummaryCard from '../../../components/booking/BookingSummaryCard';
 import useBookingStore from '../../../store/bookingStore';
+import useSystemConfigStore from '../../../store/systemConfigStore';
 import { checkoutBookings } from '../../../services/bookingService';
 import { ArrowLeft, CreditCard, Banknote, Car, Calendar, Clock, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
@@ -21,6 +22,8 @@ export default function BookingStep3Confirm() {
     getTotalPoints,
     userTier,
   } = useBookingStore();
+
+  const rewardPointsOnlinePayment = useSystemConfigStore(state => state.rewardPointsOnlinePayment);
 
   const [submitProgress, setSubmitProgress] = useState(0); // 0 → N
 
@@ -256,7 +259,7 @@ export default function BookingStep3Confirm() {
                       <h3 className={`font-medium ${paymentMethod === 'ONLINE' ? 'text-white' : 'text-white/80'}`}>Thanh toán trực tuyến</h3>
                       <p className="text-white/60 text-sm mt-1">Thanh toán qua VNPay an toàn và nhanh chóng.</p>
                       <span className="inline-block mt-2 text-xs font-medium text-green-400 bg-green-400/10 px-2 py-1 rounded">
-                        +10 Điểm thưởng / xe
+                        +{rewardPointsOnlinePayment} Điểm thưởng / xe
                       </span>
                     </div>
                   </label>

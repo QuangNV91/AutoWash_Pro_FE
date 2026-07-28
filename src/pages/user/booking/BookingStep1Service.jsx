@@ -27,8 +27,6 @@ export default function BookingStep1Service() {
   const [licensePlateErrors, setLicensePlateErrors] = useState({});
 
   // Biển số ô tô VN: 2 chữ số tỉnh + 1-2 chữ cái + gạch ngang + 4-5 chữ số
-  // VD hợp lệ: 51A-12345, 30AB-12345, 43H-1234
-  // VD không hợp lệ (xe máy): 51B1-123, 29-B12345
   const CAR_PLATE_REGEX = /^[0-9]{2}[A-Z]{1,2}-[0-9]{4,5}$/;
 
   // Kiểm tra tàton bộ biển số trong booking (format + trùng lập)

@@ -6,6 +6,7 @@ import { Clock, CheckCircle2, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import BookingSlotModal from '../../components/admin/modals/BookingSlotModal';
 import toast from 'react-hot-toast';
+import useSystemConfigStore from '../../store/systemConfigStore';
 
 const SERVICE_CONFIG = {
   'Eco Wash': { duration: 15, badge: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
@@ -139,6 +140,8 @@ export default function BookingSlotDashboard() {
     date: '', slotKey: '', service: 'Eco Wash', customer: '', plate: '', status: 'PENDING', payment: 'UNPAID'
   });
 
+  const { maxBookingsPerSlot } = useSystemConfigStore();
+
   // Calculate Capacity Logic
   const calculateAllocation = (slotBookings) => {
     let staff1 = 0;
@@ -156,16 +159,19 @@ export default function BookingSlotDashboard() {
         } else if (staff2 + duration <= 60) {
           staff2 += duration;
         } else {
-          return { staff1, staff2, isValid: false }; // Cannot fit
+          return { staff1, staff2, isValid: false, isFull: true }; // Cannot fit time
         }
       }
     }
     
+    const isDurationFull = staff1 === 60 && staff2 === 60;
+    const isCountFull = slotBookings.length >= maxBookingsPerSlot;
+
     return { 
       staff1, 
       staff2, 
-      isValid: staff1 <= 60 && staff2 <= 60,
-      isFull: staff1 === 60 && staff2 === 60,
+      isValid: staff1 <= 60 && staff2 <= 60 && slotBookings.length <= maxBookingsPerSlot,
+      isFull: isDurationFull || isCountFull,
       hasCeramic: slotBookings.some(b => b.service === 'Ceramic Shield')
     };
   };
@@ -203,7 +209,8 @@ export default function BookingSlotDashboard() {
     existingBookings.push(formData); // Test add
     const { isValid } = calculateAllocation(existingBookings);
     return isValid;
-  }, [formData, bookings, editingBookingId]);
+  }, [formData, bookings, editingBookingId, maxBookingsPerSlot]);
+
 
   const handleOpenAddModal = (slotKey) => {
     setModalMode('add');
@@ -265,7 +272,7 @@ export default function BookingSlotDashboard() {
     e.preventDefault();
     
     if (!isFormValid) {
-      toast.error("Không đủ năng suất phục vụ cho gói dịch vụ này trong khung giờ hiện tại.");
+      toast.error(`Không thể xếp thêm xe. Slot đã đầy hoặc vượt quá giới hạn ${maxBookingsPerSlot} xe/slot.`);
       return;
     }
 
@@ -499,6 +506,9 @@ export default function BookingSlotDashboard() {
                     <span className="text-sm font-medium">Thêm xe vào khung giờ</span>
                     <span className="text-xs mt-1">
                       Còn trống {60 - slot.allocation.staff1}p (NV1) / {60 - slot.allocation.staff2}p (NV2)
+                    </span>
+                    <span className="text-[10px] text-white/30 mt-1">
+                      (Đã đặt {slot.bookingsList.length}/{maxBookingsPerSlot} xe)
                     </span>
                   </button>
                 )}

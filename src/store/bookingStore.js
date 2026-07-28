@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import useSystemConfigStore from './systemConfigStore';
 
 // Giới hạn xe theo Tier
 const TIER_VEHICLE_LIMITS = {
@@ -62,7 +63,10 @@ const useBookingStore = create((set, get) => ({
       // Đồng bộ tính điểm: 1000đ = 1 điểm cho toàn bộ hệ thống
       return sum + Math.floor(price / 1000);
     }, 0);
-    const onlineBonus = get().paymentMethod === 'ONLINE' ? 10 * items.filter(i => i.service).length : 0;
+    
+    // Lấy cấu hình điểm thưởng thanh toán online từ store
+    const rewardPointsOnline = useSystemConfigStore.getState().rewardPointsOnlinePayment;
+    const onlineBonus = get().paymentMethod === 'ONLINE' ? rewardPointsOnline * items.filter(i => i.service).length : 0;
     return basePoints + onlineBonus;
   },
 

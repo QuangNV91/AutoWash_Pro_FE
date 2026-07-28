@@ -20,7 +20,7 @@ export default function VerifyPage() {
       toast.error('Không tìm thấy thông tin đăng ký. Vui lòng đăng ký lại.');
       navigate('/auth/register');
     } else if (expectedCode) {
-      toast.success(`(Mã OTP test của bạn là: ${expectedCode})`, { duration: 5000 });
+      toast.success(`(Mã OTP test của bạn là: ${expectedCode})`, { duration: 30000 });
     }
   }, [phone, expectedCode, navigate]);
 

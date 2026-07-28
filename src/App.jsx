@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import useSystemConfigStore from './store/systemConfigStore'
 import ProtectedRoute from './components/common/ProtectedRoute.jsx'
 import HomePage from './pages/guest/HomePage.jsx'
 import ServicesPage from './pages/guest/ServicesPage.jsx'
@@ -34,6 +36,12 @@ import ServiceManagement from './pages/admin/ServiceManagement.jsx'
 import SystemSettings from './pages/admin/SystemSettings.jsx'
 
 export default function App() {
+  const fetchConfig = useSystemConfigStore(state => state.fetchConfig);
+
+  useEffect(() => {
+    fetchConfig();
+  }, [fetchConfig]);
+
   return (
     <>
       <Toaster 
