@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { Users, Search, Filter, Shield, Phone, Car } from 'lucide-react';
 
-const CUSTOMERS = [
-  { id: 'CUST-001', name: 'Lê Hoàng Cường', phone: '0901234567', plate: '51F-111.11', tier: 'PLATINUM', points: 1500, spent: 15000000, lastVisit: '12/06/2026' },
-  { id: 'CUST-002', name: 'Nguyễn Văn An', phone: '0988777666', plate: '30A-123.45', tier: 'GOLD', points: 800, spent: 8500000, lastVisit: '14/06/2026' },
-  { id: 'CUST-003', name: 'Trần Thị Bình', phone: '0912345678', plate: '29C-888.88', tier: 'SILVER', points: 200, spent: 2500000, lastVisit: '10/06/2026' },
-  { id: 'CUST-004', name: 'Phạm Minh Đức', phone: '0933444555', plate: '60A-999.99', tier: 'MEMBER', points: 50, spent: 600000, lastVisit: '14/06/2026' },
-];
+const CUSTOMERS = [];
 
 const TIER_COLORS = {
   PLATINUM: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
@@ -51,21 +46,21 @@ export default function CustomerManagement() {
         <div className="bg-neutral-950 border border-white/5 rounded-2xl p-5 flex items-center justify-between">
           <div>
             <p className="text-[10px] text-white/40 font-mono tracking-widest uppercase mb-1">Tổng khách hàng</p>
-            <p className="text-3xl font-hero text-cyan-400">1,248</p>
+            <p className="text-3xl font-hero text-cyan-400">0</p>
           </div>
           <Users size={32} className="text-white/5" />
         </div>
         <div className="bg-neutral-950 border border-white/5 rounded-2xl p-5 flex items-center justify-between">
           <div>
             <p className="text-[10px] text-white/40 font-mono tracking-widest uppercase mb-1">Khách quay lại (Retention)</p>
-            <p className="text-3xl font-hero text-emerald-400">68%</p>
+            <p className="text-3xl font-hero text-emerald-400">0%</p>
           </div>
           <Shield size={32} className="text-white/5" />
         </div>
         <div className="bg-neutral-950 border border-white/5 rounded-2xl p-5 flex items-center justify-between">
           <div>
             <p className="text-[10px] text-white/40 font-mono tracking-widest uppercase mb-1">Doanh thu trung bình/Khách</p>
-            <p className="text-3xl font-hero text-purple-400">1.2M</p>
+            <p className="text-3xl font-hero text-purple-400">0</p>
           </div>
           <Car size={32} className="text-white/5" />
         </div>
@@ -86,43 +81,49 @@ export default function CustomerManagement() {
               </tr>
             </thead>
             <tbody className="text-sm">
-              {CUSTOMERS.map((customer) => (
-                <tr key={customer.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-mono text-xs text-white/60">
-                        {customer.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-medium text-white">{customer.name}</div>
-                        <div className="text-[10px] font-mono text-white/40">{customer.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-white/60 font-mono text-xs">
-                      <Phone size={12} /> {customer.phone}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-block px-2 py-1 bg-white/5 border border-white/10 rounded text-white tracking-wider font-mono text-xs">
-                      {customer.plate}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-block px-2 py-1 rounded text-[10px] font-mono tracking-widest border ${TIER_COLORS[customer.tier]}`}>
-                      {customer.tier}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="text-white">{customer.spent.toLocaleString('vi-VN')}đ</div>
-                    <div className="text-[10px] font-mono text-cyan-400 mt-0.5">{customer.points} Pts</div>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="text-white/60 font-mono text-xs">{customer.lastVisit}</div>
-                  </td>
+              {CUSTOMERS.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center text-white/40 font-mono text-sm">Chưa có dữ liệu khách hàng</td>
                 </tr>
-              ))}
+              ) : (
+                CUSTOMERS.map((customer) => (
+                  <tr key={customer.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-mono text-xs text-white/60">
+                          {customer.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="font-medium text-white">{customer.name}</div>
+                          <div className="text-[10px] font-mono text-white/40">{customer.id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-white/60 font-mono text-xs">
+                        <Phone size={12} /> {customer.phone}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-block px-2 py-1 bg-white/5 border border-white/10 rounded text-white tracking-wider font-mono text-xs">
+                        {customer.plate}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-block px-2 py-1 rounded text-[10px] font-mono tracking-widest border ${TIER_COLORS[customer.tier]}`}>
+                        {customer.tier}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="text-white">{customer.spent.toLocaleString('vi-VN')}đ</div>
+                      <div className="text-[10px] font-mono text-cyan-400 mt-0.5">{customer.points} Pts</div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="text-white/60 font-mono text-xs">{customer.lastVisit}</div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

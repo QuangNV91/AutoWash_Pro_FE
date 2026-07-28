@@ -2,23 +2,12 @@ import { useNavigate } from 'react-router-dom'
 import { BarChart3, ChevronLeft, TrendingUp, TrendingDown, Car, Clock, Star, Zap, Award } from 'lucide-react'
 
 const STATS = {
-  today:   { cars: 6, hours: 5, avgTime: 32, rating: 4.9 },
-  week:    { cars: 24, hours: 35, avgTime: 29, rating: 4.8 },
-  month:   { cars: 98, hours: 140, avgTime: 31, rating: 4.85 },
+  today:   { cars: 0, hours: 0, avgTime: 0, rating: 0 },
+  week:    { cars: 0, hours: 0, avgTime: 0, rating: 0 },
+  month:   { cars: 0, hours: 0, avgTime: 0, rating: 0 },
 }
-const SERVICE_BREAKDOWN = [
-  { name: 'Eco Wash',          count: 12, pct: 12, color: 'bg-cyan-500',    text: 'text-cyan-400'    },
-  { name: 'Premium Care',      count: 34, pct: 35, color: 'bg-purple-500',  text: 'text-purple-400'  },
-  { name: 'Detailing & Shine', count: 42, pct: 43, color: 'bg-emerald-500', text: 'text-emerald-400' },
-  { name: 'Ceramic Shield',    count: 10, pct: 10, color: 'bg-amber-500',   text: 'text-amber-400'   },
-]
-const RECENT = [
-  { date: '20/06', car: '29C-888.88', service: 'Detailing & Shine', time: 58, ok: true  },
-  { date: '20/06', car: '30A-123.45', service: 'Eco Wash',          time: 14, ok: true  },
-  { date: '19/06', car: '51F-111.11', service: 'Premium Care',       time: 33, ok: false },
-  { date: '19/06', car: '60A-999.99', service: 'Ceramic Shield',     time: 122,ok: true  },
-  { date: '18/06', car: '29C-000.11', service: 'Eco Wash',          time: 15, ok: true  },
-]
+const SERVICE_BREAKDOWN = []
+const RECENT = []
 
 export default function StaffStats() {
   const navigate = useNavigate()
@@ -121,20 +110,24 @@ export default function StaffStats() {
           <Award size={18} className="text-white/40" /> Phân bổ dịch vụ (tháng này)
         </h3>
         <div className="space-y-4">
-          {SERVICE_BREAKDOWN.map((s, i) => (
-            <div key={i}>
-              <div className="flex justify-between text-sm mb-1.5">
-                <span className="text-white/70">{s.name}</span>
-                <div className="flex items-center gap-3">
-                  <span className={`font-mono ${s.text}`}>{s.count} xe</span>
-                  <span className="text-white/30 font-mono text-xs w-10 text-right">{s.pct}%</span>
+          {SERVICE_BREAKDOWN.length === 0 ? (
+            <div className="text-center text-white/40 font-mono text-sm py-8">Chưa có dữ liệu thống kê</div>
+          ) : (
+            SERVICE_BREAKDOWN.map((s, i) => (
+              <div key={i}>
+                <div className="flex justify-between text-sm mb-1.5">
+                  <span className="text-white/70">{s.name}</span>
+                  <div className="flex items-center gap-3">
+                    <span className={`font-mono ${s.text}`}>{s.count} xe</span>
+                    <span className="text-white/30 font-mono text-xs w-10 text-right">{s.pct}%</span>
+                  </div>
+                </div>
+                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${s.color}`} style={{ width: `${s.pct}%`, transition: 'width 1s ease' }} />
                 </div>
               </div>
-              <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <div className={`h-full rounded-full ${s.color}`} style={{ width: `${s.pct}%`, transition: 'width 1s ease' }} />
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -153,20 +146,26 @@ export default function StaffStats() {
               </tr>
             </thead>
             <tbody>
-              {RECENT.map((r, i) => (
-                <tr key={i} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
-                  <td className="px-5 py-3 text-xs text-white/40 font-mono">{r.date}</td>
-                  <td className="px-5 py-3"><span className="font-mono text-xs bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white">{r.car}</span></td>
-                  <td className="px-5 py-3 text-sm text-white/70">{r.service}</td>
-                  <td className="px-5 py-3 text-sm font-mono text-white">{r.time}p</td>
-                  <td className="px-5 py-3">
-                    <span className={`flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded border ${r.ok ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-amber-400 border-amber-500/30 bg-amber-500/10'}`}>
-                      {r.ok ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-                      {r.ok ? 'Đúng giờ' : 'Trễ hẹn'}
-                    </span>
-                  </td>
+              {RECENT.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-5 py-8 text-center text-white/40 font-mono text-sm">Chưa có lịch sử làm việc</td>
                 </tr>
-              ))}
+              ) : (
+                RECENT.map((r, i) => (
+                  <tr key={i} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors">
+                    <td className="px-5 py-3 text-xs text-white/40 font-mono">{r.date}</td>
+                    <td className="px-5 py-3"><span className="font-mono text-xs bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white">{r.car}</span></td>
+                    <td className="px-5 py-3 text-sm text-white/70">{r.service}</td>
+                    <td className="px-5 py-3 text-sm font-mono text-white">{r.time}p</td>
+                    <td className="px-5 py-3">
+                      <span className={`flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded border ${r.ok ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-amber-400 border-amber-500/30 bg-amber-500/10'}`}>
+                        {r.ok ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                        {r.ok ? 'Đúng giờ' : 'Trễ hẹn'}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

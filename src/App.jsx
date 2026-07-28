@@ -44,12 +44,12 @@ export default function App() {
 
   return (
     <>
-      <Toaster 
-        position="top-right" 
+      <Toaster
+        position="top-right"
         toastOptions={{
           className: 'font-mono text-sm',
           style: { background: '#171717', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }
-        }} 
+        }}
       />
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -57,7 +57,7 @@ export default function App() {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/auth/*" element={<Auth />} />
-        
+
         {/* Protected User Routes */}
         <Route path="/booking" element={<BookingStep1Service />} />
         <Route path="/booking/datetime" element={<BookingStep2DateTime />} />
@@ -65,7 +65,7 @@ export default function App() {
         <Route path="/booking/success" element={<BookingSuccessPage />} />
         <Route path="/booking/vnpay-return" element={<BookingVnpayReturn />} />
         <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['USER', 'CUSTOMER']}><UserDashboard /></ProtectedRoute>} />
-        
+
         {/* Protected Staff Routes */}
         <Route path="/staff/*" element={<ProtectedRoute allowedRoles={['STAFF', 'ADMIN']}><StaffLayout /></ProtectedRoute>}>
           <Route index element={<StaffDashboard />} />
@@ -77,7 +77,7 @@ export default function App() {
           <Route path="profile" element={<StaffProfile />} />
           <Route path="notifications" element={<StaffNotifications />} />
         </Route>
-        
+
         {/* Protected Admin Routes */}
         <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
@@ -91,7 +91,7 @@ export default function App() {
           <Route path="reports" element={<ReportDashboard />} />
           <Route path="settings" element={<SystemSettings />} />
         </Route>
-        
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

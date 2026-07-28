@@ -45,10 +45,10 @@ export default function ReportDashboard() {
   const breakdownList = data?.revenueBreakdown || [];
 
   const KPIS = [
-    { label: 'TỔNG DOANH THU', value: formattedRevenue, change: '+12.5%', isUp: true, color: 'text-emerald-400', border: 'border-emerald-500/20' },
-    { label: 'TỔNG LƯỢT XE', value: totalCars, change: '+5.2%', isUp: true, color: 'text-cyan-400', border: 'border-cyan-500/20' },
-    { label: 'KHÁCH HÀNG', value: newCustomers, change: '+2.1%', isUp: true, color: 'text-red-400', border: 'border-red-500/20' },
-    { label: 'TỈ LỆ LẤP ĐẦY', value: Math.min(100, Math.round((totalCars / 300) * 100)) + '%', change: 'Ổn định', isUp: true, color: 'text-amber-400', border: 'border-amber-500/20' },
+    { label: 'TỔNG DOANH THU', value: formattedRevenue, color: 'text-emerald-400', border: 'border-emerald-500/20' },
+    { label: 'TỔNG LƯỢT XE', value: totalCars, color: 'text-cyan-400', border: 'border-cyan-500/20' },
+    { label: 'KHÁCH HÀNG', value: newCustomers, color: 'text-red-400', border: 'border-red-500/20' },
+    { label: 'TỈ LỆ LẤP ĐẦY', value: Math.min(100, Math.round((totalCars / 300) * 100)) + '%', color: 'text-amber-400', border: 'border-amber-500/20' },
   ];
 
   return (
@@ -75,9 +75,6 @@ export default function ReportDashboard() {
             <p className="text-[10px] text-white/40 font-mono tracking-widest uppercase mb-2">{kpi.label}</p>
             <div className="flex items-end justify-between">
               <p className={`text-3xl font-hero ${kpi.color}`}>{kpi.value}</p>
-              <div className={`flex items-center gap-1 text-[10px] font-mono px-2 py-1 rounded bg-white/5 ${kpi.isUp ? 'text-emerald-400' : 'text-red-400'}`}>
-                {kpi.isUp ? <TrendingUp size={12}/> : <TrendingUp size={12} className="rotate-180"/>} {kpi.change}
-              </div>
             </div>
           </div>
         ))}
@@ -85,23 +82,10 @@ export default function ReportDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* CHART MOCK 1 */}
-        <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 h-[400px] flex flex-col">
-          <h3 className="font-hero text-lg font-medium tracking-tight mb-6">Biểu đồ Doanh thu (Mô phỏng)</h3>
-          <div className="flex-1 flex items-end justify-between gap-2 border-b border-white/5 pb-4">
-            {[40, 60, 45, 80, 50, 75, 90, 65, 85, 55, 70, 95].map((h, i) => (
-              <div key={i} className="w-full bg-cyan-500/20 rounded-t-sm hover:bg-cyan-500/40 transition-colors relative group" style={{height: `${h}%`}}>
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] font-mono px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                  {h}M
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-4 text-[10px] font-mono text-white/40">
-            <span>Tuần 1</span>
-            <span>Tuần 2</span>
-            <span>Tuần 3</span>
-            <span>Tuần 4</span>
-          </div>
+        <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 h-[400px] flex flex-col justify-center items-center text-center">
+          <BarChart3 className="text-white/10 mb-4" size={48} />
+          <h3 className="font-hero text-lg font-medium tracking-tight text-white/50 mb-2">Biểu đồ Doanh thu</h3>
+          <p className="text-sm font-mono text-white/30">Chưa có dữ liệu API theo thời gian thực.</p>
         </div>
 
         {/* TOP SERVICES */}

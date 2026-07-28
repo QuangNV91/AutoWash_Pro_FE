@@ -21,26 +21,8 @@ const getWeekDays = () => {
   })
 }
 const WEEK = getWeekDays()
-const SHIFTS = [
-  { key: 'morning',   label: 'CA 1', time: '07:00 – 12:00', icon: Sun    },
-  { key: 'afternoon', label: 'CA 2', time: '13:00 – 18:00', icon: Sunset },
-]
-const MY_SCHEDULE = {
-  [WEEK[0].fullDate]: ['morning'],
-  [WEEK[1].fullDate]: ['morning', 'afternoon'],
-  [WEEK[2].fullDate]: [],
-  [WEEK[3].fullDate]: ['morning'],
-  [WEEK[4].fullDate]: ['afternoon'],
-  [WEEK[5].fullDate]: ['morning'],
-  [WEEK[6].fullDate]: [],
-}
-const MY_LEAVES = [
-  { id: 'LR-01', date: WEEK[2].fullDate, duration: 1, reason: 'Việc riêng', status: 'APPROVED' },
-]
-const LEAVE_HISTORY = [
-  { id: 'LR-00', startDate: '2026-06-10', duration: 2, reason: 'Ốm', status: 'APPROVED' },
-  { id: 'LR-X1', startDate: '2026-06-05', duration: 1, reason: 'Việc gia đình', status: 'REJECTED' },
-]
+const mySchedule = {}
+const leaveHistory = []
 
 export default function StaffSchedule() {
   const navigate = useNavigate()
@@ -89,8 +71,8 @@ export default function StaffSchedule() {
     initData();
   }, []);
 
-  const totalShifts = Object.values(MY_SCHEDULE).flat().length
-  const totalHours  = totalShifts * 5
+  const totalShifts = 0
+  const totalHours  = 0
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -161,7 +143,7 @@ export default function StaffSchedule() {
         {[
           { label: 'Ca tuần này', value: totalShifts, color: 'text-cyan-400' },
           { label: 'Giờ làm',     value: `${totalHours}h`, color: 'text-white' },
-          { label: 'Ngày nghỉ',   value: MY_LEAVES.filter(l => l.status === 'APPROVED').length, color: 'text-amber-400' },
+          { label: 'Ngày nghỉ',   value: myLeaves.filter(l => l.status?.toUpperCase() === 'APPROVED').length, color: 'text-amber-400' },
         ].map((s, i) => (
           <div key={i} className="bg-neutral-950 border border-white/5 rounded-2xl p-4">
             <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-1">{s.label}</p>
@@ -177,17 +159,17 @@ export default function StaffSchedule() {
             <thead>
               <tr className="border-b border-white/5 bg-black/20">
                 <th className="px-5 py-4 text-[10px] font-mono tracking-widest text-white/30 text-left w-[22%]">Ngày</th>
-                {SHIFTS.map(s => (
-                  <th key={s.key} className="px-5 py-4 text-[10px] font-mono tracking-widest text-white/30 text-left border-l border-white/5">
-                    {s.label} · {s.time}
+                {shifts.map(s => (
+                  <th key={s.id} className="px-5 py-4 text-[10px] font-mono tracking-widest text-white/30 text-left border-l border-white/5">
+                    {s.shiftName} · {s.startTime.substring(0,5)} - {s.endTime.substring(0,5)}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {WEEK.map(day => {
-                const shifts = MY_SCHEDULE[day.fullDate] || []
-                const leave  = MY_LEAVES.find(l => l.date === day.fullDate && l.status === 'APPROVED')
+                const dayShifts = mySchedule[day.fullDate] || []
+                const leave  = myLeaves.find(l => l.leaveDate === day.fullDate && l.status?.toUpperCase() === 'APPROVED')
                 return (
                   <tr key={day.fullDate} className={`border-b border-white/5 last:border-0 transition-colors ${day.isToday ? 'bg-cyan-500/5' : day.isWeekend ? 'bg-white/[0.01]' : ''}`}>
                     <td className="px-5 py-4">
@@ -196,15 +178,15 @@ export default function StaffSchedule() {
                       {day.isToday && <div className="text-[9px] text-cyan-400 font-mono mt-1">HÔM NAY</div>}
                       {day.isWeekend && !day.isToday && <div className="text-[9px] text-amber-400/70 font-mono mt-1">CAO ĐIỂM</div>}
                     </td>
-                    {SHIFTS.map(s => {
-                      const hasShift = shifts.includes(s.key)
+                    {shifts.map(s => {
+                      const hasShift = dayShifts.includes(s.id)
                       return (
-                        <td key={s.key} className="px-5 py-4 border-l border-white/5">
+                        <td key={s.id} className="px-5 py-4 border-l border-white/5">
                           {leave ? (
                             <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded">NGHỈ PHÉP</span>
                           ) : hasShift ? (
                             <span className="flex items-center gap-1.5 text-xs font-mono text-emerald-400">
-                              <span className="w-2 h-2 rounded-full bg-emerald-400" />{s.time}
+                              <span className="w-2 h-2 rounded-full bg-emerald-400" />{s.startTime.substring(0,5)}
                             </span>
                           ) : (
                             <span className="text-[10px] text-white/20 font-mono">—</span>

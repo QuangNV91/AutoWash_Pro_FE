@@ -106,6 +106,7 @@ export default function UserDashboard() {
       'WORKING': { color: 'text-blue-400 bg-blue-400/10 border-blue-400/20', text: 'Đang phục vụ', icon: <Clock3 size={14} /> },
       'COMPLETED': { color: 'text-green-400 bg-green-400/10 border-green-400/20', text: 'Đã hoàn thành', icon: <CheckCircle2 size={14} /> },
       'CANCELLED': { color: 'text-red-400 bg-red-400/10 border-red-400/20', text: 'Đã hủy', icon: null },
+      'PAYMENT_FAILED': { color: 'text-red-400 bg-red-400/10 border-red-400/20', text: 'Hủy (Lỗi TT)', icon: null },
     };
 
     const config = statusConfig[status] || statusConfig['PENDING'];
@@ -129,9 +130,9 @@ export default function UserDashboard() {
     const diffHours = (bookingDateTime - now) / (1000 * 60 * 60);
 
     if (diffHours >= 2) {
-      return { type: 'REFUND', refundPercent: 75, penaltyPoints: 0, message: 'Hủy trước 2 tiếng: Hoàn 75% tiền cọc, không phạt điểm.' };
+      return { type: 'REFUND', refundPercent: 75, message: 'Hủy trước 2 tiếng: Hoàn 75% tiền cọc.' };
     } else {
-      return { type: 'NO_REFUND', refundPercent: 0, penaltyPoints: 10, message: 'Hủy sát giờ (< 2 tiếng): Không hoàn tiền, trừ 10 điểm loyalty.' };
+      return { type: 'NO_REFUND', refundPercent: 0, message: 'Hủy sát giờ (< 2 tiếng): Không được hoàn tiền.' };
     }
   };
 
@@ -154,10 +155,7 @@ export default function UserDashboard() {
         return isMatch ? { ...b, status: 'CANCELLED' } : b;
       }));
 
-      // Cập nhật điểm user nếu bị phạt
-      if (policy.penaltyPoints > 0) {
-        setUser(prev => ({ ...prev, points: Math.max(0, prev.points - policy.penaltyPoints) }));
-      }
+
 
       toast.success('Hủy lịch thành công');
     } catch (err) {
@@ -492,9 +490,7 @@ export default function UserDashboard() {
                               {(booking.price || booking.totalAmount || 0).toLocaleString('vi-VN')}đ
                             </p>
                           </div>
-                          {booking.status === 'CANCELLED' && booking.penaltyPoints > 0 && (
-                            <p className="text-xs text-red-400 mt-1">Đã trừ {booking.penaltyPoints} điểm</p>
-                          )}
+
                           <button
                             onClick={() => navigate('/booking')}
                             className="mt-2 text-sm text-white hover:text-white/80 font-medium transition-colors underline"

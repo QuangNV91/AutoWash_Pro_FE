@@ -7,24 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 
-const ALERTS = [
-  { id: 1, type: 'warning', message: 'VẬN HÀNH: Đây là bảng điều khiển thời gian thực.', time: new Date().toLocaleTimeString() }
-];
-
-const LIVE_STAFF = [
-  {
-    id: 'NV-01', name: 'Nguyễn Văn Tèo', status: 'WORKING',
-    car: '30A-123.45', service: 'Premium Care',
-    progress: 75, timeElapsed: '22', timeTotal: '30',
-    accent: 'bg-cyan-500'
-  },
-  {
-    id: 'NV-02', name: 'Trần Văn Tí', status: 'WORKING',
-    car: '29C-888.88', service: 'Eco Wash',
-    progress: 33, timeElapsed: '5', timeTotal: '15',
-    accent: 'bg-purple-500'
-  }
-];
+const ALERTS = [];
 
 const STATUS_CONFIG = {
   PENDING: { label: 'LỊCH HẸN', style: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' },
@@ -236,16 +219,20 @@ export default function AdminDashboard() {
             <h3 className="font-hero text-xl text-white font-medium tracking-tight">Thông báo Hệ thống</h3>
           </div>
           <div className="flex-1 flex flex-col space-y-3">
-            {ALERTS.map(alert => (
-              <div key={alert.id} className={`flex items-start gap-4 p-4 rounded-xl border relative overflow-hidden ${alert.type === 'danger' ? 'bg-red-500/5 border-red-500/30' : 'bg-amber-500/5 border-amber-500/30'}`}>
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${alert.type === 'danger' ? 'bg-red-500 animate-pulse' : 'bg-amber-500'}`} />
-                {alert.type === 'danger' ? <ShieldAlert className="text-red-400 mt-0.5 shrink-0" size={20} /> : <AlertTriangle className="text-amber-400 mt-0.5 shrink-0" size={20} />}
-                <div className="flex-1">
-                  <p className={`text-sm font-medium tracking-wide ${alert.type === 'danger' ? 'text-red-400' : 'text-amber-400'}`}>{alert.message}</p>
-                  <p className="text-[11px] font-mono mt-1 opacity-60 text-white">Lúc: {alert.time}</p>
+            {ALERTS.length === 0 ? (
+              <div className="text-center text-white/40 font-mono text-sm py-12">Không có thông báo mới.</div>
+            ) : (
+              ALERTS.map(alert => (
+                <div key={alert.id} className={`flex items-start gap-4 p-4 rounded-xl border relative overflow-hidden ${alert.type === 'danger' ? 'bg-red-500/5 border-red-500/30' : 'bg-amber-500/5 border-amber-500/30'}`}>
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${alert.type === 'danger' ? 'bg-red-500 animate-pulse' : 'bg-amber-500'}`} />
+                  {alert.type === 'danger' ? <ShieldAlert className="text-red-400 mt-0.5 shrink-0" size={20} /> : <AlertTriangle className="text-amber-400 mt-0.5 shrink-0" size={20} />}
+                  <div className="flex-1">
+                    <p className={`text-sm font-medium tracking-wide ${alert.type === 'danger' ? 'text-red-400' : 'text-amber-400'}`}>{alert.message}</p>
+                    <p className="text-[11px] font-mono mt-1 opacity-60 text-white">Lúc: {alert.time}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
