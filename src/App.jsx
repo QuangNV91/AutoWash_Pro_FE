@@ -59,11 +59,11 @@ export default function App() {
         <Route path="/auth/*" element={<Auth />} />
 
         {/* Protected User Routes */}
-        <Route path="/booking" element={<BookingStep1Service />} />
-        <Route path="/booking/datetime" element={<BookingStep2DateTime />} />
-        <Route path="/booking/confirm" element={<BookingStep3Confirm />} />
-        <Route path="/booking/success" element={<BookingSuccessPage />} />
-        <Route path="/booking/vnpay-return" element={<BookingVnpayReturn />} />
+        <Route path="/booking" element={<ProtectedRoute allowedRoles={['USER', 'CUSTOMER']}><BookingStep1Service /></ProtectedRoute>} />
+        <Route path="/booking/datetime" element={<ProtectedRoute allowedRoles={['USER', 'CUSTOMER']}><BookingStep2DateTime /></ProtectedRoute>} />
+        <Route path="/booking/confirm" element={<ProtectedRoute allowedRoles={['USER', 'CUSTOMER']}><BookingStep3Confirm /></ProtectedRoute>} />
+        <Route path="/booking/success" element={<ProtectedRoute allowedRoles={['USER', 'CUSTOMER']}><BookingSuccessPage /></ProtectedRoute>} />
+        <Route path="/booking/vnpay-return" element={<ProtectedRoute allowedRoles={['USER', 'CUSTOMER']}><BookingVnpayReturn /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['USER', 'CUSTOMER']}><UserDashboard /></ProtectedRoute>} />
 
         {/* Protected Staff Routes */}
