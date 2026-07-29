@@ -17,6 +17,7 @@ const SERVICE_COLOR = {
   'Eco Wash': 'text-cyan-400', 'Premium Care': 'text-purple-400',
   'Detailing & Shine': 'text-emerald-400', 'Ceramic Shield': 'text-amber-400',
 }
+const getServiceColor = (name) => SERVICE_COLOR[name] || 'text-indigo-400'
 const SLOTS = [
   { label: 'Slot 1', time: '07:00 – 08:00' }, { label: 'Slot 2', time: '08:00 – 09:00' },
   { label: 'Slot 3', time: '09:00 – 10:00' }, { label: 'Slot 4', time: '10:00 – 11:00' },
@@ -83,7 +84,7 @@ export default function StaffBookings() {
       };
 
       try {
-        const res = await api.get('/api/v1/services');
+        const res = await api.get('/api/services');
         if (res.data?.success && res.data.data && res.data.data.length > 0) {
           const newMap = {};
           res.data.data.forEach(s => {
@@ -115,7 +116,7 @@ export default function StaffBookings() {
             customer: b.customerName || 'Khách vãng lai',
             service: b.serviceName || 'Eco Wash',
             duration: currentServicesMap[b.serviceName]?.duration || 30,
-            price: currentServicesMap[b.serviceName]?.price || 0,
+            price: b.totalAmount || currentServicesMap[b.serviceName]?.price || 0,
             status: b.status || 'PENDING',
             payment: b.paymentStatus === 'SUCCESS' ? 'PAID' : 'UNPAID',
           }));
@@ -285,7 +286,7 @@ export default function StaffBookings() {
                             </span>
                           </div>
                           <p className="text-sm font-medium text-white">{b.customer}</p>
-                          <p className={`text-xs mt-0.5 ${SERVICE_COLOR[b.service]}`}>{b.service} · {b.duration}p</p>
+                          <p className={`text-xs mt-0.5 ${getServiceColor(b.service)}`}>{b.service} · {b.duration}p</p>
                           <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
                             <span className={`text-[10px] font-mono ${b.payment === 'PAID' ? 'text-emerald-400' : 'text-red-400'}`}>
                               {b.payment === 'PAID' ? '✓ Đã TT' : '✗ Chưa TT'}

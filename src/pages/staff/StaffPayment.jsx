@@ -18,6 +18,7 @@ const SERVICE_COLOR = {
   'Eco Wash': 'text-cyan-400', 'Premium Care': 'text-purple-400',
   'Detailing & Shine': 'text-emerald-400', 'Ceramic Shield': 'text-amber-400',
 }
+const getServiceColor = (name) => SERVICE_COLOR[name] || 'text-indigo-400'
 const TIER_COLOR = { MEMBER: 'text-gray-400', SILVER: 'text-slate-300', GOLD: 'text-amber-400', PLATINUM: 'text-purple-400' }
 
 export default function StaffPayment() {
@@ -39,7 +40,7 @@ export default function StaffPayment() {
       };
 
       try {
-        const resServices = await api.get('/api/v1/services');
+        const resServices = await api.get('/api/services');
         if (resServices.data?.success && resServices.data.data) {
           const newMap = {};
           resServices.data.data.forEach(s => {
@@ -68,7 +69,7 @@ export default function StaffPayment() {
             plate: b.licensePlate || '—',
             customer: b.customerName || 'Khách hàng',
             service: b.serviceName || 'Eco Wash',
-            price: currentServicesMap[b.serviceName]?.price || 0,
+            price: b.totalAmount || currentServicesMap[b.serviceName]?.price || 0,
             loyaltyPoints: currentServicesMap[b.serviceName]?.points || 50,
             tier: 'MEMBER',
             tierDiscount: 0
@@ -110,7 +111,7 @@ export default function StaffPayment() {
     </div>
   )
 
-  const bonusPts   = method === 'BANK_TRANSFER' || method === 'MOMO' ? 10 : 0
+  const bonusPts   = 0 // Đã bỏ cộng 10 điểm khi thanh toán online theo yêu cầu
   const finalPrice = selected.price
   const totalPts   = selected.loyaltyPoints + bonusPts
 
@@ -179,7 +180,7 @@ export default function StaffPayment() {
               </div>
               <p className="text-sm font-medium text-white">{b.customer}</p>
               <div className="flex justify-between items-center mt-1">
-                <p className={`text-xs font-medium ${SERVICE_COLOR[b.service]}`}>{b.service}</p>
+                <p className={`text-xs font-medium ${getServiceColor(b.service)}`}>{b.service}</p>
                 <p className="text-sm font-mono text-white">{b.price.toLocaleString('vi-VN')}đ</p>
               </div>
             </button>
@@ -204,7 +205,7 @@ export default function StaffPayment() {
             <div className="p-6 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-white/50">Dịch vụ</span>
-                <span className={`font-medium ${SERVICE_COLOR[selected.service]}`}>{selected.service}</span>
+                <span className={`font-medium ${getServiceColor(selected.service)}`}>{selected.service}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-white/50">Đơn giá</span>

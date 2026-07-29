@@ -105,8 +105,7 @@ export default function ServiceManagement() {
       await fetchServices();
     } catch (err) {
       console.error('Delete failed:', err);
-      showToast(err.response?.data?.message || 'Xóa thất bại', 'error');
-      setServices(prev => prev.filter(s => s.id !== id));
+      showToast(err.response?.data?.message || 'Dịch vụ này đã có đơn đặt, không thể xóa!', 'error');
     }
   };
 
@@ -137,7 +136,7 @@ export default function ServiceManagement() {
       description: cleanFeatures.join(', '),
       duration: finalData.duration,
       basePrice: finalData.price,
-      basePoints: Math.floor(finalData.price / 10000), // Auto-calc points
+      basePoints: Math.floor(finalData.price / 1000), // Auto-calc points
       status: finalData.isActive ? 'ACTIVE' : 'INACTIVE',
     };
 

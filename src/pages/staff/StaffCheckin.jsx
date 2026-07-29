@@ -13,6 +13,7 @@ const SERVICE_COLOR = {
   'Detailing & Shine': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
   'Ceramic Shield': 'text-amber-400 bg-amber-500/10 border-amber-500/20',
 }
+const getServiceColor = (name) => SERVICE_COLOR[name] || 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'
 const STATUS_NEXT = { PENDING: 'ARRIVED', ARRIVED: 'WORKING', WORKING: 'DONE' }
 const STATUS_LABEL_NEXT = { PENDING: 'Xác nhận đã đến', ARRIVED: 'Bắt đầu rửa xe', WORKING: 'Hoàn thành' }
 const STATUS_ICON_NEXT = { PENDING: LogIn, ARRIVED: Play, WORKING: CheckCircle2 }
@@ -75,7 +76,7 @@ export default function StaffCheckin() {
       };
 
       try {
-        const res = await api.get('/api/v1/services');
+        const res = await api.get('/api/services');
         if (res.data?.success && res.data.data && res.data.data.length > 0) {
           const newMap = {};
           res.data.data.forEach(s => {
@@ -116,7 +117,7 @@ export default function StaffCheckin() {
             phone: '—', // BE BookingResponse doesn't have phone, assume empty
             service: b.serviceName || 'Eco Wash',
             duration: currentServicesMap[b.serviceName]?.duration || 30,
-            price: currentServicesMap[b.serviceName]?.price || 0,
+            price: b.totalAmount || currentServicesMap[b.serviceName]?.price || 0,
             status: b.status || 'PENDING',
             payment: b.paymentStatus === 'SUCCESS' ? 'PAID' : 'UNPAID',
             startedAt: b.status === 'WORKING' ? Date.now() - 5 * 60 * 1000 : null,
@@ -227,7 +228,7 @@ export default function StaffCheckin() {
                   {activeBooking.plate}
                 </div>
                 <p className="text-base font-medium text-white">{activeBooking.customer}</p>
-                <p className={`text-sm font-medium ${SERVICE_COLOR[activeBooking.service].split(' ')[0]}`}>
+                <p className={`text-sm font-medium ${getServiceColor(activeBooking.service).split(' ')[0]}`}>
                   {activeBooking.service} · {activeBooking.duration} phút
                 </p>
               </div>
@@ -255,7 +256,7 @@ export default function StaffCheckin() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="font-mono text-sm bg-white/5 border border-white/10 px-2.5 py-1 rounded text-white tracking-widest">{b.plate}</span>
-                    <span className={`text-xs font-mono px-2 py-0.5 rounded border ${SERVICE_COLOR[b.service]}`}>{b.service}</span>
+                    <span className={`text-xs font-mono px-2 py-0.5 rounded border ${getServiceColor(b.service)}`}>{b.service}</span>
                     <span className="text-xs font-mono text-white/30">{b.time}</span>
                   </div>
                   <p className="text-sm font-medium text-white">{b.customer}</p>
