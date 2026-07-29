@@ -8,7 +8,6 @@ export default function StaffManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
@@ -38,7 +37,7 @@ export default function StaffManagement() {
   }, []);
 
   const handleDeactivate = async (id, currentStatus) => {
-    if (currentStatus === 'INACTIVE') return; // Cannot deactivate twice or maybe add activate API if exists
+    if (currentStatus === 'INACTIVE') return;
     if (window.confirm("Bạn có chắc chắn muốn vô hiệu hóa tài khoản nhân viên này?")) {
       try {
         await api.patch(`/api/staffs/${id}/deactivate`);
@@ -65,7 +64,7 @@ export default function StaffManagement() {
     }
   };
 
-  const filteredStaffs = staffs.filter(s => 
+  const filteredStaffs = staffs.filter(s =>
     s.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.account?.username?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -84,15 +83,15 @@ export default function StaffManagement() {
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
-            <input 
-              type="text" 
-              placeholder="Tìm tên nhân viên..." 
+            <input
+              type="text"
+              placeholder="Tìm tên nhân viên..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="w-full bg-neutral-950 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
             />
           </div>
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold rounded-xl transition-colors flex items-center gap-2 whitespace-nowrap"
           >
@@ -177,7 +176,7 @@ export default function StaffManagement() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button 
+                      <button
                         onClick={() => handleDeactivate(staff.id, staff.status)}
                         disabled={staff.status === 'INACTIVE'}
                         className="px-3 py-1.5 rounded bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-400 transition-colors text-xs disabled:opacity-30 disabled:hover:bg-white/5 disabled:hover:text-white/60"
@@ -204,57 +203,57 @@ export default function StaffManagement() {
                 <X size={20} />
               </button>
             </div>
-            
+
             <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-xs font-medium text-white/60 mb-1.5">Họ và tên</label>
-                <input 
+                <input
                   type="text" required
-                  value={formData.fullName} onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                  className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none" 
-                  placeholder="Nguyễn Văn A" 
+                  value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  placeholder="Nguyễn Văn A"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-white/60 mb-1.5">Tên đăng nhập</label>
-                  <input 
+                  <input
                     type="text" required
-                    value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})}
-                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none" 
+                    value={formData.username} onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-white/60 mb-1.5">Mật khẩu</label>
-                  <input 
+                  <input
                     type="password" required
-                    value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none" 
+                    value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-white/60 mb-1.5">Số điện thoại</label>
-                  <input 
+                  <input
                     type="text" required
-                    value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none" 
+                    value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-white/60 mb-1.5">Email</label>
-                  <input 
+                  <input
                     type="email" required
-                    value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none" 
+                    value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
                   />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-white/60 mb-1.5">Loại nhân viên</label>
-                <select 
-                  value={formData.staffType} onChange={(e) => setFormData({...formData, staffType: e.target.value})}
+                <select
+                  value={formData.staffType} onChange={(e) => setFormData({ ...formData, staffType: e.target.value })}
                   className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none appearance-none"
                 >
                   <option value="WASHER">Nhân viên rửa xe</option>

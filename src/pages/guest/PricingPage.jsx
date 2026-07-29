@@ -5,7 +5,6 @@ import Footer from '../../components/layout/Footer';
 import { Clock, Star, Percent, Crown, Award, Sparkles } from 'lucide-react';
 import { getServices } from '../../services/bookingService';
 
-// Dữ liệu gói dịch vụ — đồng bộ với MOCK_SERVICES trong bookingService.js
 const PRICING_PLANS = [
   {
     id: 1,
@@ -91,7 +90,6 @@ const PRICING_PLANS = [
   },
 ];
 
-// Màu theme tương ứng
 const THEME = {
   cyan: {
     badge: 'bg-cyan-500/10 text-cyan-400',
@@ -212,7 +210,7 @@ export default function PricingPage() {
               {PRICING_PLANS.map((plan) => {
                 const t = THEME[plan.themeColor];
                 const apiData = apiServices[plan.name];
-                
+
                 // Cập nhật giá trị hiển thị từ API nếu có
                 const displayPrice = apiData ? (apiData.basePrice ?? apiData.base_price ?? apiData.priceRaw).toLocaleString('vi-VN') : plan.price;
                 const displayTime = apiData ? `${apiData.durationMinutes ?? apiData.duration_minutes ?? parseInt(plan.duration)} phút` : plan.duration;

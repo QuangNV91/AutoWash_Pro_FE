@@ -136,32 +136,21 @@ export default function BookingSlotDashboard() {
   const { maxBookingsPerSlot } = useSystemConfigStore();
 
   const calculateAllocation = (slotBookings) => {
-    let staff1 = 0;
-    let staff2 = 0;
+    let usedTime = 0;
 
     for (const b of slotBookings) {
       const duration = SERVICE_CONFIG[b.service]?.duration || 0;
-      if (duration === 120) {
-        staff1 += 60;
-        staff2 += 60;
-      } else {
-        if (staff1 + duration <= 60) {
-          staff1 += duration;
-        } else if (staff2 + duration <= 60) {
-          staff2 += duration;
-        } else {
-          return { staff1, staff2, isValid: false, isFull: true };
-        }
-      }
+      usedTime += duration;
     }
 
-    const isDurationFull = staff1 === 60 && staff2 === 60;
+    // A Ceramic Shield takes 120m, but this view is grouped by 60m slots. 
+    // It's full if we hit 60m.
+    const isDurationFull = usedTime >= 60;
     const isCountFull = slotBookings.length >= maxBookingsPerSlot;
 
     return {
-      staff1,
-      staff2,
-      isValid: staff1 <= 60 && staff2 <= 60 && slotBookings.length <= maxBookingsPerSlot,
+      usedTime,
+      isValid: (usedTime <= 60 || (slotBookings.length === 1 && usedTime === 120)) && slotBookings.length <= maxBookingsPerSlot,
       isFull: isDurationFull || isCountFull,
       hasCeramic: slotBookings.some(b => b.service === 'Ceramic Shield')
     };
@@ -418,27 +407,16 @@ export default function BookingSlotDashboard() {
                     <h3 className="text-xl font-hero text-white tracking-tight mt-1">{slot.time}</h3>
 
                     <div className="mt-4 space-y-2">
-                      {/* NV1 Progress */}
+                      {/* Capacity Progress */}
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-medium text-white/60 w-6">NV1</span>
+                        <span className="text-[10px] font-medium text-white/60 w-[45px]">Khoang 1</span>
                         <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-500 ${slot.allocation.staff1 === 60 ? 'bg-red-500' : slot.allocation.staff1 > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                            style={{ width: `${(slot.allocation.staff1 / 60) * 100}%` }}
+                            className={`h-full rounded-full transition-all duration-500 ${slot.allocation.usedTime >= 60 ? 'bg-red-500' : slot.allocation.usedTime > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                            style={{ width: `${Math.min((slot.allocation.usedTime / 60) * 100, 100)}%` }}
                           />
                         </div>
-                        <span className="text-[10px] text-white/40 w-8 text-right">{slot.allocation.staff1}p</span>
-                      </div>
-                      {/* NV2 Progress */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-medium text-white/60 w-6">NV2</span>
-                        <div className="h-1.5 flex-1 bg-white/5 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-500 ${slot.allocation.staff2 === 60 ? 'bg-red-500' : slot.allocation.staff2 > 30 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                            style={{ width: `${(slot.allocation.staff2 / 60) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-[10px] text-white/40 w-8 text-right">{slot.allocation.staff2}p</span>
+                        <span className="text-[10px] text-white/40 w-8 text-right">{slot.allocation.usedTime}p</span>
                       </div>
                     </div>
                   </div>
@@ -493,8 +471,8 @@ export default function BookingSlotDashboard() {
                     >
                       <Plus size={24} className="mb-2" />
                       <span className="text-sm font-medium">Thêm xe vào khung giờ</span>
-                      <span className="text-xs mt-1">
-                        Còn trống {60 - slot.allocation.staff1}p (NV1) / {60 - slot.allocation.staff2}p (NV2)
+                      <span className="text-xs mt-1 text-white/50">
+                        Sức chứa trống: {Math.max(60 - slot.allocation.usedTime, 0)}p
                       </span>
                       <span className="text-[10px] text-white/30 mt-1">
                         (Đã đặt {slot.bookingsList.length}/{maxBookingsPerSlot} xe)
@@ -506,7 +484,7 @@ export default function BookingSlotDashboard() {
                     <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-5 flex flex-col items-center justify-center text-amber-500/60 min-h-[160px]">
                       <Shield size={24} className="mb-2 opacity-50" />
                       <span className="text-sm font-medium text-center">Khung giờ bị khóa</span>
-                      <span className="text-xs mt-1 text-center px-4">Gói Ceramic Shield chiếm dụng 100% nhân lực hiện tại</span>
+                      <span className="text-xs mt-1 text-center px-4">Gói Ceramic Shield chiếm dụng 100% công suất hiện tại</span>
                     </div>
                   )}
                 </div>

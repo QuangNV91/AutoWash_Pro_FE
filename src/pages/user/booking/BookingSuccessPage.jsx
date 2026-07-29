@@ -9,9 +9,9 @@ export default function BookingSuccessPage() {
   const txnRef = searchParams.get('txnRef');
   const paymentStatus = searchParams.get('paymentStatus');
 
-  const { 
+  const {
     bookingItems,
-    selectedDate, 
+    selectedDate,
     submitResults,
     paymentMethod,
     getTotalPoints,
@@ -22,10 +22,8 @@ export default function BookingSuccessPage() {
 
   const isVNPayRedirect = txnRef && paymentStatus;
 
-  // Nếu không có item nào và cũng không phải từ VNPay về -> không có gì để hiển thị
   if (!isVNPayRedirect && (!bookingItems.length || !bookingItems[0].service)) return null;
 
-  // Nếu thất bại từ VNPay
   if (isVNPayRedirect && paymentStatus !== 'SUCCESS') {
     return (
       <PageWrapper title="Thanh toán thất bại">
@@ -40,7 +38,7 @@ export default function BookingSuccessPage() {
                 Giao dịch của bạn đã bị hủy hoặc xảy ra lỗi (Mã GD: {txnRef}). Vui lòng thử lại.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button 
+                <button
                   onClick={() => navigate('/booking')}
                   className="px-8 py-3.5 font-medium rounded-full bg-white text-black hover:bg-neutral-200 transition-colors text-sm"
                 >
@@ -54,7 +52,6 @@ export default function BookingSuccessPage() {
     );
   }
 
-  // Cấu hình giao diện thành công (có thể là VNPAY success nhưng mất state, hoặc success từ CASH còn state)
   const successCount = submitResults.filter(r => r.success).length;
   const totalPoints = getTotalPoints();
   const totalPrice = getTotalPrice();
@@ -66,18 +63,18 @@ export default function BookingSuccessPage() {
         <div className="bg-neutral-950 border border-white/5 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
           {/* Decorative background glow */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-white/5 blur-[100px] rounded-full"></div>
-          
+
           <div className="relative z-10 flex flex-col items-center">
             <div className="w-24 h-24 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center mb-6">
               <CheckCircle2 size={48} className="text-green-400" />
             </div>
-            
+
             <h1 className="font-hero text-4xl font-medium text-white mb-4 tracking-tight">
               {isVNPayRedirect ? "Thanh toán & Đặt lịch thành công!" : "Đặt lịch thành công!"}
             </h1>
             <p className="text-white/60 mb-10 max-w-md mx-auto">
-              Cảm ơn bạn đã tin tưởng AutoWash Pro. 
-              {hasStoreData && successCount > 1 
+              Cảm ơn bạn đã tin tưởng AutoWash Pro.
+              {hasStoreData && successCount > 1
                 ? ` Đã đặt thành công ${successCount} xe.`
                 : ' Dưới đây là thông tin chi tiết về lịch hẹn của bạn.'}
               {isVNPayRedirect && (
@@ -85,7 +82,7 @@ export default function BookingSuccessPage() {
               )}
             </p>
 
-            {/* Chi tiết từng xe (Chỉ hiển thị nếu còn state store) */}
+            {/* */}
             {hasStoreData ? (
               <div className="w-full space-y-4 mb-10">
                 {bookingItems.map((item, index) => {
@@ -104,7 +101,7 @@ export default function BookingSuccessPage() {
                           </span>
                         )}
                       </div>
-                      
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex gap-4">
                           <div className="text-white/40 mt-1"><Car size={20} /></div>
@@ -114,7 +111,7 @@ export default function BookingSuccessPage() {
                             <p className="text-white/60 text-sm mt-1">{duration} phút</p>
                           </div>
                         </div>
-                        
+
                         <div className="flex gap-4">
                           <div className="text-white/40 mt-1"><Clock size={20} /></div>
                           <div>
@@ -131,19 +128,18 @@ export default function BookingSuccessPage() {
                 })}
               </div>
             ) : (
-              // Không có state store (vừa từ VNPay về) -> hiển thị thông báo chung chung để user xem lịch trong dashboard
               <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 mb-10">
-                 <p className="text-white/80 mb-4">Lịch hẹn của bạn đã được ghi nhận trên hệ thống.</p>
-                 <button 
-                   onClick={() => navigate('/dashboard')}
-                   className="text-white underline hover:text-white/80"
-                 >
-                   Xem chi tiết trong Quản lý lịch hẹn
-                 </button>
+                <p className="text-white/80 mb-4">Lịch hẹn của bạn đã được ghi nhận trên hệ thống.</p>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="text-white underline hover:text-white/80"
+                >
+                  Xem chi tiết trong Quản lý lịch hẹn
+                </button>
               </div>
             )}
 
-            {/* Tổng kết (Chỉ hiển thị nếu còn state store) */}
+            {/*  */}
             {hasStoreData && (
               <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 mb-10">
                 <div className="grid grid-cols-3 gap-4 text-center">
@@ -162,8 +158,8 @@ export default function BookingSuccessPage() {
                     </p>
                   </div>
                 </div>
-                
-                {/* Địa điểm */}
+
+                {/*  */}
                 <div className="flex gap-4 mt-6 pt-6 border-t border-white/5">
                   <div className="text-white/40 mt-1"><MapPin size={20} /></div>
                   <div className="text-left">
@@ -173,19 +169,19 @@ export default function BookingSuccessPage() {
                   </div>
                 </div>
 
-                {/* Phương thức thanh toán */}
+                {/*  */}
                 <div className="mt-4 pt-4 border-t border-white/5 text-left">
                   <p className="text-sm text-white/60 flex items-center gap-2">
-                    <span className="text-white/40">Thanh toán:</span> 
+                    <span className="text-white/40">Thanh toán:</span>
                     {paymentMethod === 'ONLINE' ? 'Đã thanh toán Online' : 'Thanh toán tại cửa hàng'}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Action Buttons */}
+            {/* */}
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-              <button 
+              <button
                 onClick={() => {
                   navigate('/');
                   setTimeout(() => resetCart(), 100);
@@ -194,7 +190,7 @@ export default function BookingSuccessPage() {
               >
                 Về trang chủ
               </button>
-              <button 
+              <button
                 onClick={() => {
                   navigate('/dashboard');
                   setTimeout(() => resetCart(), 100);
@@ -203,7 +199,7 @@ export default function BookingSuccessPage() {
               >
                 Quản lý lịch hẹn
               </button>
-              <Link 
+              <Link
                 to="/booking"
                 onClick={() => {
                   resetKeepDate();
@@ -214,7 +210,7 @@ export default function BookingSuccessPage() {
                 Đặt lịch xe khác
               </Link>
             </div>
-            
+
           </div>
         </div>
       </div>

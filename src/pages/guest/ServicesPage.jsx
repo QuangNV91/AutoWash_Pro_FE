@@ -5,7 +5,6 @@ import Footer from '../../components/layout/Footer';
 import { Clock, ShieldCheck, PenTool, Award } from 'lucide-react';
 import { getServices } from '../../services/bookingService';
 
-// Dữ liệu dịch vụ chi tiết — đồng bộ với bookingService.js
 const SERVICE_BLOCKS = [
   {
     id: 1,
@@ -196,7 +195,7 @@ export default function ServicesPage() {
             {SERVICE_BLOCKS.map((svc) => {
               const t = THEME[svc.themeColor];
               const isReverse = svc.direction === 'reverse';
-              
+
               const apiData = apiServices[svc.name];
               const displayPrice = apiData ? (apiData.basePrice ?? apiData.base_price ?? apiData.price).toLocaleString('vi-VN') + 'đ' : svc.price;
               const displayTime = apiData ? (apiData.durationMinutes ?? apiData.duration_minutes ?? apiData.duration) + ' phút' : svc.duration;

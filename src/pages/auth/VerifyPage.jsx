@@ -40,18 +40,17 @@ export default function VerifyPage() {
         phone: phone,
         code: code
       });
-      
+
       setSuccess('Xác thực thành công! Đang chuyển hướng...');
-      
+
       const data = response?.data || response;
       const token = data?.token || data?.data?.token;
       const role = data?.role || data?.data?.role;
-      
-      // Since verify-phone returns a token, we can log them in automatically
+
       if (token) {
         localStorage.setItem('token', token);
         if (role) localStorage.setItem('role', role);
-        
+
         setTimeout(() => {
           if (role === 'ADMIN') navigate('/admin');
           else if (role === 'STAFF') navigate('/staff');

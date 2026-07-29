@@ -22,7 +22,6 @@ const SERVICE_COLOR = {
   'Ceramic Shield': 'text-amber-400',
 }
 
-// ============ SUB-COMPONENTS ============
 
 const LiveClock = () => {
   const [time, setTime] = useState(new Date())
@@ -412,8 +411,8 @@ export default function StaffDashboard() {
                     </td>
                     <td className="px-6 py-3">
                       <span className={`inline-flex items-center text-[11px] font-mono px-2 py-1 rounded border ${b.payment === 'PAID'
-                          ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                          : 'text-red-400 bg-red-500/10 border-red-500/20'
+                        ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                        : 'text-red-400 bg-red-500/10 border-red-500/20'
                         }`}>
                         {b.payment === 'PAID' ? 'Đã TT' : 'Chưa TT'}
                       </span>

@@ -2,20 +2,18 @@ import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import LeaveRequestModal from '../../components/admin/modals/LeaveRequestModal';
 import toast from 'react-hot-toast';
-import { 
+import {
   Users, AlertTriangle, Check, X, UserCheck, Plus,
   RefreshCw
 } from 'lucide-react';
-
-// ============ NATIVE DATE HELPERS ============
 
 const generateCurrentWeek = () => {
   const today = new Date();
   const day = today.getDay();
   const diff = today.getDate() - day + (day === 0 ? -6 : 1);
   const monday = new Date(today.setDate(diff));
-  
-  return Array.from({length: 7}).map((_, i) => {
+
+  return Array.from({ length: 7 }).map((_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
     return {
@@ -23,8 +21,8 @@ const generateCurrentWeek = () => {
       dateObj: d,
       name: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'][d.getDay()],
       short: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][d.getDay()],
-      dateStr: `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`,
-      fullDate: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,
+      dateStr: `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`,
+      fullDate: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
       isWeekend: d.getDay() === 0 || d.getDay() === 6
     };
   });
@@ -44,16 +42,12 @@ export default function StaffScheduleDashboard() {
   const [scheduleData, setScheduleData] = useState([]);
   const [rotationPointer, setRotationPointer] = useState(0);
   const [summary, setSummary] = useState({ fullShifts: 0, missingShifts: 0, totalShifts: 0 });
-  
+
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [approvedLeaves, setApprovedLeaves] = useState([]); // [{ staffId, date }]
 
-  // Modals
   const [isNewRequestModalOpen, setIsNewRequestModalOpen] = useState(false);
   const [reqForm, setReqForm] = useState({ staffId: 'NV-01', startDate: WEEK_DAYS[0].fullDate, duration: 1 });
-
-  // ============ LOGIC ============
-
   const pendingRequests = leaveRequests.filter(r => r.status === 'pending');
   const requestHistory = leaveRequests.filter(r => r.status !== 'pending');
 
@@ -61,7 +55,7 @@ export default function StaffScheduleDashboard() {
     const leaves = leavesOverride || approvedLeaves;
     const currentStaffs = staffDataOverride || staffProfiles;
     if (currentStaffs.length === 0) return;
-    
+
     let fullShifts = 0;
     let missingShifts = 0;
     let totalShifts = 0;
@@ -75,17 +69,14 @@ export default function StaffScheduleDashboard() {
     }));
 
     const newSchedule = WEEK_DAYS.map((dayObj) => {
-      // 1. Phân loại nhân sự nghỉ phép
       const onLeaveWorkers = workers.filter(w => leaves.some(l => l.staffId === w.id && l.date === dayObj.fullDate));
       const availableWorkers = workers.filter(w => !onLeaveWorkers.includes(w));
 
-      // 2. Sắp xếp ưu tiên
       const sortedWorkers = availableWorkers.slice().sort((a, b) => {
         if (a.currentHours !== b.currentHours) return a.currentHours - b.currentHours;
         return a.sortIndex - b.sortIndex;
       });
 
-      // 3. Phân CA 1 (Cần 2 người)
       const morningAssigned = sortedWorkers.slice(0, 2);
       let morningAssignments = [];
       if (morningAssigned.length > 0) {
@@ -95,7 +86,6 @@ export default function StaffScheduleDashboard() {
       totalShifts++;
       if (morningAssigned.length < 2) missingShifts++; else fullShifts++;
 
-      // 4. Phân CA 2 (Cần 2 người khác CA 1)
       const remainingWorkers = sortedWorkers.filter(w => !morningAssignments.some(m => m.staffId === w.id));
       const afternoonAssigned = remainingWorkers.slice(0, 2);
       let afternoonAssignments = [];
@@ -106,8 +96,8 @@ export default function StaffScheduleDashboard() {
       totalShifts++;
       if (afternoonAssigned.length < 2) missingShifts++; else fullShifts++;
 
-      return { 
-        day: dayObj, 
+      return {
+        day: dayObj,
         onLeave: onLeaveWorkers.map(w => ({ id: w.id, name: w.name, avatarBg: w.avatarBg })),
         shifts: { morning: morningAssignments, afternoon: afternoonAssignments }
       };
@@ -127,7 +117,6 @@ export default function StaffScheduleDashboard() {
   };
 
   useEffect(() => {
-    // Fetch Staffs
     const fetchStaffsAndInit = async () => {
       try {
         const staffRes = await api.get('/api/staffs');
@@ -139,7 +128,7 @@ export default function StaffScheduleDashboard() {
             { bg: 'bg-amber-500', text: 'text-amber-400' },
           ];
           const mappedStaffs = staffRes.data.data
-            .filter(s => s.status === 'ACTIVE') // Only active staff
+            .filter(s => s.status === 'ACTIVE')
             .map((s, idx) => ({
               id: s.id,
               name: s.fullName,
@@ -148,7 +137,7 @@ export default function StaffScheduleDashboard() {
               leaveDays: 0,
               avatarBg: colors[idx % colors.length].bg,
               color: colors[idx % colors.length].text
-          }));
+            }));
           setStaffProfiles(mappedStaffs);
           createStaffSchedule({ notify: false }, null, mappedStaffs);
         }
@@ -156,10 +145,9 @@ export default function StaffScheduleDashboard() {
         console.error('Fetch staffs failed:', err);
       }
     };
-    
+
     fetchStaffsAndInit();
-    
-    // Fetch pending leave requests from API
+
     const fetchLeaves = async () => {
       try {
         const res = await api.get('/api/leave-requests/pending');
@@ -169,7 +157,7 @@ export default function StaffScheduleDashboard() {
             staffId: l.staff?.id || 'NV-01',
             staffName: l.staff?.fullName || l.staff?.username || 'Nhân viên',
             startDate: l.leaveDate,
-            duration: 1, // BE doesn't support multi-day yet
+            duration: 1,
             status: l.status.toLowerCase(),
             createdAt: l.createdAt ? new Date(l.createdAt).toLocaleString('vi-VN') : ''
           }));
@@ -180,7 +168,6 @@ export default function StaffScheduleDashboard() {
       }
     };
     fetchLeaves();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleApproveLeave = async (req) => {
@@ -188,19 +175,19 @@ export default function StaffScheduleDashboard() {
       if (typeof req.id === 'number') {
         await api.patch(`/api/leave-requests/${req.id}/approve`);
       }
-      
+
       const startDateObj = new Date(req.startDate);
       const newLeaves = [];
       for (let i = 0; i < req.duration; i++) {
         const d = new Date(startDateObj);
         d.setDate(startDateObj.getDate() + i);
-        const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         newLeaves.push({ staffId: req.staffId, date: dateStr });
       }
 
       const updatedApproved = [...approvedLeaves, ...newLeaves];
       setApprovedLeaves(updatedApproved);
-      
+
       setLeaveRequests(prev => prev.map(r => r.id === req.id ? { ...r, status: 'approved', processedAt: new Date().toLocaleTimeString('vi-VN') } : r));
       createStaffSchedule({ notify: false }, updatedApproved);
     } catch (err) {
@@ -231,17 +218,16 @@ export default function StaffScheduleDashboard() {
       startDate: reqForm.startDate,
       duration: Number(reqForm.duration),
       status: 'pending',
-      createdAt: new Date().toLocaleString('vi-VN', { hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' })
+      createdAt: new Date().toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })
     };
     setLeaveRequests([newReq, ...leaveRequests]);
     setIsNewRequestModalOpen(false);
   };
 
-  // ============ RENDER ============
 
   return (
     <div className="p-6 lg:p-8 space-y-8 w-full max-w-[1400px] mx-auto font-body text-white selection:bg-cyan-500/30">
-      
+
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b border-white/5 pb-6">
         <div>
@@ -255,13 +241,13 @@ export default function StaffScheduleDashboard() {
           <div className="px-4 py-2 border border-white/10 rounded-xl text-sm font-medium font-mono tracking-widest bg-black/50 text-white/60">
             {WEEK_DAYS[0].dateStr} - {WEEK_DAYS[6].dateStr}
           </div>
-          <button 
+          <button
             onClick={() => setIsNewRequestModalOpen(true)}
             className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium transition-colors font-mono uppercase tracking-widest flex items-center gap-2"
           >
-            <Plus size={16}/> Đơn nghỉ
+            <Plus size={16} /> Đơn nghỉ
           </button>
-          <button 
+          <button
             onClick={() => createStaffSchedule({ notify: true })}
             className="group relative inline-flex items-center justify-center gap-2 px-6 py-2 bg-cyan-500/10 text-cyan-400 font-medium text-sm rounded-xl border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all overflow-hidden shadow-[0_0_15px_rgba(6,182,212,0.15)] font-mono uppercase tracking-widest"
           >
@@ -330,7 +316,7 @@ export default function StaffScheduleDashboard() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
+
         {/* SCHEDULE MATRIX (Takes 2/3 width) */}
         <div className="xl:col-span-2 bg-neutral-950 border border-white/5 rounded-2xl overflow-hidden flex flex-col">
           <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
@@ -361,7 +347,7 @@ export default function StaffScheduleDashboard() {
                       <div className="text-[10px] font-mono text-white/40">{dayData.day.dateStr}</div>
                       {dayData.day.isWeekend && <div className="text-[9px] text-amber-400 font-mono mt-1 border border-amber-500/30 bg-amber-500/10 px-1 py-0.5 inline-block rounded">CA CAO ĐIỂM</div>}
                     </td>
-                    
+
                     {/* MORNING SHIFT */}
                     <td className="px-5 py-4 align-top border-l border-white/5">
                       <div className="flex flex-col gap-2">
@@ -415,7 +401,7 @@ export default function StaffScheduleDashboard() {
 
         {/* LEAVE MANAGEMENT (Takes 1/3 width) */}
         <div className="space-y-6 flex flex-col">
-          
+
           {/* PENDING REQUESTS */}
           <div className="bg-neutral-950 border border-white/5 rounded-2xl flex flex-col flex-1">
             <div className="p-5 border-b border-white/5 flex justify-between items-center">
@@ -430,7 +416,7 @@ export default function StaffScheduleDashboard() {
               ) : (
                 pendingRequests.map(req => {
                   const reqDateObj = new Date(req.startDate);
-                  const dateStr = `${String(reqDateObj.getDate()).padStart(2,'0')}/${String(reqDateObj.getMonth()+1).padStart(2,'0')}`;
+                  const dateStr = `${String(reqDateObj.getDate()).padStart(2, '0')}/${String(reqDateObj.getMonth() + 1).padStart(2, '0')}`;
                   return (
                     <div key={req.id} className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
                       <div className="flex justify-between items-start mb-2">
@@ -439,21 +425,21 @@ export default function StaffScheduleDashboard() {
                       </div>
                       <p className="text-xs text-white/60 font-mono mb-3">
                         Nghỉ {req.duration} ngày từ {dateStr}
-                        <br/>
+                        <br />
                         <span className="text-[10px] text-white/30 mt-1 block">Tạo: {req.createdAt}</span>
                       </p>
                       <div className="flex gap-2">
-                        <button 
+                        <button
                           onClick={() => handleApproveLeave(req)}
                           className="flex-1 py-1.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 text-xs font-mono transition-colors flex justify-center items-center gap-1"
                         >
-                          <Check size={14}/> DUYỆT
+                          <Check size={14} /> DUYỆT
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleRejectLeave(req.id)}
                           className="flex-1 py-1.5 rounded bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 text-xs font-mono transition-colors flex justify-center items-center gap-1"
                         >
-                          <X size={14}/> TỪ CHỐI
+                          <X size={14} /> TỪ CHỐI
                         </button>
                       </div>
                     </div>
@@ -476,7 +462,7 @@ export default function StaffScheduleDashboard() {
                   <div key={req.id} className="flex flex-col gap-1 pb-3 border-b border-white/5 last:border-0 last:pb-0">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium text-white/80">{req.staffName}</span>
-                      {req.status === 'approved' 
+                      {req.status === 'approved'
                         ? <span className="text-[10px] text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded bg-emerald-500/10">ĐÃ DUYỆT</span>
                         : <span className="text-[10px] text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded bg-red-500/10">TỪ CHỐI</span>
                       }

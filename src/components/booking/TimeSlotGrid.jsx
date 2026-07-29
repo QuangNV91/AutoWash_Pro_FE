@@ -1,28 +1,16 @@
 import { Clock, AlertCircle } from 'lucide-react';
 
-/**
- * TimeSlotGrid — Render lưới khung giờ
- * 
- * Props:
- * - slots: Array<{ time: string, available: boolean }> — từ API
- * - selectedTime: string | null
- * - onSelectTime: (time: string) => void
- * - conflictSlots: Array<{ time: string, conflictWith: string }> — xung đột client-side
- * - loading: boolean
- * - error: string | null
- * - hasDate: boolean — đã chọn ngày chưa
- */
-export default function TimeSlotGrid({ 
-  slots = [], 
-  selectedTime, 
-  onSelectTime, 
+
+export default function TimeSlotGrid({
+  slots = [],
+  selectedTime,
+  onSelectTime,
   conflictSlots = [],
   loading = false,
   error = null,
   hasDate = false,
   selectedDate = null,
 }) {
-  // Trạng thái chưa chọn ngày
   if (!hasDate) {
     return (
       <div className="text-center py-12 border border-dashed border-white/10 rounded-2xl bg-white/5">
@@ -32,7 +20,6 @@ export default function TimeSlotGrid({
     );
   }
 
-  // Loading
   if (loading) {
     return (
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
@@ -43,7 +30,6 @@ export default function TimeSlotGrid({
     );
   }
 
-  // Error
   if (error) {
     return (
       <div className="text-center py-8 border border-red-500/20 rounded-2xl bg-red-900/10">
@@ -53,7 +39,6 @@ export default function TimeSlotGrid({
     );
   }
 
-  // Không có slot nào
   if (slots.length === 0) {
     return (
       <div className="text-center py-12 border border-dashed border-white/10 rounded-2xl bg-white/5">
@@ -63,13 +48,11 @@ export default function TimeSlotGrid({
     );
   }
 
-  // Tạo set lookup cho conflict slots
   const conflictMap = {};
   conflictSlots.forEach(cs => {
     conflictMap[cs.time] = cs.conflictWith;
   });
 
-  // Calculate if selectedDate is today to lock past times
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -84,8 +67,7 @@ export default function TimeSlotGrid({
         const isSelected = selectedTime === slot.time;
         const conflictWith = conflictMap[slot.time];
         const isConflict = !!conflictWith;
-        
-        // Kiểm tra xem giờ này đã trôi qua chưa (nếu là hôm nay)
+
         let isPastTime = false;
         if (isToday) {
           const [h, m] = slot.time.split(':').map(Number);
@@ -117,8 +99,8 @@ export default function TimeSlotGrid({
             className={buttonClass}
             title={
               isConflict ? `Trùng với ${conflictWith}` :
-              isPastTime ? 'Đã qua giờ' :
-              !slot.available ? 'Hết chỗ' : 'Còn trống'
+                isPastTime ? 'Đã qua giờ' :
+                  !slot.available ? 'Hết chỗ' : 'Còn trống'
             }
           >
             {slot.time}

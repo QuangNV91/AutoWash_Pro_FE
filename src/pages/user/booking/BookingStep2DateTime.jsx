@@ -35,7 +35,6 @@ export default function BookingStep2DateTime() {
     }
   }, [bookingItems, navigate]);
 
-  // Gọi API lấy slot khi chọn ngày
   const fetchSlotsForAllItems = useCallback(async (date) => {
     if (!date) return;
 

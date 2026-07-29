@@ -1,6 +1,5 @@
 import { Clock, Star, CheckCircle2 } from 'lucide-react';
 
-// Màu theme cho từng gói dịch vụ
 const THEME_STYLES = {
   cyan: {
     badge: 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300',
@@ -39,7 +38,6 @@ const THEME_STYLES = {
 export default function ServiceCard({ service, isSelected, onSelect, compact = false }) {
   const price = service.basePrice ?? service.base_price ?? service.price;
   const duration = service.durationMinutes ?? service.duration_minutes ?? service.duration;
-  // Đồng bộ hoàn toàn logic tính điểm = Giá / 1000 cho tất cả mọi nơi
   const points = Math.floor(price / 1000);
   const theme = THEME_STYLES[service.themeColor] ?? THEME_STYLES.cyan;
 
@@ -54,21 +52,21 @@ export default function ServiceCard({ service, isSelected, onSelect, compact = f
         }
       `}
     >
-      {/* Glow corner khi selected */}
+      {/* */}
       {isSelected && (
         <div className="absolute top-0 right-0 w-24 h-24 opacity-40 pointer-events-none"
           style={{ background: `radial-gradient(circle at top right, ${getGlowColor(service.themeColor)}, transparent 70%)` }}
         />
       )}
 
-      {/* Badge gói */}
+      {/*  */}
       {service.badge && (
         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-widest uppercase mb-3 ${theme.badge}`}>
           {service.badge}
         </span>
       )}
 
-      {/* Selected checkmark */}
+      {/*  */}
       {isSelected && (
         <div className={`absolute top-3 right-3 ${theme.check}`}>
           <CheckCircle2 size={18} />
@@ -97,7 +95,7 @@ export default function ServiceCard({ service, isSelected, onSelect, compact = f
         </span>
       </div>
 
-      {/* Features list — full mode */}
+      {/*  */}
       {!compact && service.features && (
         <div className="border-t border-white/10 pt-4">
           <ul className="space-y-2">
@@ -111,7 +109,7 @@ export default function ServiceCard({ service, isSelected, onSelect, compact = f
         </div>
       )}
 
-      {/* Feature count — compact mode */}
+      {/* */}
       {compact && service.features && (
         <div className="border-t border-white/10 pt-3">
           <p className={`text-xs ${theme.accent} font-medium`}>

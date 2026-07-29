@@ -32,16 +32,15 @@ export default function ReportDashboard() {
 
   const revenue = Number(data?.totalRevenue || 0);
   const formattedRevenue = revenue >= 1000000 ? (revenue / 1000000).toFixed(1) + 'M' : revenue.toLocaleString('vi-VN');
-  
+
   const totalCars = data?.totalBookingsToday || 0;
-  
-  // Calculate unique customers from schedule
+
   const uniqueCustomers = new Set();
   (data?.todaySchedule || []).forEach(s => {
     if (s.customer !== 'Khach vang lai') uniqueCustomers.add(s.customer);
   });
   const newCustomers = uniqueCustomers.size;
-  
+
   const breakdownList = data?.revenueBreakdown || [];
 
   const KPIS = [
@@ -86,20 +85,21 @@ export default function ReportDashboard() {
           <h3 className="font-hero text-lg font-medium tracking-tight mb-6">Dịch vụ thịnh hành</h3>
           <div className="flex-1 space-y-6">
             {breakdownList.length === 0 ? (
-               <div className="text-center text-white/40 font-mono text-sm py-12">Chưa có dữ liệu tháng này.</div>
+              <div className="text-center text-white/40 font-mono text-sm py-12">Chưa có dữ liệu tháng này.</div>
             ) : breakdownList.map((s, i) => {
               const rev = s.revenue >= 1000000 ? (s.revenue / 1000000).toFixed(1) + 'M' : s.revenue.toLocaleString('vi-VN');
               return (
-              <div key={i}>
-                <div className="flex justify-between items-end mb-2">
-                  <span className="text-sm font-medium text-white">{s.name}</span>
-                  <span className="text-xs font-mono text-white/60">{rev}</span>
+                <div key={i}>
+                  <div className="flex justify-between items-end mb-2">
+                    <span className="text-sm font-medium text-white">{s.name}</span>
+                    <span className="text-xs font-mono text-white/60">{rev}</span>
+                  </div>
+                  <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${s.color}`} style={{ width: `${Math.max(5, s.percent)}%` }} />
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${s.color}`} style={{width: `${Math.max(5, s.percent)}%`}} />
-                </div>
-              </div>
-            )})}
+              )
+            })}
           </div>
         </div>
       </div>

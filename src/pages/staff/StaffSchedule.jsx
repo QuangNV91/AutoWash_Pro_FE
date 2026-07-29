@@ -12,9 +12,9 @@ const getWeekDays = () => {
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday); d.setDate(monday.getDate() + i)
     return {
-      name: names[d.getDay()], short: ['CN','T2','T3','T4','T5','T6','T7'][d.getDay()],
-      date: `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`,
-      fullDate: `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`,
+      name: names[d.getDay()], short: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][d.getDay()],
+      date: `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`,
+      fullDate: `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`,
       isToday: d.toDateString() === new Date().toDateString(),
       isWeekend: d.getDay() === 0 || d.getDay() === 6,
     }
@@ -29,7 +29,7 @@ export default function StaffSchedule() {
   const [leaveModal, setLeaveModal] = useState(false)
   const [form, setForm] = useState({ date: WEEK[0].fullDate, shiftId: '', reason: '' })
   const [submitted, setSubmitted] = useState(false)
-  
+
   const [myLeaves, setMyLeaves] = useState([])
   const [staffId, setStaffId] = useState(null)
   const [shifts, setShifts] = useState([])
@@ -42,21 +42,18 @@ export default function StaffSchedule() {
         const username = localStorage.getItem('username');
         if (!username) return;
 
-        // Fetch staff info to get ID
         const staffRes = await api.get('/api/staffs');
         const staffList = staffRes.data?.data || [];
         const me = staffList.find(s => s.username === username);
-        
+
         if (me) {
           setStaffId(me.id);
-          // Fetch my leave requests
           const leaveRes = await api.get(`/api/leave-requests/staff/${me.id}`);
           if (leaveRes.data?.data) {
             setMyLeaves(leaveRes.data.data);
           }
         }
 
-        // Fetch shifts for the dropdown
         const shiftRes = await api.get('/api/shifts');
         if (shiftRes.data?.data) {
           setShifts(shiftRes.data.data);
@@ -72,7 +69,7 @@ export default function StaffSchedule() {
   }, []);
 
   const totalShifts = 0
-  const totalHours  = 0
+  const totalHours = 0
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -80,27 +77,26 @@ export default function StaffSchedule() {
       setError('Vui lòng chọn ca làm việc');
       return;
     }
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
       await api.post('/api/leave-requests', {
         staffId: staffId,
         shiftId: Number(form.shiftId),
-        leaveDate: form.date, // format YYYY-MM-DD
+        leaveDate: form.date,
         reason: form.reason
       });
-      
+
       setSubmitted(true)
       setLeaveModal(false)
-      
-      // Refresh list
+
       const leaveRes = await api.get(`/api/leave-requests/staff/${staffId}`);
       if (leaveRes.data?.data) {
         setMyLeaves(leaveRes.data.data);
       }
-      
+
       setTimeout(() => setSubmitted(false), 3000)
     } catch (err) {
       setError(err.response?.data?.message || 'Gửi thất bại');
@@ -142,8 +138,8 @@ export default function StaffSchedule() {
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: 'Ca tuần này', value: totalShifts, color: 'text-cyan-400' },
-          { label: 'Giờ làm',     value: `${totalHours}h`, color: 'text-white' },
-          { label: 'Ngày nghỉ',   value: myLeaves.filter(l => l.status?.toUpperCase() === 'APPROVED').length, color: 'text-amber-400' },
+          { label: 'Giờ làm', value: `${totalHours}h`, color: 'text-white' },
+          { label: 'Ngày nghỉ', value: myLeaves.filter(l => l.status?.toUpperCase() === 'APPROVED').length, color: 'text-amber-400' },
         ].map((s, i) => (
           <div key={i} className="bg-neutral-950 border border-white/5 rounded-2xl p-4">
             <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-1">{s.label}</p>
@@ -161,7 +157,7 @@ export default function StaffSchedule() {
                 <th className="px-5 py-4 text-[10px] font-mono tracking-widest text-white/30 text-left w-[22%]">Ngày</th>
                 {shifts.map(s => (
                   <th key={s.id} className="px-5 py-4 text-[10px] font-mono tracking-widest text-white/30 text-left border-l border-white/5">
-                    {s.shiftName} · {s.startTime.substring(0,5)} - {s.endTime.substring(0,5)}
+                    {s.shiftName} · {s.startTime.substring(0, 5)} - {s.endTime.substring(0, 5)}
                   </th>
                 ))}
               </tr>
@@ -169,7 +165,7 @@ export default function StaffSchedule() {
             <tbody>
               {WEEK.map(day => {
                 const dayShifts = mySchedule[day.fullDate] || []
-                const leave  = myLeaves.find(l => l.leaveDate === day.fullDate && l.status?.toUpperCase() === 'APPROVED')
+                const leave = myLeaves.find(l => l.leaveDate === day.fullDate && l.status?.toUpperCase() === 'APPROVED')
                 return (
                   <tr key={day.fullDate} className={`border-b border-white/5 last:border-0 transition-colors ${day.isToday ? 'bg-cyan-500/5' : day.isWeekend ? 'bg-white/[0.01]' : ''}`}>
                     <td className="px-5 py-4">
@@ -186,7 +182,7 @@ export default function StaffSchedule() {
                             <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded">NGHỈ PHÉP</span>
                           ) : hasShift ? (
                             <span className="flex items-center gap-1.5 text-xs font-mono text-emerald-400">
-                              <span className="w-2 h-2 rounded-full bg-emerald-400" />{s.startTime.substring(0,5)}
+                              <span className="w-2 h-2 rounded-full bg-emerald-400" />{s.startTime.substring(0, 5)}
                             </span>
                           ) : (
                             <span className="text-[10px] text-white/20 font-mono">—</span>
@@ -214,11 +210,10 @@ export default function StaffSchedule() {
                 <p className="text-sm font-medium text-white">{l.leaveDate} · {l.shift?.shiftName}</p>
                 <p className="text-xs text-white/40 font-mono mt-0.5">{l.reason}</p>
               </div>
-              <span className={`text-[10px] font-mono px-2.5 py-1 rounded border ${
-                l.status === 'APPROVED' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
-                : l.status === 'REJECTED' ? 'text-red-400 bg-red-500/10 border-red-500/30'
-                : 'text-amber-400 bg-amber-500/10 border-amber-500/30'
-              }`}>
+              <span className={`text-[10px] font-mono px-2.5 py-1 rounded border ${l.status === 'APPROVED' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
+                  : l.status === 'REJECTED' ? 'text-red-400 bg-red-500/10 border-red-500/30'
+                    : 'text-amber-400 bg-amber-500/10 border-amber-500/30'
+                }`}>
                 {l.status === 'APPROVED' ? 'ĐÃ DUYỆT' : l.status === 'REJECTED' ? 'TỪ CHỐI' : 'CHỜ DUYỆT'}
               </span>
             </div>

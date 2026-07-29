@@ -5,11 +5,10 @@ import toast from 'react-hot-toast';
 
 export default function SystemSettings() {
   const { maxBookingsPerSlot, rewardPointsOnlinePayment, updateConfig } = useSystemConfigStore();
-  
+
   const [localMaxBookings, setLocalMaxBookings] = useState(maxBookingsPerSlot);
   const [localRewardPoints, setLocalRewardPoints] = useState(rewardPointsOnlinePayment);
 
-  // Sync state if fetched late
   useEffect(() => {
     setLocalMaxBookings(maxBookingsPerSlot);
     setLocalRewardPoints(rewardPointsOnlinePayment);
@@ -35,7 +34,7 @@ export default function SystemSettings() {
           </div>
           <p className="text-white/40 text-sm font-mono tracking-wide">SYSTEM.PREFERENCES // Quản lý thông số vận hành lõi</p>
         </div>
-        <button 
+        <button
           onClick={handleSave}
           className="px-6 py-2.5 bg-cyan-500/10 text-cyan-400 font-medium text-sm rounded-xl border border-cyan-500/30 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all shadow-[0_0_15px_rgba(6,182,212,0.15)] font-mono uppercase tracking-widest flex items-center gap-2">
           <Save size={16} /> LƯU THAY ĐỔI
@@ -43,7 +42,7 @@ export default function SystemSettings() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* LEFT NAV (Mock) */}
         <div className="space-y-2">
           {[
@@ -63,7 +62,7 @@ export default function SystemSettings() {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 space-y-6">
             <h3 className="font-hero text-lg font-medium tracking-tight border-b border-white/5 pb-4">Thông tin Cơ sở</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] text-white/40 tracking-widest uppercase">Tên Xưởng / Cửa hàng</label>
@@ -83,17 +82,17 @@ export default function SystemSettings() {
 
           <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 space-y-6">
             <h3 className="font-hero text-lg font-medium tracking-tight border-b border-white/5 pb-4">Cấu hình Đặt lịch & Điểm thưởng</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] text-white/40 tracking-widest uppercase">Giới hạn số xe / khung giờ</label>
                 <div className="relative">
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={localMaxBookings}
                     onChange={(e) => setLocalMaxBookings(e.target.value)}
                     min="1"
-                    className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none" 
+                    className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-white/40">xe</span>
                 </div>
@@ -102,12 +101,12 @@ export default function SystemSettings() {
               <div className="space-y-2">
                 <label className="text-[10px] text-white/40 tracking-widest uppercase">Điểm thưởng TT Online</label>
                 <div className="relative">
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     value={localRewardPoints}
                     onChange={(e) => setLocalRewardPoints(e.target.value)}
                     min="0"
-                    className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none" 
+                    className="w-full bg-black/50 border border-white/10 px-4 py-2.5 rounded-lg text-sm text-white focus:border-cyan-500 focus:outline-none"
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-white/40">điểm</span>
                 </div>
@@ -118,7 +117,7 @@ export default function SystemSettings() {
 
           <div className="bg-neutral-950 border border-white/5 rounded-2xl p-6 space-y-6">
             <h3 className="font-hero text-lg font-medium tracking-tight border-b border-white/5 pb-4">Quy tắc Tự động</h3>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
                 <div>

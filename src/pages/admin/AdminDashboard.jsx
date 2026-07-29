@@ -84,7 +84,7 @@ export default function AdminDashboard() {
       }
     };
     fetchData();
-    const interval = setInterval(fetchData, 30000); // refresh every 30s
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, [filter]);
 
@@ -96,7 +96,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // Calculate metrics based on real data
   const METRICS = [
     {
       label: filter === 'month' ? 'Doanh thu Tháng' : filter === 'week' ? 'Doanh thu Tuần' : 'Doanh thu Hôm nay',

@@ -2,7 +2,6 @@ import api from './api';
 import { mapTimeToSlot } from '../utils/scheduleUtils';
 
 /**
- * Lấy danh sách dịch vụ
  */
 export async function getServices() {
   try {
@@ -15,7 +14,6 @@ export async function getServices() {
 }
 
 /**
- * Lấy slot trống cho 1 ngày + 1 dịch vụ
  */
 export async function getAvailableSlots(bookingDate, serviceId) {
   try {
@@ -32,7 +30,6 @@ export async function getAvailableSlots(bookingDate, serviceId) {
 }
 
 /**
- * Gọi API checkout để tạo bookings và lấy link thanh toán (nếu ONLINE)
  */
 export async function checkoutBookings(checkoutData) {
   try {
@@ -45,7 +42,6 @@ export async function checkoutBookings(checkoutData) {
 }
 
 /**
- * Lấy danh sách lịch hẹn của user đang đăng nhập
  */
 export async function getBookingHistory() {
   try {
@@ -58,7 +54,6 @@ export async function getBookingHistory() {
 }
 
 /**
- * Hủy lịch hẹn
  */
 export async function cancelBooking(bookingId) {
   try {
@@ -71,7 +66,6 @@ export async function cancelBooking(bookingId) {
 }
 
 /**
- * Cập nhật trạng thái và dịch vụ cho lịch hẹn (Dành cho Staff/Admin)
  */
 export async function updateBookingStatus(bookingId, updateData) {
   try {

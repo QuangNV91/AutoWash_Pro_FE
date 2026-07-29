@@ -160,9 +160,9 @@ export default function UserDashboard() {
 
   const TIERS = [
     { id: 'MEMBER', label: 'Thành viên', points: 0 },
-    { id: 'SILVER', label: 'Bạc', points: 1000 },
-    { id: 'GOLD', label: 'Vàng', points: 2000 },
-    { id: 'DIAMOND', label: 'Kim Cương', points: 5000 },
+    { id: 'SILVER', label: 'Bạc', points: 500 },
+    { id: 'GOLD', label: 'Vàng', points: 1500 },
+    { id: 'PLATINUM', label: 'Kim Cương', points: 3000 },
   ];
 
   let currentTierIndex = 0;

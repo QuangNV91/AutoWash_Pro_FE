@@ -49,7 +49,6 @@ export default function ServiceManagement() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState('add');
   const [editingId, setEditingId] = useState(null);
@@ -94,7 +93,6 @@ export default function ServiceManagement() {
     } catch (err) {
       console.error('Toggle active failed:', err);
       showToast(err.response?.data?.message || 'Thao tác thất bại', 'error');
-      // Fallback: update local state
       setServices(prev => prev.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s));
     }
   };
@@ -108,7 +106,6 @@ export default function ServiceManagement() {
     } catch (err) {
       console.error('Delete failed:', err);
       showToast(err.response?.data?.message || 'Xóa thất bại', 'error');
-      // Fallback
       setServices(prev => prev.filter(s => s.id !== id));
     }
   };
@@ -135,7 +132,6 @@ export default function ServiceManagement() {
     const cleanFeatures = formData.features.filter(f => f.trim() !== '');
     const finalData = { ...formData, features: cleanFeatures, price: Number(formData.price) };
 
-    // Build BE payload
     const payload = {
       serviceName: finalData.name,
       description: cleanFeatures.join(', '),
@@ -154,14 +150,12 @@ export default function ServiceManagement() {
         await api.put(`/api/services/${editingId}`, payload);
         showToast(`Cập nhật "${finalData.name}" thành công`);
       }
-      // Save color + features to local map for future reference
       SERVICE_EXTRAS[finalData.name] = { color: finalData.color, features: cleanFeatures };
       setIsModalOpen(false);
       await fetchServices();
     } catch (err) {
       console.error('Save failed:', err);
       showToast(err.response?.data?.message || 'Lưu thất bại', 'error');
-      // Fallback: update local
       if (modalMode === 'add') {
         const newId = `SRV-0${services.length + 1}`;
         setServices([...services, { id: newId, ...finalData }]);
@@ -199,8 +193,8 @@ export default function ServiceManagement() {
       {/* Toast Notification */}
       {toast.show && (
         <div className={`fixed top-6 right-6 z-[100] px-5 py-3 rounded-xl border flex items-center gap-3 text-sm font-medium shadow-2xl animate-[fadeIn_0.3s_ease] ${toast.type === 'error'
-            ? 'bg-red-500/10 border-red-500/30 text-red-400'
-            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+          ? 'bg-red-500/10 border-red-500/30 text-red-400'
+          : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
           }`}>
           {toast.type === 'error' ? <X size={16} /> : <Check size={16} />}
           {toast.message}

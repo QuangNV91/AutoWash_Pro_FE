@@ -6,11 +6,11 @@ export default function DateStrip({ selectedDate, onSelectDate, maxDays = 7 }) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    
+
     return {
       date: d,
       dayName: i === 0 ? 'Hôm nay' : i === 1 ? 'Ngày mai' : d.toLocaleDateString('vi-VN', { weekday: 'short' }),
-      dateString: `${year}-${month}-${day}`, // Local YYYY-MM-DD
+      dateString: `${year}-${month}-${day}`,
       dayOfMonth: d.getDate(),
       month: d.getMonth() + 1
     };
@@ -26,8 +26,8 @@ export default function DateStrip({ selectedDate, onSelectDate, maxDays = 7 }) {
               key={item.dateString}
               onClick={() => onSelectDate(item.dateString)}
               className={`flex-shrink-0 w-24 h-28 rounded-2xl border flex flex-col items-center justify-center transition-all duration-300
-                ${isSelected 
-                  ? 'border-white bg-white/10 text-white' 
+                ${isSelected
+                  ? 'border-white bg-white/10 text-white'
                   : 'border-white/10 bg-white/5 text-white/60 hover:border-white/30 hover:bg-white/10'}
               `}
             >

@@ -7,13 +7,6 @@ import {
 import { updateBookingStatus } from '../../services/bookingService'
 import toast from 'react-hot-toast'
 
-const MOCK_BOOKINGS = [
-  { id: 'BKG-10312', time: '09:00', plate: '29C-888.88', customer: 'Trần Thị Bình',   phone: '0912345678', service: 'Detailing & Shine', duration: 60,  status: 'WORKING',   payment: 'UNPAID', price: 350000, startedAt: Date.now() - 22 * 60 * 1000 },
-  { id: 'BKG-10313', time: '10:00', plate: '60A-999.99', customer: 'Phạm Minh Đức',   phone: '0933444555', service: 'Eco Wash',          duration: 15,  status: 'ARRIVED',   payment: 'PAID',   price: 50000,  startedAt: null },
-  { id: 'BKG-10314', time: '10:30', plate: '—',          customer: 'Võ Thị Em',       phone: '0977123456', service: 'Premium Care',       duration: 30,  status: 'PENDING',   payment: 'UNPAID', price: 150000, startedAt: null },
-  { id: 'BKG-10315', time: '11:00', plate: '—',          customer: 'Đỗ Văn Phúc',     phone: '0908876543', service: 'Ceramic Shield',     duration: 120, status: 'PENDING',   payment: 'PAID',   price: 800000, startedAt: null },
-]
-
 const SERVICE_COLOR = {
   'Eco Wash': 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
   'Premium Care': 'text-purple-400 bg-purple-500/10 border-purple-500/20',
@@ -22,7 +15,7 @@ const SERVICE_COLOR = {
 }
 const STATUS_NEXT = { PENDING: 'ARRIVED', ARRIVED: 'WORKING', WORKING: 'DONE' }
 const STATUS_LABEL_NEXT = { PENDING: 'Xác nhận đã đến', ARRIVED: 'Bắt đầu rửa xe', WORKING: 'Hoàn thành' }
-const STATUS_ICON_NEXT  = { PENDING: LogIn, ARRIVED: Play, WORKING: CheckCircle2 }
+const STATUS_ICON_NEXT = { PENDING: LogIn, ARRIVED: Play, WORKING: CheckCircle2 }
 const STATUS_COLOR_NEXT = {
   PENDING: 'bg-orange-500/10 border-orange-500/30 text-orange-400 hover:bg-orange-500/20',
   ARRIVED: 'bg-blue-500/10  border-blue-500/30  text-blue-400  hover:bg-blue-500/20',
@@ -37,13 +30,13 @@ function WorkingTimer({ startedAt, duration }) {
   }, [startedAt])
   const elMin = Math.floor(elapsed / 60)
   const elSec = elapsed % 60
-  const prog  = Math.min((elMin / duration) * 100, 100)
-  const over  = elMin >= duration
+  const prog = Math.min((elMin / duration) * 100, 100)
+  const over = elMin >= duration
   return (
     <div>
       <div className="flex justify-between text-xs font-mono mb-2">
         <span className={over ? 'text-red-400 font-bold animate-pulse' : 'text-white/60'}>
-          ⏱ {elMin}p {elSec.toString().padStart(2,'0')}s đã trôi
+          ⏱ {elMin}p {elSec.toString().padStart(2, '0')}s đã trôi
         </span>
         <span className="text-white/40">/ {duration}p</span>
       </div>
@@ -64,7 +57,7 @@ export default function StaffCheckin() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [plateInput, setPlateInput] = useState('')
   const [selectedService, setSelectedService] = useState('')
-  
+
   const [servicesMap, setServicesMap] = useState({
     'Eco Wash': { price: 50000, duration: 15 },
     'Premium Care': { price: 150000, duration: 30 },
@@ -100,7 +93,7 @@ export default function StaffCheckin() {
         const offset = new Date().getTimezoneOffset();
         const localDate = new Date(new Date().getTime() - (offset * 60 * 1000));
         let today = localDate.toISOString().split('T')[0];
-        
+
         const savedDate = sessionStorage.getItem('staffCheckinDate');
         if (location.state?.date) {
           today = location.state.date;
@@ -110,10 +103,10 @@ export default function StaffCheckin() {
         }
 
         const res = await api.get('/api/bookings');
-        
+
         if (res.data?.success && res.data.data) {
           const dayBookings = res.data.data.filter(b => b.bookingDate === today);
-          
+
           const formattedBookings = dayBookings.map(b => ({
             id: `BKG-${b.id}`,
             realId: b.id,
@@ -168,7 +161,7 @@ export default function StaffCheckin() {
       if (b.realId) {
         await updateBookingStatus(b.realId, updateData);
       }
-      
+
       setBookings(prev => prev.map(item => {
         if (item.id !== id) return item;
         let updatedBooking = { ...item };
@@ -192,11 +185,11 @@ export default function StaffCheckin() {
     }
   }
 
-  const openConfirm = (b) => { 
-    setSelected(b); 
-    setPlateInput(b.plate !== '—' ? b.plate : ''); 
+  const openConfirm = (b) => {
+    setSelected(b);
+    setPlateInput(b.plate !== '—' ? b.plate : '');
     setSelectedService(b.service);
-    setConfirmOpen(true); 
+    setConfirmOpen(true);
   }
 
   const activeBooking = bookings.find(b => b.status === 'WORKING')
@@ -305,7 +298,7 @@ export default function StaffCheckin() {
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-white/50">Dịch vụ</span>
-                  <select 
+                  <select
                     value={selectedService}
                     onChange={(e) => setSelectedService(e.target.value)}
                     className="bg-black/50 border border-white/10 rounded-lg px-2 py-1 text-sm text-white focus:outline-none focus:border-cyan-500"
@@ -319,7 +312,7 @@ export default function StaffCheckin() {
                   <div className="flex justify-between items-center text-sm bg-cyan-500/10 border border-cyan-500/20 p-2 rounded-lg mt-2">
                     <span className="text-cyan-400 text-xs">Giá mới (chênh lệch):</span>
                     <span className="text-cyan-400 font-mono">
-                      {servicesMap[selectedService].price.toLocaleString('vi-VN')}đ 
+                      {servicesMap[selectedService].price.toLocaleString('vi-VN')}đ
                       <span className="text-white/50 ml-1">({(servicesMap[selectedService].price - selected.price) > 0 ? '+' : ''}{(servicesMap[selectedService].price - selected.price).toLocaleString('vi-VN')}đ)</span>
                     </span>
                   </div>
